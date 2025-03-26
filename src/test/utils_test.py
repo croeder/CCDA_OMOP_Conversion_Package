@@ -1,8 +1,8 @@
 # Unit tests are disabled by default. Please refer to the README.md for instructions on how to enable them.
 # import pytest
-from myproject.utils import add_one
+from Chris_Project.utils import add_one
 
-from myproject.bar import baz
+from Chris_Project.bar import baz
 
 def test_baz():
     baz()
