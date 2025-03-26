@@ -1,4 +1,0 @@
-
-
-def baz():
-    print("bazz")
