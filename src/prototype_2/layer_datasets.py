@@ -200,8 +200,8 @@ def process_file(filepath, write_csv_flag) -> dict[str, pd.DataFrame]:
 
     logging.basicConfig(
         format='%(levelname)s: %(message)s',
-        filename=f"logs/log_file_{base_name}.log",
-        force=True,
+#        filename=f"logs/log_file_{base_name}.log",
+#        force=True,
          level=logging.ERROR
         #level=logging.WARNING
         # level=logging.INFO

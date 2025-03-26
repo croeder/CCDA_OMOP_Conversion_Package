@@ -25,8 +25,8 @@ conn = duckdb.connect()
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     format='%(levelname)s: %(message)s',
-    filename=f"logs/load_omop.log",
-    force=True,
+#    filename=f"logs/load_omop.log",
+#    force=True,
     level=logging.INFO
     # level=logging.WARNING level=logging.ERROR # level=logging.INFO # level=logging.DEBUG
 )

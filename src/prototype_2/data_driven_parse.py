@@ -785,7 +785,7 @@ def parse_config_from_xml_file(tree, config_name,
     base_name = os.path.basename(filename)
     logging.basicConfig(
         format='%(levelname)s: %(message)s',
-        filename=f"logs/log_config_{base_name}_{config_name}.log",
+#        filename=f"logs/log_config_{base_name}_{config_name}.log",
         #force=True, level=logging.WARNING)
         force=True, level=logging.ERROR)
 
@@ -1125,8 +1125,8 @@ def process_file(filepath :str, print_output: bool):
 
     logging.basicConfig(
         format='%(levelname)s: %(message)s',
-        filename=f"logs/log_file_{base_name}.log",
-        force=True,
+#        filename=f"logs/log_file_{base_name}.log",
+#        force=True,
         # level=logging.ERROR
         level=logging.WARNING
         # level=logging.INFO
