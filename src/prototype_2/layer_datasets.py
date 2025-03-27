@@ -203,15 +203,15 @@ def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame
     base_name = os.path.basename(filepath)
 
     logging.basicConfig(
-        format='%(levelname)s: %(message)s',
+        format='%(levelname)s: %(filename)s %(lineno)d %(message)s',
 #        filename=f"logs/log_file_{base_name}.log",
 #        force=True,
-         level=logging.ERROR
-        #level=logging.WARNING
-        # level=logging.INFO
+         #level=logging.ERROR
+         #level=logging.WARNING
+         level=logging.INFO
         # level=logging.DEBUG
     )
-
+    logging.info(f"parsing string from {filepath}")
     omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
     DDP.reconcile_visit_foreign_keys(omop_data)
     if omop_data is not None or len(omop_data) < 1:
