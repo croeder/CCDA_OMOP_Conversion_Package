@@ -1031,6 +1031,30 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
     else:
         logger.error("??? bust in domain_dates for reconcilliation")
         
+@typechecked
+def parse_string(ccda_string, file_path,
+              metadata :dict[str, dict[str, dict[str, str]]]) -> dict[str, 
+                      list[ dict[str,  None | str | float | int] | None  ] | None]:
+    """ 
+        * E X P E R I M E N T A L *
+    
+        Parses many meta configs from a string instead of a single file, 
+        collects them in omop_dict.
+        
+        Returns omop_dict, a  dict keyed by configuration names, 
+        each a list of record/row dictionaries.
+    """
+    omop_dict = {}
+    pk_dict = defaultdict(list)
+    tree = ET.fromstring(ccda_string)
+    base_name = os.path.basename(file_path)
+    for config_name, config_dict in metadata.items():
+        data_dict_list = parse_config_from_xml_file(tree, config_name, config_dict, base_name, pk_dict)
+        if config_name in omop_dict: 
+            omop_dict[config_name] = omop_dict[config_name].extend(data_dict_list)
+        else:
+            omop_dict[config_name] = data_dict_list
+    return omop_dict
 
     
     

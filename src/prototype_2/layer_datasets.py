@@ -190,7 +190,39 @@ def write_csvs_from_dataframe_dict(df_dict :dict[str, pd.DataFrame], file_name, 
         else:
             print(f"ERROR: NOT WRITING domain {config_name} to file {filepath}, no dataframe")
 
+@typechecked
+def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame]:
+    """ 
+        * E X P E R I M E N T A L *
+    
+        Processes a string creates dataset and writes csv
+        returns dataset
+        
+        (really calls into a lot of DDP detail and seems like it belongs there)
+    """
+    base_name = os.path.basename(filepath)
 
+    logging.basicConfig(
+        format='%(levelname)s: %(message)s',
+        filename=f"logs/log_file_{base_name}.log",
+        force=True,
+         level=logging.ERROR
+        #level=logging.WARNING
+        # level=logging.INFO
+        # level=logging.DEBUG
+    )
+
+    omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
+    DDP.reconcile_visit_foreign_keys(omop_data)
+    if omop_data is not None or len(omop_data) < 1:
+        dataframe_dict = create_omop_domain_dataframes(omop_data, filepath)
+    else:
+        logger.error(f"no data from {filepath}")
+        
+    if write_csv_flag:
+        write_csvs_from_dataframe_dict(dataframe_dict, base_name, "output")
+    return dataframe_dict
+            
 @typechecked
 def process_file(filepath, write_csv_flag) -> dict[str, pd.DataFrame]:
     """ processes file, creates dataset and writes csv
