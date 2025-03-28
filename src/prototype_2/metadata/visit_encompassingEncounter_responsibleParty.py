@@ -268,6 +268,6 @@ metadata = {
             'constant_value' : '',
 	    'order':16
         },
-        'preceding_visit_occurrence_id': { 'config_type': None, 'order': 17}a
+        'preceding_visit_occurrence_id': { 'config_type': None, 'order': 17}
     }
 }
