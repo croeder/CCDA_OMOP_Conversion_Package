@@ -260,7 +260,7 @@ metadata = {
         'admitting_source_value': { 
             'config_type': 'CONSTANT',
             'constant_value' : '',
-	    'order':41
+	    'order':14
         },
         'discharge_to_concept_id': { 'config_type': None, 'order': 15},
         'discharge_to_source_value':  {
@@ -268,6 +268,6 @@ metadata = {
             'constant_value' : '',
 	    'order':16
         },
-        'preceding_visit_occurrence_id': { 'config_type': None, 'order': 17},
-
+        'preceding_visit_occurrence_id': { 'config_type': None, 'order': 17}a
+    }
 }

@@ -255,12 +255,14 @@ metadata = {
     		    'vocabulary_oid': 'visit_concept_codeSystem',
                 'default': 0
     	    },
-            'order': 12 },
+            'order': 12 
+        },
+
         'admitting_source_concept_id': { 'config_type': None, 'order': 13},
         'admitting_source_value': { 
             'config_type': 'CONSTANT',
             'constant_value' : '',
-	    'order':41
+	    'order':14
         },
         'discharge_to_concept_id': { 'config_type': None, 'order': 15},
         'discharge_to_source_value':  {
@@ -268,7 +270,6 @@ metadata = {
             'constant_value' : '',
 	    'order':16
         },
-        'preceding_visit_occurrence_id': { 'config_type': None, 'order': 17},
-
-        
+        'preceding_visit_occurrence_id': { 'config_type': None, 'order': 17}
+    }
 }

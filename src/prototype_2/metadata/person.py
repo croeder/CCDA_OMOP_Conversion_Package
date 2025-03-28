@@ -191,10 +191,5 @@ metadata = {
         },
         'ethnicity_source_concept_id': { 'config_type': None, 'order': 18 },
 
-	'filename' : {
-		'config_type': 'FILENAME',
-		'order':100
-	} 
-
     }
 }
