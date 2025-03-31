@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import math
 import os
 import pandas as pd
 import re
@@ -119,17 +120,26 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                     if field in domain_data_dict:
                         if domain_data_dict[field] == 'RECONCILE FK':
                             logger.error(f"RECONCILE FK for {field} in {config_name}")
-                            column_dict[field].append(None)
+                            #column_dict[field].append(None)
+                            prepared_value = None
                         elif field == 'visit_concept_id' and type(domain_data_dict[field]) == str:
                             # hack when visit_type_xwalk returns a string
-                            column_dict[field].append(int32(domain_data_dict[field]))
+                            #column_dict[field].append(int32(domain_data_dict[field]))
+                            prepared_value =  int32(domain_data_dict[field])
                         elif field[-8:] == "datetime" and domain_data_dict[field] is not None:
                             try:
-                                column_dict[field].append(domain_data_dict[field].replace(tzinfo=None))
+                                #column_dict[field].append(domain_data_dict[field].replace(tzinfo=None))
+                                prepared_value = domain_data_dict[field].replace(tzinfo=None)
                             except Exception as e:
+                                prepared_value = None
                                 print(f"ERROR  TZ {type(domain_data_dict[field])} {domain_data_dict[field]} {field} {e}")
                         else:
-                            column_dict[field].append(domain_data_dict[field])
+                            #column_dict[field].append(domain_data_dict[field])
+                            prepared_value = domain_data_dict[field]
+
+                        if math.isnan(prepared_value):
+                            prepared_value = None
+                        column_dict[field].append(prepared_value)
                     else:
                         column_dict[field].append(None)
                         
