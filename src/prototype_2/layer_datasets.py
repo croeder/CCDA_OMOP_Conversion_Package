@@ -15,6 +15,7 @@ from collections import defaultdict
 import lxml
 import tempfile
 from numpy import int32
+from numpy import int64
 from numpy import float32
 from numpy import datetime64
 import numpy as np
