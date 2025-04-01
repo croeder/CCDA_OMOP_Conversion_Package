@@ -122,8 +122,7 @@ def create_truncated_hash(input_string) -> int | None:
     int_trunc_hash_value = int(truncated_hash, 16)
     return int_trunc_hash_value
 
-@typechecked
-def create_hash(input_string) -> int64 | None:
+def create_hash(input_string):
     if input_string == '':
         return None
     hash_value = hashlib.md5(input_string.encode('utf-8').upper())
