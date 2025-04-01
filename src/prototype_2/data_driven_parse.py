@@ -266,15 +266,19 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             logger.error(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
 
         if attribute_value is None or attribute_value != attribute_value:
-            wth = f"No Nones, N/As, NaNs or NaTs allowed(1)! {config_name} {field_tag}" 
-            #raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(1)! {config_name} {field_tag}")
-            raise Exception(wth)
-            return None
+            if field_details_dict['data_type'] == 'DATETIME' or field_details_dict['data_type'] == 'DATE':
+                attribute_value=datetime.date.fromisoformat("1970-01-01")
+                return attribute_value
+            else:
+                wth = f"No Nones, N/As, NaNs or NaTs allowed(1)! {config_name} {field_tag}" 
+                #raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(1)! {config_name} {field_tag}")
+                raise Exception(wth)
+                return None
     else:
-        if attribute_value is None or attribute_value != attribute_value:
-            wth = f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}" 
-            #raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}")
-            raise Exception(wth)
+        #if attribute_value is None or attribute_value != attribute_value:
+        #    wth = f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}" 
+        #    ##raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}")
+        #    raise Exception(wth)
         return attribute_value
 
 
