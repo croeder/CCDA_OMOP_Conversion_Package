@@ -210,6 +210,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 #attribute_value = cast_to_date(attribute_value)
                 try:
                     attribute_value = cast_to_date(attribute_value)
+                    if attribute_value != attribute_value:
+                        attribute_value = datetime.date.fromisoformat("1970-01-01")
                 except Exception as e:
                     attribute_value = datetime.date.fromisoformat("1970-01-01")
                     print(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
@@ -217,6 +219,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             elif field_details_dict['data_type'] == 'DATETIME':
                 try:
                     attribute_value = cast_to_datetime(attribute_value)
+                    if attribute_value != attribute_value:
+                        attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                 except Exception as e:
                     attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                     print(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
