@@ -62,7 +62,7 @@ def show_column_dict(config_name, column_dict):
         print(f"   config: {config_name}  key:{key} length(val):{len(val)}")
 
 
-def find_max_columns(config_name :str, domain_list: list[ dict[str, tuple[ None | str | float | int, str]] | None  ]) -> dict[str, any]:
+def find_max_columns(config_name :str, domain_list: list[ dict[str, tuple[ None | str | float | int | int64, str]] | None  ]) -> dict[str, any]:
     """  Give a list of dictionaries, find the maximal set of columns that has the basic OMOP columns. 
 
          Trying to deal with a list that may have dictionaries that lack certain fields.
@@ -97,7 +97,7 @@ def find_max_columns(config_name :str, domain_list: list[ dict[str, tuple[ None 
 
 
 @typechecked
-def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | str | float | int] | None  ] | None],
+def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | str | float | int | int64] | None  ] | None],
                                   filepath) ->  dict[str, pd.DataFrame]:
     """ transposes the rows into columns,
         creates a Pandas dataframe
