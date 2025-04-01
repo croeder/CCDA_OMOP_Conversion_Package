@@ -110,7 +110,7 @@ ns = {
 #    return bigint_hash_value
 
 @typechecked
-def create_hash(input_string) -> int | None:
+def create_hash(input_string) -> int64 | None:
     """ matches common SQL code when that code also truncates to 13 characters
         SQL: cast(conv(substr(md5(test_string), 1, 15), 16, 10) as bigint) as hashed_value
     """
@@ -119,7 +119,7 @@ def create_hash(input_string) -> int | None:
     
     hash_value = hashlib.md5(input_string.encode('utf-8').upper())
     truncated_hash = hash_value.hexdigest()[0:13]
-    int_trunc_hash_value = int(truncated_hash, 16)
+    int_trunc_hash_value = int64(truncated_hash, 16)
     return int_trunc_hash_value
 
 
