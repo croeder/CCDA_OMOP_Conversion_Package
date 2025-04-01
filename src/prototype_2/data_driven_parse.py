@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 """ Table-Driven ElementTree parsing in Python
 
@@ -254,17 +255,19 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 print(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
                 logger.error(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
 
-            if attribute_value is None or math.isnan(attribute_value) or pd.isnull(attribute_value):
+            if attribute_value is None or attribute_value != attribute_value:
                 raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(2)! {config_name} {field_tag}")
             return attribute_value
 
         else:
             print(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
             logger.error(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
+
+        if attribute_value is None or attribute_value != attribute_value:
             raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(1)! {config_name} {field_tag}")
             return None
     else:
-        if attribute_value is None or math.isnan(attribute_value) or pd.isnull(attribute_value):
+        if attribute_value is None or attribute_value != attribute_value:
             raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}")
         return attribute_value
 
