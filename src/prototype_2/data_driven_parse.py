@@ -133,10 +133,12 @@ def cast_to_date(string_value) ->  datetime.date | None:
         return datetime_val.date()
     except Exception as x:
         print(f"ERROR couldn't parse {string_value} as date. Exception:{x}")
-        return None
+        #return None
+        return  datetime.date.fromisoformat("1970-01-01")
     except ValueError as ve:
         print(f"ERROR couldn't parse {string_value} as date. ValueError:{ve}")
-        return None
+        #return None
+        return  datetime.date.fromisoformat("1970-01-01")
 
 def cast_to_datetime(string_value) -> datetime.datetime | None:
     try:
@@ -144,7 +146,8 @@ def cast_to_datetime(string_value) -> datetime.datetime | None:
         return datetime_val
     except Exception as x:
         print(f"ERROR couldn't parse {string_value} as datetime. {x}")
-        return None
+        #return None
+        return  datetime.date.fromisoformat("1970-01-01T00:00:00")
 
 
 @typechecked
