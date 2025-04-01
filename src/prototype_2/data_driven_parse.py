@@ -264,7 +264,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             return None
     else:
         if attribute_value is None or math.isnan(attribute_value) or pd.isnull(attribute_value):
-            raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}"
+            raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}")
         return attribute_value
 
 
