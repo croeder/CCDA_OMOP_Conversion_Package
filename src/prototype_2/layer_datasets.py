@@ -144,7 +144,12 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                         #    # for debuggin in Spark, raise exception
                         #    msg=f"layered_datasets.create_omop_domain_dataframes() None start-date {config_name} {field} {prepared_value} <--"
                         #    raise Exception(msg)
-                        
+                    else:
+                        # field is not in dict, so would be null, but odd for other reasons, want to know about this    
+                        if prepared_value is None:
+                            # for debuggin in Spark, raise exception
+                            msg=f"layered_datasets.create_omop_domain_dataframes() not in dict {config_name} {field} {prepared_value} <--"
+                            raise Exception(msg)
                     column_dict[field].append(None)
                         
     
@@ -176,7 +181,11 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                                 print(f"CAST ERROR in layer_datasets.py table:{table_name} column:{column_name} type:{column_type}  ")
                                 print(f"  exception  {domain_df[column_name]}   {type(domain_df[column_name])}")
 
-                    # TODO: check whole column for NaN or NaT here
+                        # TODO: check whole column for NaN or NaT here
+                        null_count = domain_df[column_name].isnull().sum()
+                        if null_count > 0:
+                            msg=f"nulls in column {column_name}"
+                            raise Exception(msg)
                                                               
                             
                 df_dict[config_name] = domain_df
@@ -234,7 +243,28 @@ def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame
     if write_csv_flag:
         write_csvs_from_dataframe_dict(dataframe_dict, base_name, "output")
     return dataframe_dict
-            
+
+@typechecked
+def process_string_to_dict(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame]:
+    """ 
+        * E X P E R I M E N T A L *
+    
+        Processes a string creates dataset and writes csv
+        returns  dict of column lists
+    """
+    base_name = os.path.basename(filepath)
+
+    logging.basicConfig(
+        format='%(levelname)s: %(filename)s %(lineno)d %(message)s',
+         level=logging.INFO #level=logging.WARNING
+    )
+
+    omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
+    DDP.reconcile_visit_foreign_keys(omop_data)
+
+    return omop_data
+
+
 @typechecked
 def process_file(filepath, write_csv_flag) -> dict[str, pd.DataFrame]:
     """ processes file, creates dataset and writes csv
