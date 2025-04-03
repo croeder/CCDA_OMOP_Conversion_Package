@@ -29,7 +29,7 @@ domain_dataframe_column_types ={
         'zip': str,
         'county': str,
         'location_source_value': str
-    }
+    },
     'provider': {
         'provider_id' : int64,
         'provider_name': str,
