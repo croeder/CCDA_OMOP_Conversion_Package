@@ -1,5 +1,5 @@
 
-from numpy import datetime
+import datetime
 from numpy import datetime64
 from numpy import float64
 from numpy import float32
