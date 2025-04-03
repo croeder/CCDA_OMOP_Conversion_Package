@@ -421,7 +421,7 @@ def do_foreign_key_fields(output_dict :dict[str, None | str | float | int | int3
                     ###print(f"WARNING FK has more than one value {field_tag}, tagging with 'RECONCILE FK' ")
                     logger.info(f"WARNING FK has more than one value {field_tag}, tagging with 'RECONCILE FK'")
                     # original hack:
-                    output_dict[field_tag] = 'RECONCILE FK'
+                    output_dict[field_tag] = -1  #### 'RECONCILE FK'
                 
             else:
                 path = root_path + "/"
