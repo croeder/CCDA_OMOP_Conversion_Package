@@ -13,15 +13,23 @@ domain_dataframe_column_types ={
     # table names here
  
     'care_site':{
-        'care_site_id': int64, # check
+        'care_site_id': int64, 
         'care_site_name': str,
         'place_of_service_concept_id': int32,
         'location_id': int64,
         'care_site_source_value': str,
         'place_of_service_source_value': str
     },
-    #'location':{
-    #}
+    'location':{
+        'location_id': int64,
+        'address_1': str,
+        'address_2': str,
+        'city': str,
+        'state': str,
+        'zip': str,
+        'county': str,
+        'location_source_value': str
+    }
     'provider': {
         'provider_id' : int64,
         'provider_name': str,
