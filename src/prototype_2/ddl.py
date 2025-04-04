@@ -35,29 +35,39 @@ processing_status = True
 
 
 config_to_domain_name_dict = {
+    #'Care_Site': 'Care_Site',
     'Care_Site_ee': 'Care_Site',
     'Care_Site_pr': 'Care_Site',
+
+    'Condition': 'Condition',
+
+    'Location': 'Location',
     'Location_ee': 'Location',
     'Location_pr': 'Location',
-    'Condition': 'Condition',
-    'Location': 'Location',
+
+    #'Measurement': 'Measurement',
+    'Measurement_vital_signs': 'Measurement',
+    'Measurement_results': 'Measurement', #### filename is measurement.py
+
     'Observation': 'Observation',
+
     'Person': 'Person',
+    
     'Provider': 'Provider',
     'Provider_header_documentationOf': 'Provider',
     'Provider_encompassingEncounter': 'Provider',
     'Provider_encompassingEncounter_responsibleParty': 'Provider',
+
+    'Visit': 'Visit',
     'Visit_encompassingEncounter': 'Visit',
     'Visit_encompassingEncounter_responsibleParty': 'Visit',
-    'Visit': 'Visit',
-    'Measurement': 'Measurement',
-    'Measurement_vital_signs': 'Measurement',
-    'Measurement_results': 'Measurement',
-    'Drug': 'Drug',
+
+    #'Drug': 'Drug', 
     'Medication_medication_activity' : 'Drug',
     'Medication_medication_dispense' : 'Drug',
     'Immunization_immunization_activity' : 'Drug',
-    'Procedure': 'Procedure',
+
+    #'Procedure': 'Procedure', 
     'Procedure_activity_procedure' : 'Procedure',
     'Procedure_activity_observation' : 'Procedure',
     'Procedure_activity_act' : 'Procedure'
