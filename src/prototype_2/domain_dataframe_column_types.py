@@ -19,6 +19,7 @@ domain_dataframe_column_types ={
         'location_id': int64,
         'care_site_source_value': str,
         'place_of_service_source_value': str
+        ,'filename': str
     },
     'location':{
         'location_id': int64,
@@ -29,6 +30,7 @@ domain_dataframe_column_types ={
         'zip': str,
         'county': str,
         'location_source_value': str
+        ,'filename': str
     },
     'provider': {
         'provider_id' : int64,
@@ -44,6 +46,7 @@ domain_dataframe_column_types ={
         'specialty_source_concept_id': int32,
         'gender_source_value' : str,
         'gender_source_concept_id' : int32
+        ,'filename': str
     },
     'person': {
         'person_id' : int64,
@@ -64,6 +67,7 @@ domain_dataframe_column_types ={
         'race_source_concept_id' : int32,
         'ethnicity_source_value' : str,
         'ethnicity_source_concept_id' : int32
+        ,'filename': str
     },
     'visit_occurrence': {
         'visit_occurrence_id': int64,
@@ -83,6 +87,7 @@ domain_dataframe_column_types ={
         'discharge_to_concept_id': int32,
         'discharge_to_source_value': str,
         'preceding_visit_occurrence_id': int64
+        ,'filename': str
     },
     'measurement': {
         'measurement_id': int64,
@@ -105,6 +110,7 @@ domain_dataframe_column_types ={
         'measurement_source_concept_id': int32,
         'unit_source_value': str,
         'value_source_value': str
+        ,'filename': str
     },
     'observation': {
         'observation_id': int64,
@@ -125,6 +131,7 @@ domain_dataframe_column_types ={
         'observation_source_concept_id': int32,
         'unit_source_value': str,
         'qualifier_source_value': str
+        ,'filename': str
     },
     'condition_occurrence': {
         'condition_occurrence_id': int64,
@@ -143,6 +150,7 @@ domain_dataframe_column_types ={
         'condition_source_value': str,
         'condition_source_concept_id': int32,
         'condition_status_source_value': str
+        ,'filename': str
     },
     'procedure_occurrence': {
         'procedure_occurrence_id': int64,
@@ -159,6 +167,7 @@ domain_dataframe_column_types ={
         'procedure_source_value': str,
         'procedure_source_concept_id': int32,
         'modifier_source_value': str
+        ,'filename': str
     },
     'drug_exposure': {
         'drug_exposure_id': int64,
@@ -184,6 +193,7 @@ domain_dataframe_column_types ={
         'drug_source_concept_id': int32,
         'route_source_value': str,
         'dose_unit_source_value': str
+        ,'filename': str
     }
 }    
 
