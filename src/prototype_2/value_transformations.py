@@ -47,7 +47,7 @@ def cast_as_number(args_dict):
 
 
 def cast_as_concept_id(args_dict):  # TBD FIX TODO
-    raise Exeption("cast_as_concept not implemented")
+    raise Exception("cast_as_concept not implemented")
 
     string_value = args_dict['input']
     type_value = args_dict['type']

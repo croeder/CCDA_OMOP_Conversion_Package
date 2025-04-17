@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 import argparse
 import logging
@@ -20,7 +19,7 @@ from numpy import float32
 from numpy import datetime64
 import numpy as np
 import warnings
-import ..value_transformations as value_transformations
+from . import value_transformations
 
 
 
