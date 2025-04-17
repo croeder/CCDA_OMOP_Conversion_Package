@@ -122,14 +122,6 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
 
     codemap_xwalk = get_codemap_xwalk()
 
-    # initing the maps is not working, test here, quickly, fail severly
-    df = codemap_xwalk[ (codemap_xwalk['src_vocab_code_system'] == '2.16.840.1.113883.6.96') & (codemap_xwalk['src_code']  == '608837004') ]
-    test_value = df['target_concept_id'].iloc[0]
-    if test_value is None:
-        raise Exception("codemap_xwalk test failed with some form of None")
-    if test_value != '1340204':
-        raise Exception("codemap_xwalk test failed to deliver correct code got: {test_value}")
-        
     #df = codemap_xwalk[ (codemap_xwalk['vocab_oid'] == vocabulary_oid) & (codemap_xwalk['src_code']  == concept_code) ]
     # 2025-03-04 new version of codemap schema:
     df = codemap_xwalk[ (codemap_xwalk['src_vocab_code_system'] == vocabulary_oid) & (codemap_xwalk['src_code']  == concept_code) ]
