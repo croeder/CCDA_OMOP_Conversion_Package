@@ -263,7 +263,19 @@ def process_string_to_dict(contents, filepath, write_csv_flag, codemap_dict, vis
 
     # * TEST CONCEPT MAP INITIALIZATON *
     # initing the maps is not working, test here, quickly, fail severly
-    test_value = value_transformations.codemap_xwalk_concept_id({'vocabulary_oid': '2.16.840.1.113883.6.96', 'concept_code': 608837004, 'default': 'XXX'})
+    try:
+        retval = codemap_dict[('2.16.840.1.113883.6.96', 608837004)]
+    except KeyError as e:
+        msg=f"key error in layer_datasets. {codemap_dict.keys()}"
+        raise Exception(msg)
+    msg2 = f"no key error in layer_datasets {retval}"
+    raise Exception(msg2)
+
+    try:
+        test_value = value_transformations.codemap_xwalk_concept_id({'vocabulary_oid': '2.16.840.1.113883.6.96', 'concept_code': 608837004, 'default': 'XXX'})
+    except KeyError as e:
+        msg=f"key error in layer_datasets. {codemap_dict.keys()}"
+        raise Exception(msg)
     if test_value is None or test_value == 'XXX' or test_value == 'None':
         raise Exception("codemap_xwalk test failed with some form of None")
     if test_value != 1340204:
