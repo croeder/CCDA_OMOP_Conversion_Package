@@ -20,6 +20,9 @@ from numpy import datetime64
 import numpy as np
 import warnings
 from . import value_transformations
+from . import set_codemap_xwalk_dict
+from . import set_ccda_value_set_mapping_table_dict
+from . import set_visit_concept_xwalk_mapping_dict
 
 
 
@@ -245,14 +248,18 @@ def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame
     return dataframe_dict
 
 @typechecked
-def process_string_to_dict(contents, filepath, write_csv_flag) -> dict[str, list[dict]]:
-    """ 
-        * E X P E R I M E N T A L *
-    
-        Processes a string creates dataset and writes csv
-        returns  dict of column lists
+def process_string_to_dict(contents, filepath, write_csv_flag, codemap_dict, visit_map_dict, valueset_map_dict) -> dict[str, list[dict]]:
     """
-    base_name = os.path.basename(filepath)
+        Processes an XML CCDA string, returns data as Python structures.
+
+        Requires python dictionaries for mapping, brought in here, initialized to the package as 
+        part of making them available to executors in Spark.
+
+        Returns  dict of column lists
+    """
+    set_codemap_xwalk_dict(codemap_dict)
+    set_ccda_value_set_mapping_table_dict(visit_map_dict)
+    set_visit_concept_xwalk_mapping_dict(valueset_map_dict)
 
     # * TEST CONCEPT MAP INITIALIZATON *
     # initing the maps is not working, test here, quickly, fail severly
@@ -260,7 +267,8 @@ def process_string_to_dict(contents, filepath, write_csv_flag) -> dict[str, list
     if test_value is None or test_value == 'XXX' or test_value == 'None':
         raise Exception("codemap_xwalk test failed with some form of None")
     if test_value != 1340204:
-        raise Exception("codemap_xwalk test failed to deliver correct code")
+        msg="codemap_xwalk test failed to deliver correct code, got: {test_value}"
+        raise Exception(msg)
 
     logging.basicConfig(
         format='%(levelname)s: %(filename)s %(lineno)d %(message)s',

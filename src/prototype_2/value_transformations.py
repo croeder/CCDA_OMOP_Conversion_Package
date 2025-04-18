@@ -3,9 +3,9 @@ import pandas as pd
 #from . import codemap_xwalk
 #from . import ccda_value_set_mapping_table_dataset
 #from . import visit_concept_xwalk_mapping_dataset
-from . import get_codemap_xwalk
-from . import get_ccda_value_set_mapping_table_dataset
-from . import get_visit_concept_xwalk_mapping_dataset
+from . import get_codemap_xwalk_dict
+from . import get_ccda_value_set_mapping_table_dict
+from . import get_visit_concept_xwalk_mapping_dict
 from typeguard import typechecked
 import datetime
 from numpy import int32
@@ -114,11 +114,34 @@ def codemap_xwalk_source_concept_id(args_dict):
 
 
 def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
+    return _codemap_xwalk_DICT(vocabulary_oid, concept_code, column_name, default)
+
+
+def _codemap_xwalk_DICT(vocabulary_oid, concept_code, column_name, default):
+    if get_codemap_xwalk_dict() is None:
+        raise Exception("visit_concept_xwalk_mapping_dict is not initialized in prototype_2/__init__.py for value_transformations.py")
+
+    codeap_xwalk_mapping_dict= get_visit_concept_xwalk_mapping_dict()
+    map_dict = codemap_xwalk_mapping_dict[(vocabulary_oid, concept_code)]
+
+    if map_dict is None:
+        return default
+
+    if len(map_dict) < 1:
+        return default
+
+    if len(map_dict) > 1:
+       logger.warning(f"_visit_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
+
+    return map_dict[column_name]
+
+
+def _codemap_xwalk_DATASET(vocabulary_oid, concept_code, column_name, default):
     """ expects: vocabulary_oid, concept_code
         throws/raises when codemap_xwalk is None
     """
     if get_codemap_xwalk() is None:
-        raise Exception("codemap_xwalk is not initialized in prototype_2/__init__.py for value_transformations.py")
+        raise Exception("codemap_xwalk is not initialized in prototype_2/__init__.py for value_transformations.py") ##### failed her
 
     codemap_xwalk = get_codemap_xwalk()
 
@@ -189,6 +212,32 @@ def visit_xwalk_source_concept_id(args_dict):
     
 
 def _visit_xwalk(vocabulary_oid, concept_code, column_name, default):
+    return _visit_xwalk_DICTIONARY(vocabulary_oid, concept_code, column_name, default)
+
+
+def _visit_xwalk_DICTIONARY(vocabulary_oid, concept_code, column_name, default):
+    """ expects: vocabulary_oid, concept_code
+        throws/raises when visit_concept_xwalk_mapping_dataset is None
+    """
+    if get_visit_concept_xwalk_mapping_dict() is None:
+        raise Exception("visit_concept_xwalk_mapping_dict is not initialized in prototype_2/__init__.py for value_transformations.py")
+
+    visit_concept_xwalk_mapping_dataset =  get_visit_concept_xwalk_mapping_dict()
+    map_dict = visit_concept_xwalk_mapping_dict[(vocabulary_oid, concept_code)]
+
+    if map_dict is None:
+        return default
+
+    if len(map_dict) < 1:
+        return default
+
+    if len(map_dict) > 1:
+       logger.warning(f"_visit_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
+
+    return map_dict[column_name]
+
+
+def _visit_xwalk_DATASET(vocabulary_oid, concept_code, column_name, default):
     """ expects: vocabulary_oid, concept_code
         throws/raises when visit_concept_xwalk_mapping_dataset is None
     """
@@ -258,17 +307,40 @@ def valueset_xwalk_source_concept_id(args_dict):
     id_value =  _valueset_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'], 
                 'source_concept_id', args_dict['default']) 
    
+
+def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default):
+    return valueset_xwalk_DICT(vocabulary_oid, concept_code, column_name, default)
+
+
+def _valueset_xwalk_DICT(vocabulary_oid, concept_code, column_name, default):
     if id_value is not None:
         return int32(id_value)
     else:
         return None
 
-    
-def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default):
+    if get_ccda_value_set_mapping_table_dict() is None:
+        raise Exception("ccda_value_set_mapping_talbe_dict is not initialized in prototype_2/__init__.py for value_transformations.py")
+
+    ccda_value_set_mapping_dict =  get_ccda_value_set_mapping_dict()
+    map_dict = ccda_value_set_mapping_dict[(vocabulary_oid, concept_code)]
+
+    if map_dict is None:
+        return default
+
+    if len(map_dict) < 1:
+        return default
+
+    if len(map_dict) > 1:
+       logger.warning(f"_valueset_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
+
+    return map_dict[column_name]
+
+
+def _valueset_xwalk_DATASET(vocabulary_oid, concept_code, column_name, default):
     """ expects: vocabulary_oid, concept_code
         throws/raises when ccda_value_set_mapping_table_dataset is None
     """
-    if get_visit_concept_xwalk_mapping_dataset() is None:
+    if get_ccda_value_set_mapping_table_dataset() is None:
         raise Exception("ccda_value_set_mapping_table_dataset is not initialized in prototype_2/__init__.py for value_transformations.py")
 
     ccda_value_set_mapping_table_dataset =  get_ccda_value_set_mapping_table_dataset()
