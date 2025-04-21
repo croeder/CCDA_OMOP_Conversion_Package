@@ -211,6 +211,7 @@ metadata = {
     	'visit_detail_id':	{ 'config_type': None, 'order':  16 },
 
     	'measurement_source_value':	{
+		    'config_type': 'DERIVED',
     	    'FUNCTION': VT.concat_fields,
     	    'argument_names': {
     		    'first_field': 'measurement_concept_code',
