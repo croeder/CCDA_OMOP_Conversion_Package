@@ -35,7 +35,7 @@ processing_status = True
 
 
 config_to_domain_name_dict = {
-    #'Care_Site': 'Care_Site',
+    'Care_Site': 'Care_Site',
     'Care_Site_ee': 'Care_Site',
     'Care_Site_pr': 'Care_Site',
 
@@ -45,11 +45,16 @@ config_to_domain_name_dict = {
     'Location_ee': 'Location',
     'Location_pr': 'Location',
 
-    #'Measurement': 'Measurement',
+    'Measurement': 'Measurement',
     'Measurement_vital_signs': 'Measurement',
     'Measurement_results': 'Measurement', #### filename is measurement.py
 
     'Observation': 'Observation',
+    'Observation_social_history_smoking': 'Observation',
+    'Observation_social_history_pregnancy': 'Observation',
+    'Observation_social_history_tobacco_use': 'Observation',
+    'Observation_social_history_cultural': 'Observation',
+    'Observation_social_history_home_environment': 'Observation',
 
     'Person': 'Person',
     
@@ -62,15 +67,20 @@ config_to_domain_name_dict = {
     'Visit_encompassingEncounter': 'Visit',
     'Visit_encompassingEncounter_responsibleParty': 'Visit',
 
-    #'Drug': 'Drug', 
+    'Drug': 'Drug', 
     'Medication_medication_activity' : 'Drug',
     'Medication_medication_dispense' : 'Drug',
     'Immunization_immunization_activity' : 'Drug',
 
-    #'Procedure': 'Procedure', 
+    'Procedure': 'Procedure', 
     'Procedure_activity_procedure' : 'Procedure',
     'Procedure_activity_observation' : 'Procedure',
-    'Procedure_activity_act' : 'Procedure'
+    'Procedure_activity_act' : 'Procedure',
+    'Device' : 'Device',
+    'Device_organizer_supply' : 'Device',
+    'Device_supply' : 'Device',
+    'Device_organizer_procedure' : 'Device',
+    'Device_procedure' : 'Device'
 
 }
 
@@ -84,10 +94,38 @@ domain_name_to_table_name = {
     'Person'     : 'person',
     'Procedure'  : 'procedure_occurrence',
     'Provider'   : 'provider',
-    'Visit'      : 'visit_occurrence'
+    'Visit'      : 'visit_occurrence',
+    'Device'       : 'device_exposure',
 }
 
 sql_import_dict = {
+    'Device':{
+        'column_list': [
+            'device_exposure_id',
+            'person_id',
+            'device_concept_id',
+            'device_exposure_start_date',
+            'device_exposure_start_datetime',
+            'device_exposure_end_date',
+            'device_exposure_end_datetime',
+            'device_type_concept_id',
+            'unique_device_id',
+            'quantity',
+            'provider_id',
+            'visit_occurrence_id',
+            'visit_detail_id',
+            'device_source_value',
+            'device_source_concept_id'
+        ],
+        'sql': None, 
+        'table_name': "device_exposure",
+        'pk_query': """
+                SELECT count(*) as row_ct, 
+                       count(device_exposure_id) as p_id, 
+                       count(distinct device_exposure_id) as d_p_id
+                FROM device_exposure
+                """
+    },
     'Procedure':{
         'column_list': [
             'procedure_occurrence_id',
@@ -339,6 +377,7 @@ def _apply_local_ddl():
     x=conn.execute(measurement_ddl)
     x=conn.execute(procedure_ddl)
     x=conn.execute(drug_ddl)
+    x=conn.execute(device_ddl)
     df = conn.sql("SHOW ALL TABLES;").df()
     print(df[['database', 'schema', 'name']])
 
@@ -410,7 +449,7 @@ def main():
     _apply_ddl("OMOPCDM_duckdb_5.3_ddl_with_constraints_and_bigint_PK.sql")
 
     domain_list = ['Person', 'Visit', 'Provider', 'Care_Site', 'Location',
-               'Measurement', 'Drug', 'Procedure'  #, 'Observation'
+               'Measurement', 'Drug', 'Procedure', 'Device', 'Observation'
     ]
 
     for domain in domain_list:

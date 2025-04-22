@@ -1,7 +1,6 @@
 
-from numpy import int32
 import prototype_2.value_transformations as VT
-#
+from numpy import int32
 metadata = {
     'Procedure_activity_act': {
     	'root': {
@@ -14,7 +13,6 @@ metadata = {
     		   "/../hl7:entry/hl7:act[@moodCode='EVN']/"
                "hl7:statusCode[@code='active' or @code='completed']/..")
         },
-
     	'procedure_occurrence_id_root': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
@@ -25,7 +23,7 @@ metadata = {
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
             'attribute': 'extension',
     	},
-    	'procedure_occurrence_id_hash': {
+        'procedure_occurrence_id_hash': {
     	    'config_type': 'HASH',
             'fields' : [ 'procedure_occurrence_id_root', 'procedure_occurrence_id_extension' ],
             'priority': ('procedure_occurrence_id', 1)
@@ -142,10 +140,7 @@ metadata = {
             'config_type': 'CONSTANT',
             'constant_value' : '',
             'order': 14
-        },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        }        
+        }
+
     }
 }

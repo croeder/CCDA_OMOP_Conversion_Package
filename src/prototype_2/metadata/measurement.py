@@ -210,18 +210,28 @@ metadata = {
     	},
     	'visit_detail_id':	{ 'config_type': None, 'order':  16 },
 
-    	'measurement_source_value':	{
-		    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.concat_fields,
-    	    'argument_names': {
-    		    'first_field': 'measurement_concept_code',
-    		    'second_field': 'measurement_concept_codeSystem',
+        'measurement_source_value':     {
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.concat_fields,
+            'argument_names': {
+                'first_field': 'measurement_concept_code',
+                'second_field': 'measurement_concept_codeSystem',
                 'default': 0
-    	    },
+            },
             'order':  17
         },
 
-    	'measurement_source_concept_id':	{ 'config_type': None, 'order':  18 },
+
+    	'measurement_source_concept_id': {
+    	    'config_type': 'DERIVED',
+    	    'FUNCTION': VT.codemap_xwalk_source_concept_id,
+    	    'argument_names': {
+    		    'concept_code': 'measurement_concept_code',
+    		    'vocabulary_oid': 'measurement_concept_codeSystem',
+                'default': 0
+    	    },
+            'order': 18
+    	},
 
     	'unit_source_value':	{ 
     	    'config_type': 'CONSTANT',
@@ -256,10 +266,10 @@ metadata = {
             'config_type': 'PRIORITY',
             'order':20
         },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-		}
-        
+
+	'filename' : {
+		'config_type': 'FILENAME',
+		'order':100
+	} 
     }
 }

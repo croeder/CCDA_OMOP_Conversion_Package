@@ -194,6 +194,23 @@ domain_dataframe_column_types ={
         'route_source_value': str,
         'dose_unit_source_value': str
         ,'filename': str
+    },
+    'device_exposure': {
+        'device_concept_id': int32,
+        'person_id': int64,
+        'device_concept_id': int32,
+        'deviceexposure_start_date': datetime.date,
+        'device_exposure_start_datetime': datetime.datetime,
+        'device_exposure_end_date': datetime.date,
+        'device_exposure_end_datetime': datetime.datetime,
+        'device_type_concept_id': int32,
+        'unique_device_id': str,
+        'quantity': int32,
+        'provider_id': int64,
+        'visit_occurrence_id': int64,
+        'visit_detail_id': int64,
+        'device_source_value': str,
+        'device_source_concept_id': int32
     }
 }    
 

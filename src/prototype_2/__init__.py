@@ -8,6 +8,7 @@ MIN_PYTHON = (3, 10)
 if sys.version_info < MIN_PYTHON:
     sys.exit(f"Python version {MIN_PYTHON}  or later is required.")
 
+
 logging.basicConfig(
     stream=sys.stdout,
     format='%(levelname)s: %(message)s',
@@ -56,5 +57,6 @@ def get_visit_concept_xwalk_mapping():
     return None # TODO 
 def get_visit_concept_xwalk_mapping_dict():
     return visit_concept_xwalk_mapping_dict
+
 
 

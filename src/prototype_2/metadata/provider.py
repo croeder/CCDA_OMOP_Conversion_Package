@@ -93,7 +93,7 @@ metadata = {
         },
         'dea': {
             'config_type': 'FIELD',
-            'element': 'hl7:id[@root="2.16.840.1.113883.D.E.A"]', # TODO get the correct OID
+            'element': 'hl7:id[@root="2.16.840.1.113883.4.814"]', 
             'attribute': "extension",
             'order': 4
         },
@@ -167,10 +167,11 @@ metadata = {
             'config_type': None,
             'order' :13
         },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        }
+
+	'filename' : {
+		'config_type': 'FILENAME',
+		'order':100
+	} 
     },
     
 }

@@ -96,10 +96,11 @@ metadata = {
             'fields' : [ 'test_derived_field' ],
             'order': 9
         },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        } 
+
+	'filename' : {
+		'config_type': 'FILENAME',
+		'order':100
+	} 
     }
 }
 

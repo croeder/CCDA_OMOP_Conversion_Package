@@ -75,7 +75,6 @@ import pandas as pd
 import sys
 import hashlib
 import zlib
-#import ctypes
 from numpy import int32
 from numpy import int64
 import traceback
@@ -164,7 +163,7 @@ def cast_to_datetime(string_value) -> datetime.datetime | None:
 
 @typechecked
 def parse_field_from_dict(field_details_dict :dict[str, str], root_element, 
-        config_name, field_tag, root_path) ->  None | str | float | int | int32 | int64 | datetime.datetime | datetime.date:
+        config_name, field_tag, root_path) ->  None | str | float | int | int32 | int64 | datetime.datetime | datetime.date | list:
     """ Retrieves a value for the field descrbied in field_details_dict that lies below
         the root_element.
         Domain and field_tag are here for error messages.
@@ -771,6 +770,10 @@ def parse_config_for_single_root(root_element, root_path, config_name,
             logger.warning((f"ACCEPTING {domain_id} "
                             f"id:{output_dict['procedure_occurrence_id']} "
                             f"cpt:{output_dict['procedure_concept_id']}") )
+        elif expected_domain_id == "Device":
+            logger.warning((f"ACCEPTING {domain_id} "
+                            f"id:{output_dict['device_exposure_id']} "
+                            f"cpt:{output_dict['device_concept_id']}") )
         return output_dict
     else:
         if expected_domain_id == "Observation":
@@ -789,6 +792,10 @@ def parse_config_for_single_root(root_element, root_path, config_name,
             logger.warning( ( f"DENYING/REJECTING have:{domain_id} expect:{expected_domain_id} "
                               f"id:{output_dict['drug_exposure_id']} "
                               f"cpt:{output_dict['drug_concept_id']}") )
+        elif expected_domain_id == "Device":
+            logger.warning( ( f"DENYING/REJECTING have:{domain_id} expect:{expected_domain_id} "
+                              f"id:{output_dict['device_exposure_id']} "
+                              f"cpt:{output_dict['device_concept_id']}") )
         elif expected_domain_id == "Condition":
             logger.warning( ( f"DENYING/REJECTING have:{domain_id} expect:{expected_domain_id} "
                               f"id:{output_dict['condition_occurrencd_id']} "
@@ -917,6 +924,9 @@ domain_dates = {
     'Drug'       : {'start': ['drug_exposure_start_date', 'drug_exposure_start_datetime'],
                     'end': ['drug_exposure_end_date', 'drug_exposure_end_datetime'],
                     'id': 'drug_exposure_id'},
+    'Device'     : {'start': ['device_exposure_start_date', 'device_exposure_start_datetime'],
+                    'end': ['device_exposure_end_date', 'device_exposure_end_datetime'],
+                    'id': 'device_exposure_id'},
 }
         
 @typechecked 
@@ -944,7 +954,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
      # A: All parsing done upstream with datatype constraints on the FIELD configs
         
     if 'date' in domain_dates[domain].keys():
-        # just one date
+        # Logic for domains with just one date
             for thing in domain_dict:
 
                 date_field_name = domain_dates[domain]['date'][0]
@@ -959,6 +969,9 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                 
                 # TODO: check for a second visit that fits
                 # TODO: the bennis_shauna file has UNK for the end date.
+                date_field_value = thing[date_field_name]
+                if thing[datetime_field_name] is not None and isinstance(thing[datetime_field_name], datetime.datetime):
+                    date_field_value = thing[datetime_field_name]
                 
                 if date_field_value is not None :
                     # compare dates
@@ -967,41 +980,67 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                     for visit in visit_dict:
                         try:
                             start_visit_date = visit['visit_start_date']
-                            if visit['visit_start_datetime'] is not None:
-                                start_visit_date = visit['visit_start_datetime']
-                                
+                            ##if visit['visit_start_datetime'] is not None:
+                            ##    start_visit_date = visit['visit_start_datetime']
+                             
+                            start_visit_datetime = visit['visit_start_datetime']
                             end_visit_date = visit['visit_end_date']
-                            if visit['visit_end_datetime'] is not None:
-                                end_visit_date = visit['visit_end_datetime']
+                            ##if visit['visit_end_datetime'] is not None:
+                            ##    end_visit_date = visit['visit_end_datetime']
+                            end_visit_datetime = visit['visit_end_datetime']
                             
-                            # Normalize all to datetime.date
-                            #if isinstance(start_visit_date, datetime.datetime):
-                            #    start_visit_date = start_visit_date.date()
+                            ### Normalize all to datetime.date
+                            ###if isinstance(start_visit_date, datetime.datetime):
+                            ###    start_visit_date = start_visit_date.date()
                             
-                            #if isinstance(end_visit_date, datetime.datetime):
-                            #    end_visit_date = end_visit_date.date()
+                            ###if isinstance(end_visit_date, datetime.datetime):
+                            ###    end_visit_date = end_visit_date.date()
                                 
-                            #if isinstance(date_field_value, datetime.datetime):
-                            #    date_field_value = date_field_value.date()
+                            ###if isinstance(date_field_value, datetime.datetime):
+                            ###    date_field_value = date_field_value.date()
 
-                            # Remove timezone info by converting all to naive datetime
-                            if start_visit_date.tzinfo is not None:
-                                start_visit_date = start_visit_date.replace(tzinfo=None)
+                            ### Remove timezone info by converting all to naive datetime
+                            ##if start_visit_date.tzinfo is not None:
+                            ##    start_visit_date = start_visit_date.replace(tzinfo=None)
+
+                            if isinstance(date_field_value, datetime.datetime):
+                                if start_visit_datetime != end_visit_datetime:
+                                    if start_visit_datetime <= date_field_value <= end_visit_datetime:
+                                        if not have_visit:
+                                            # update the visit_occurrence_id in that domain record
+                                            thing['visit_occurrence_id'] = visit['visit_occurrence_id']
+                                            have_visit = True
+                                else:
+                                    end_visit_datetime_adjusted = datetime.datetime.combine(end_visit_date,
+                                                                                            datetime.time(23, 59, 59))
+                                    if start_visit_datetime <= date_field_value <= end_visit_datetime_adjusted:
+                                        if not have_visit:
+                                            # update the visit_occurrence_id in that domain record
+                                            thing['visit_occurrence_id'] = visit['visit_occurrence_id']
+                                            have_visit = True
+
                             
-                            if end_visit_date.tzinfo is not None:
-                                end_visit_date = end_visit_date.replace(tzinfo=None)
+                            ##if end_visit_date.tzinfo is not None:
+                            ##    end_visit_date = end_visit_date.replace(tzinfo=None)
                                 
-                            if date_field_value.tzinfo is not None:
-                                date_field_value = date_field_value.replace(tzinfo=None)
+                            ##if date_field_value.tzinfo is not None:
+                            ##    date_field_value = date_field_value.replace(tzinfo=None)
+                            # Match using only dates
+                            elif isinstance(date_field_value, datetime.date):
+                                if start_visit_date <= date_field_value <= end_visit_date:
+                                    if not have_visit:
+                                        # update the visit_occurrence_id in that domain record
+                                        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
+                                        have_visit = True
                             
-                            if start_visit_date <= date_field_value and date_field_value <= end_visit_date:
-                                ###print(f"MATCHED visit: v_start:{start_visit_date} d_date:{date_field_value} v_end:{end_visit_date}")
-                                # got one! ....is it the first?
-                                if not have_visit:
-                                    # update the visit_occurrence_id in that domain record
-                                    thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                ###else:
-                                    ###print("WARNING got a second fitting visit for {domain} {thing[domain_dates['id']]}")
+                            ##if start_visit_date <= date_field_value and date_field_value <= end_visit_date:
+                            ##    ###print(f"MATCHED visit: v_start:{start_visit_date} d_date:{date_field_value} v_end:{end_visit_date}")
+                            ##    # got one! ....is it the first?
+                            ##    if not have_visit:
+                            ##        # update the visit_occurrence_id in that domain record
+                            ##        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
+                            ##    ###else:
+                            ##        ###print("WARNING got a second fitting visit for {domain} {thing[domain_dates['id']]}")
                         except KeyError as ke:
                            logger.error(f"missing field  \"{ke}\", in visit reconcilliation, see warnings for detail")
                            logger.warning(f"missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")
@@ -1012,13 +1051,17 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                     ###if not have_visit:
                         ###print(f"WARNING wasn't able to reconcile {domain} {thing}")
                         ###print("")
+                    if not have_visit:
+                        logger.error(f" couldn't reconcile visit for {domain} event: {thing}")
+                        print(f"WARNING couldn't reconcile visit for {domain} event: {thing}")
+                        print("")
                         
                 else:
                     # S.O.L.
                     ### print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
                     logger.error(f"no date available for visit reconcilliation in domain {domain} for {thing}")
                 
-
+    # Logic for domains with start and end date/dateime
     elif 'start' in domain_dates[domain].keys() and 'end' in domain_dates[domain].keys():
         for thing in domain_dict:
             start_date_field_name = domain_dates[domain]['start'][0]
@@ -1026,39 +1069,96 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
             end_date_field_name = domain_dates[domain]['end'][0]
             end_datetime_field_name = domain_dates[domain]['end'][1]
             
-            start_date_value = thing[start_date_field_name]
-            end_date_value = thing[end_date_field_name]
+            ##start_date_value = thing[start_date_field_name]
+            ##end_date_value = thing[end_date_field_name]
+            start_date_value = None
+            end_date_value = None
             
-            if thing[start_datetime_field_name] is not None:
-                    start_date_value = thing[start_datetime_field_name]
-                    
-            if thing[end_datetime_field_name] is not None:
-                    end_date_value = thing[end_datetime_field_name]
+            ##if thing[start_datetime_field_name] is not None:
+            ##        start_date_value = thing[start_datetime_field_name]
+            ##        
+            ##if thing[end_datetime_field_name] is not None:
+            ##        end_date_value = thing[end_datetime_field_name]
+
+            # Prefer datetime if available
+            if thing[start_datetime_field_name] is not None and isinstance(thing[start_datetime_field_name],
+                                                                           datetime.datetime):
+                start_date_value = thing[start_datetime_field_name]
+            else:
+                start_date_value = thing[start_date_field_name]
+            
+            # Prefer datetime if available, else use end_date field, else fallback to start_date
+            if thing[end_datetime_field_name] is not None and isinstance(thing[end_datetime_field_name],
+                                                                         datetime.datetime):
+                end_date_value = thing[end_datetime_field_name]
+            elif thing[end_date_field_name] is not None:
+               end_date_value = thing[end_date_field_name]
+            else:
+                end_date_value = start_date_value
             
             if start_date_value is not None and end_date_value is not None:
                 have_visit = False
                 for visit in visit_dict:
                     try:
                         start_visit_date = visit['visit_start_date']
-                        if visit['visit_start_datetime'] is not None:
-                            start_visit_date = visit['visit_start_datetime']
+                        start_visit_datetime = visit['visit_start_datetime']
+                        ##if visit['visit_start_datetime'] is not None:
+                        ##    start_visit_date = visit['visit_start_datetime']
                                 
                         end_visit_date = visit['visit_end_date']
-                        if visit['visit_end_datetime'] is not None:
-                            end_visit_date = visit['visit_end_datetime']
-                        
-                        if start_visit_date and end_visit_date:
-                            # Check if event overlaps with the visit period
+                        end_visit_datetime = visit['visit_end_datetime']
+                        ##if visit['visit_end_datetime'] is not None:
+                        ##    end_visit_date = visit['visit_end_datetime']
+                        ##
+                        ##if start_visit_date and end_visit_date:
+                        ##    # Check if event overlaps with the visit period
+
+                        end_visit_datetime = visit['visit_end_datetime']
+
+                        # Adjust datetime comparisons for start and end values
+                        if isinstance(start_date_value, datetime.datetime) and isinstance(end_date_value,
+                                                                                          datetime.datetime):
+                            if start_visit_datetime != end_visit_datetime:
+                                if (
+                                        (start_visit_datetime <= start_date_value <= end_visit_datetime) and
+                                        (start_visit_datetime <= end_date_value <= end_visit_datetime)
+                                ):
+                                    print(
+                                        f"MATCHED visit: v_start:{start_visit_datetime} event_start:{start_date_value} event_end:{end_date_value} v_end:{end_visit_datetime}")
+                                    if not have_visit:
+                                        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
+                                        have_visit = True
+                            else:
+                                end_visit_datetime_adjusted = datetime.datetime.combine(end_visit_date,
+                                                                                        datetime.time(23, 59, 59))
+                                if (
+                                        (start_visit_datetime <= start_date_value <= end_visit_datetime_adjusted) and
+                                        (start_visit_datetime <= end_date_value <= end_visit_datetime_adjusted)
+                                ):
+                                    print(
+                                        f"MATCHED visit: v_start:{start_visit_datetime} event_start:{start_date_value} event_end:{end_date_value} adjusted v_end:{end_visit_datetime_adjusted}")
+                                    if not have_visit:
+                                        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
+                                        have_visit = True
+
+                        # Compare with dates if datetime is not available
+                        elif isinstance(start_date_value, datetime.date) and isinstance(end_date_value, datetime.date):
+
+
+
                             if (
-                                (start_visit_date <= start_date_value <= end_visit_date) or
-                                (start_visit_date <= end_date_value <= end_visit_date) or
-                                (start_date_value <= start_visit_date and end_visit_date <= end_date_value)
+                                ##(start_visit_date <= start_date_value <= end_visit_date) or
+                                ##(start_visit_date <= end_date_value <= end_visit_date) or
+                                ##(start_date_value <= start_visit_date and end_visit_date <= end_date_value)
++                                    (start_visit_date <= start_date_value <= end_visit_date) and
++                                    (start_visit_date <= end_date_value <= end_visit_date)
                             ):
 ###                                print(f"MATCHED visit: v_start:{start_visit_date} event_start:{start_date_value} event_end:{end_date_value} v_end:{end_visit_date}")
                                 if not have_visit:
                                     thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                else:
-                                    print(f"WARNING multiple fitting visits for {domain} {thing[domain_dates['id']]}")
+                                ##else:
+                                ##    print(f"WARNING multiple fitting visits for {domain} {thing[domain_dates['id']]}")
+                                have_visit = True
                     except KeyError as ke:
                         print(f"WARNING missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")   
                     except Exception as e:
@@ -1066,12 +1166,12 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
 
                 if not have_visit:
                     logger.error(f" couldn't reconcile visit for {domain} event: {thing}")
-                    ##print(f"WARNING couldn't reconcile visit for {domain} event: {thing}")
-                    #print("")
+                    print(f"WARNING couldn't reconcile visit for {domain} event: {thing}")
+                    print("")
             
             else:
                     # S.O.L.
-                    ###print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
+                    print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
                     logger.error(f" no date available for visit reconcilliation in domain {domain} for {thing}")
 
     else:
@@ -1109,16 +1209,20 @@ def reconcile_visit_foreign_keys(data_dict :dict[str,
                                                  list[ dict[str,  None | str | float | int |int64 | datetime.datetime | datetime.date] | None  ] | None]) :
     # data_dict is a dictionary of config_names to a list of record-dicts
     metadata = [
-    ('Measurement', 'Measurement_results', 'Visit' ),
-    ('Measurement', 'Measurement_vital_signs', 'Visit' ),
-    ('Observation', 'Observation', 'Visit' ),
-    ('Condition', 'Condition', 'Visit' ),
-    ('Procedure', 'Procedure_activity_procedure', 'Visit'),
-    ('Procedure', 'Procedure_activity_observation', 'Visit'),
-    ('Procedure', 'Procedure_activity_act', 'Visit'),
-    ('Drug', 'Medication_medication_activity', 'Visit'),
-    ('Drug', 'Medication_medication_dispense', 'Visit'),
-    ('Drug', 'Immunization_immunization_activity', 'Visit')
+        ('Measurement', 'Measurement_results', 'Visit' ),
+        ('Measurement', 'Measurement_vital_signs', 'Visit' ),
+        ('Observation', 'Observation', 'Visit' ),
+        ('Condition', 'Condition', 'Visit' ),
+        ('Procedure', 'Procedure_activity_procedure', 'Visit'),
+        ('Procedure', 'Procedure_activity_observation', 'Visit'),
+        ('Procedure', 'Procedure_activity_act', 'Visit'),
+        ('Drug', 'Medication_medication_activity', 'Visit'),
+        ('Drug', 'Medication_medication_dispense', 'Visit'),
+        ('Drug', 'Immunization_immunization_activity', 'Visit'),
+        ('Device', 'Device_organizer_supply', 'Visit'),
+        ('Device', 'Device_supply', 'Visit'),
+        ('Device', 'Device_organizer_procedure', 'Visit'),
+        ('Device', 'Device_procedure', 'Visit')
     ]
 
     for meta_tuple in metadata:

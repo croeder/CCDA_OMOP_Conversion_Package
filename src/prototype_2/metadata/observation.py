@@ -91,7 +91,15 @@ metadata = {
             'order': 4
     	},
     	# FIX same issue as above. Is it always just a single value, or do we ever get high and low?
-    	'observation_datetime': { 'config_type': None, 'order': 5 },
+    	# 'observation_datetime': { 'config_type': None, 'order': 5 },
+        'observation_datetime': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime", 
+            'attribute': "value",
+            'data_type': 'DATETIME',
+            'order': 5
+        },               
+        
     	'observation_type_concept_id': {
             'config_type': 'CONSTANT',
             'constant_value' : int32(32827),
@@ -172,8 +180,6 @@ metadata = {
             'order':  9
     	},
 
-
-
         'value_unit':  {
     	    'config_type': 'FIELD',
     	    'element': 'hl7:value',
@@ -182,13 +188,13 @@ metadata = {
         'qualifier_concept_id' : { 'config_type': None, 'order': 10 },
         'unit_concept_id': { 'config_type': None, 'order': 11 },
         'provider_id': { 'config_type': None, 'order': 12 },
-
+        
     	'visit_occurrence_id':	{
     	    'config_type': 'FK',
     	    'FK': 'visit_occurrence_id',
-		    'order': 13 
-    	},
-
+            'order': 13
+    	},    
+        
         'visit_detail_id': { 'config_type': None, 'order': 14 },
 
         'observation_source_value': {
@@ -214,10 +220,11 @@ metadata = {
             'constant_value' : '',
             'order': 18 
         },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        }		
+
+	'filename' : {
+		'config_type': 'FILENAME',
+		'order':100
+	} 
     }
 }
 

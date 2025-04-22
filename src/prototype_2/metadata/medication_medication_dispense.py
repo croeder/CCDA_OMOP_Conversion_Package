@@ -14,10 +14,9 @@ metadata = {
     	    'element':
      		  ('./hl7:component/hl7:structuredBody/hl7:component/hl7:section/'
     		   'hl7:templateId[@root="2.16.840.1.113883.10.20.22.2.1" or @root="2.16.840.1.113883.10.20.22.2.1.1"]/../'
-
                    'hl7:entry/hl7:substanceAdministration[@moodCode="INT" or @moodCode="EVN"]/' 
-
-                   'hl7:entryRelationship/hl7:supply[@moodCode="EVN"]/'
+                    #  'hl7:entryRelationship/hl7:supply[@moodCode="EVN"]/'   # THANAPHOP
+                   'hl7:entryRelationship/hl7:supply/hl7:statusCode[@code="active" or @code="completed"]/' 
                    'hl7:statusCode[@code="active" or @code="completed"]/../'
                    'hl7:templateId[@root="2.16.840.1.113883.10.20.22.4.18"]/..'
               )
@@ -145,16 +144,15 @@ metadata = {
             'constant_value' : int32(32825), # OMOP concept ID for 'EHR dispensing record'
             'order': 9
         },
-        
-        'stop_reason': { 
+       'stop_reason': { 
             'config_type': 'CONSTANT',
             'constant_value' : '',
             'order':10
-        },
+        }, 
+        
         'refills': { 'config_type': None, 'order': 11},
 
         # This approach applies primarily to pre-coordinated consumables, 
-        # such as clinical drugs with fixed-dose forms (e.g., tablets, capsules).
         # Example: If the "metoprolol 25mg tablet" is dispensed as 30 tablets,
         #  the extracted quantity will be 30.
         # Needs additional approaches to handle liquid formulations, clinical 
@@ -215,9 +213,6 @@ metadata = {
             'attribute': "unit",
             'order': 23
         },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        }
+
     }
 }

@@ -23,7 +23,7 @@ metadata = {
     	},
     	'visit_occurrence_id': { 
        	    'config_type': 'HASH',
-            'fields' : [ 'visit_occurrence_id_root', 'visit_occurrence_id_extension' ], 
+            'fields' : [ 'visit_occurrence_id_root', 'visit_occurrence_id_extension','person_id','provider_id','visit_concept_id','visit_start_date','visit_end_date'], 
             'order' : 1
         },
 
@@ -300,9 +300,11 @@ metadata = {
 	    'order':16
         },
         'preceding_visit_occurrence_id': { 'config_type': None, 'order': 17},
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        }
+
+	'filename' : {
+		'config_type': 'FILENAME',
+		'order':100
+	} 
+        
     }
 }

@@ -1,4 +1,3 @@
-
 import prototype_2.value_transformations as VT
 from numpy import int32
 #
@@ -19,8 +18,8 @@ metadata = {
 #    		   "/../hl7:entry/hl7:substanceAdministration[@moodCode='EVN' and "
 #               "(hl7:statusCode[@code='active'] or hl7:statusCode[@code='completed'])]")
         },
-
-    	'drug_exposure_id_root': {
+    	
+        'drug_exposure_id_root': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
             'attribute': 'root',
@@ -165,12 +164,12 @@ metadata = {
             'constant_value' : int32(32818), # OMOP concept ID for 'EHR administration record'
             'order': 9
         },
-        
         'stop_reason': { 
             'config_type': 'CONSTANT',
             'constant_value' : '',
             'order':10
         },
+        
         'refills': { 'config_type': None, 'order': 11},
        
         'quantity': {
@@ -295,9 +294,6 @@ metadata = {
             'attribute': "unit",
             'order': 23
         },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        } 
+
     }
 }

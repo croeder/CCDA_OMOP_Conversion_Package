@@ -14,7 +14,6 @@ metadata = {
     		   "/../hl7:entry/hl7:procedure[@moodCode='EVN']/"
                "hl7:statusCode[@code='active' or @code='completed']/..")
         },
-
     	'procedure_occurrence_id_root': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
@@ -143,9 +142,6 @@ metadata = {
             'constant_value' : '',
             'order': 14
         },
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-        }
+
     }
 }
