@@ -176,6 +176,10 @@ metadata = {
                 'default': 0
             },
             'order': 15
-        }
+        },
+     	'filename' : {
+		    'config_type': 'FILENAME',
+		    'order':100
+	    }
     }
 }

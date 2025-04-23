@@ -142,6 +142,9 @@ metadata = {
             'constant_value' : '',
             'order': 14
         },
-
+        'filename' : {
+            'config_type': 'FILENAME',
+            'order':100
+		}
     }
 }
