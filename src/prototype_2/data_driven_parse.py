@@ -62,7 +62,7 @@
 
 """
 
-# import pandas as pd
+import pandas as pd
 # mamba install -y -q lxml
 
 import argparse
@@ -753,6 +753,10 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     priority_field_names = do_priority_fields(output_dict, root_element, root_path, config_name,  config_dict,
                                               error_fields_set, pk_dict)
     do_foreign_key_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
+
+    # distinct
+    output_dict=pd.DataFrame(output_dict).drop_duplicates().to_dict('records')
+
     output_dict = sort_output_dict(output_dict, config_dict, config_name)
 
 
