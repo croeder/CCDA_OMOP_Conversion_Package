@@ -754,9 +754,6 @@ def parse_config_for_single_root(root_element, root_path, config_name,
                                               error_fields_set, pk_dict)
     do_foreign_key_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
 
-    # distinct
-    #output_dict=pd.DataFrame(output_dict).drop_duplicates().to_dict('records')
-    output_dict=pd.DataFrame.from_records(output_dict).drop_duplicates().to_dict('records')
 
     output_dict = sort_output_dict(output_dict, config_dict, config_name)
 
@@ -884,6 +881,9 @@ def parse_config_from_xml_file(tree, config_name,
     if len(error_fields_set) > 0:
         print(f"DOMAIN Fields with errors in config {config_name} {error_fields_set}")
         logger.error(f"DOMAIN Fields with errors in config {config_name} {error_fields_set}")
+
+    # distinct
+    output_list=pd.DataFrame(output_list).drop_duplicates().to_dict('records')
 
     return output_list
 
