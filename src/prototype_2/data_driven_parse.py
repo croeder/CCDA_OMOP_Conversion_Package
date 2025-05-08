@@ -441,8 +441,8 @@ def do_foreign_key_fields(output_dict :dict[str, None | str | float | int | int3
 
 @typechecked
 def do_derived_fields(output_dict :dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date], 
-                      root_element, root_path, config_name,  
-                      config_dict :dict[str, dict[str, str | None]], 
+                      root_element, root_path, config_name,
+                      config_dict :dict[str, dict[str, str | None]],
                       error_fields_set :set[str]):
     """ Do/compute derived values now that their inputs should be available in the output_dict
         Except for a special argument named 'default', when the value is what is other wise the field to look up in the output dict.
@@ -748,10 +748,10 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     do_basic_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
     do_derived_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set)
     domain_id = do_domain_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set)
+    do_foreign_key_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
     do_hash_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
     priority_field_names = do_priority_fields(output_dict, root_element, root_path, config_name,  config_dict,
                                               error_fields_set, pk_dict)
-    do_foreign_key_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
 
 
     output_dict = sort_output_dict(output_dict, config_dict, config_name)

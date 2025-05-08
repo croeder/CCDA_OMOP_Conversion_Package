@@ -44,7 +44,10 @@ import prototype_2.metadata.device_procedure as device_procedure
 
     REMEMBER to update the ddl.py file as well.
 """
-#  NB: Order is important here.
+
+# ***
+#  NB: *** Order is important here. ***
+# ***
 #  PKs like person and visit must come before referencing FK configs, like in measurement
 
 meta_dict =  location.metadata | \
