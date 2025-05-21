@@ -814,7 +814,7 @@ def make_distinct(rows):
     seen_tuples = set()
     unique_rows = []
     for row in rows:
-        row_tuple = tuple(row)
+        row_tuple = tuple(sorted(row.items()))
         if row_tuple not in seen_tuples:
             seen_tuples.add(row_tuple)
             unique_rows.append(row)
