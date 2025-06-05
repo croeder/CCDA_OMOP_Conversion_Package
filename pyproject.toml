@@ -1,0 +1,60 @@
+[build-system]
+requires = [ "hatchling >= 1.25", ]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "ccda_to_omop"
+version = "0.0.8"
+authors = [ 
+    { name="Chris Roeder", email="chris@tislab.org" },  
+    { name="Chris Roeder", email="roederc@unc.med.edu" },  
+]
+description = "A package for converting HL7 CCDA documents to OHDSI OMOP"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+standard_builtins = [
+    "argparse",
+    "collections",
+    "datetime",
+    "hashlib",
+    "io",
+    "json",
+    "math",
+    "os",
+    "re",
+    "sys",
+    "tarfile",
+    "tempfile",
+    "traceback",
+    "unittest",
+    "urllib",
+    "warnings",
+    "zlib"
+]
+
+dependencies = [
+    "python-dateutil==2.9.0",
+    "duckdb==1.3.0",
+    "logging==0.4.9.6",
+    "lxml==5.4.0",
+    "numpy==2.2.6",
+    "pandas==2.2.3",
+    "pytz==2025.2",
+    "requests==2.32.3",
+    "setuptools==80.9.0",
+    "typeguard==4.4.3",
+]
+
+license = "GPL-3.0"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/cladteam/CCDA_OMOP_by_Python"
+Issues = "https://github.com/cladteam/CCDA_OMOP_by_Python/issues"
+

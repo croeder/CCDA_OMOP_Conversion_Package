@@ -1,15 +1,33 @@
-# gotchas from Chris 
-- The name of the project is what you use to import that package into your other repo. 
-  When importing in Foundry, you must specify the name in lower case.
-  The package you import inside python is the the name of the directory under the 'src' directory and has no relationship to the repository name.
+# pypi: ccda_to_omop
+# foundry: CCDA_OMOP_Conversion_Package
 
-# Publishing Conda libraries
+This code is for converting HL7 CCDA documents to OHDSI OMOP.
+
+This is a python package with associated files to support publishing it
+in Palantir Foundry as well as PyPi. Currentl a work in progess, adding PyPi.
+
+## Sub Projects/Directories
+This repositor has siblings that might be of interest.
+- CCDA-tools is a collection of different file snoopers, scripts that find and show a XML elements with a certain tag, like id, code or section.
+ https://github.com/chrisroederucdenver/CCDA-tools
+- CCDA-data
+sample data is in it's own repo. The directory has been flattened compared to earlier work.
+https://github.com/chrisroederucdenver/CCDA-data
+- CCDA_Private is a private repository for keeping and sharing the vocabularies used here. After dealing with licenses this data, the OMOP concepts can be dowloaded from athena.ohdsi.org.
+https://github.com/chrisroederucdenver/CCDA_OMOP_Private
+
+
+Code here, prototype_2/value_transformations.py  loads the concept map from a file map_to_standard.csv from the local top leve.
+It is not included in this repo however. It is in CCDA-tools.  Running locally, for the moment, requires the file to be copied over (or linked).
+(now owned by cladteam)
+
+## Publishing Conda libraries (Foundry)
 
 This repository template is set up to publish a Conda library into Foundry. The ``build.gradle`` file configures the publish task to only run when the repository is tagged. You can create a new tag from the "Branches" tab.
 
 By default, the repository's name at creation time is used as the name for the Conda package. It is possible to change the name of the package by updating the ``condaPackageName`` variable in the ``gradle.properties`` file. Note that since this is a hidden file, you will need to enable "Show hidden files and folders".
 
-*Important:* underscores in the repository name are rewritten to dash. For example, if your repository is named `my_library`, then the library will be published as `my-library`.
+#*Important:* underscores in the repository name are rewritten to dash. For example, if your repository is named `my_library`, then the library will be published as `my-library`.
 
 ## Consuming Conda Libraries
 
@@ -65,6 +83,7 @@ apply plugin: 'com.palantir.transforms.lang.pytest-defaults'
 
 You can find an example unit test inside the `src/test` directory. Please refer to the [documentation](https://www.palantir.com/docs/foundry/transforms-python/unit-tests/#enabling-tests) for more information.
 
+
 # CCDA_OMOP_by_Python
 
 This is a project to convert CCDA documents to OMOP CDM format in Python.
@@ -73,20 +92,5 @@ The bulk of the work is in the prototype_2 directory. Further instruction is in 
 
 ## BADGE
 [![Prototype 2](https://github.com/cladteam/CCDA_OMOP_by_Python/actions/workflows/prototype_2.yml/badge.svg)](https://github.com/cladteam/CCDA_OMOP_by_Python/actions/workflows/prototype_2.yml)
-
-## Sub Projects/Directories
-This repositor has siblings that might be of interest.
-- CCDA-tools is a collection of different file snoopers, scripts that find and show a XML elements with a certain tag, like id, code or section.
- https://github.com/chrisroederucdenver/CCDA-tools
-- CCDA-data
-sample data is in it's own repo. The directory has been flattened compared to earlier work.
-https://github.com/chrisroederucdenver/CCDA-data
-- CCDA_Private is a private repository for keeping and sharing the vocabularies used here. After dealing with licenses this data, the OMOP concepts can be dowloaded from athena.ohdsi.org.
-https://github.com/chrisroederucdenver/CCDA_OMOP_Private
-
-
-Code here, prototype_2/value_transformations.py  loads the concept map from a file map_to_standard.csv from the local top leve.
-It is not included in this repo however. It is in CCDA-tools.  Running locally, for the moment, requires the file to be copied over (or linked).
-(now owned by cladteam)
 
 
