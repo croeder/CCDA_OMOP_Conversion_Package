@@ -474,12 +474,15 @@ def do_derived_fields(output_dict :dict[str, None | str | float | int | int32 | 
             try:
                 function_reference = field_details_dict['FUNCTION']
                 function_value = field_details_dict['FUNCTION'](args_dict)
-#                if function_reference != VT.concat_fields and function_value is None:
-#                    logger.error((f"do_derived_fields(): No mapping back for {config_name} {field_tag}"
- #                                 f" from {field_details_dict['FUNCTION']}  {args_dict}   {config_dict[field_tag]}  "
-#                                  "If this is from a value_as_concept/code field, it may not be an error, but "
- #                                 "an artificat of data that doesn't have a value or one that is not "
-#                                  "meant as a concept id"))
+                if function_reference != VT.concat_fields and function_value is None and args_dict['concept_code'] is not None:
+                    logger.error((f"do_derived_fields(): MAPPING FAIL args:{args_dict}"
+                                  #f"\nNo value returned for {config_name} {field_tag}"
+                                  #f"\n  from {field_details_dict['FUNCTION']} "
+                                  #f"\n  config:{config_dict[field_tag]}"
+                                  #"\n     If this is from a value_as_concept/code field, it may not be an error, but "
+                                  #"\n   an artificat of data that doesn't have a value or one that is not "
+                                  #"\n   meant as a concept id"
+                                 ))
                 output_dict[field_tag] = function_value
                 logger.info((f"     DERIVED {function_value} for "
                                 f"{field_tag}, {field_details_dict} {output_dict[field_tag]}"))
@@ -503,7 +506,7 @@ def do_derived_fields(output_dict :dict[str, None | str | float | int | int32 | 
                 logger.error(f"DERIVED exception: {e}")
                 output_dict[field_tag] = None
             except: # Error as er:
-#                logger.error(f"DERIVED error: {er}")
+                logger.error(f"DERIVED error: {er}")
                 output_dict[field_tag] = None
                 
 @typechecked
@@ -540,19 +543,22 @@ def do_domain_fields(output_dict :dict[str, None | str | float | int | int32 | i
                         logger.error(f"DERIVED exception: {e}")
                         output_dict[field_tag] = None
                     except: # Error as er:
-#                        logger.error(f"DERIVED error: {er}")
+                        logger.error(f"DERIVED error: {er}")
                         output_dict[field_tag] = None
                     
             # Derive the value
             try:
                 function_reference = field_details_dict['FUNCTION']
                 function_value = field_details_dict['FUNCTION'](args_dict)
-                if function_reference != VT.concat_fields and (function_value is None or function_value == 0): 
-                    logger.error((f"do_domain_fields(): No mapping back for {config_name} {field_tag} "
-                                  f"from {field_details_dict['FUNCTION']} {args_dict}   {config_dict[field_tag]}"
-                                  "If this is from a value_as_concept/code field, it may not be an error, but "
-                                  "an artificat of data that doesn't have a value or one that is not "
-                                  "meant as a concept id"))
+                if function_reference != VT.concat_fields and (function_value is None or function_value == 0) and args_dict['concept_code'] is not None:
+                    logger.error((f"do_derived_fields(): MAPPING FAIL args:{args_dict}"
+                                  #f"\nNo value returned for {config_name} {field_tag} "
+                                  #f"\n  from {field_details_dict['FUNCTION']} "
+                                  #f"\n  config:{config_dict[field_tag]}"
+                                  #"\n     If this is from a value_as_concept/code field, it may not be an error, but "
+                                  #"\n   an artificat of data that doesn't have a value or one that is not "
+                                  #"\n   meant as a concept id"
+                                ))
                 domain_id = function_value
                 output_dict[field_tag] = function_value
                 logger.info((f"     DOMAIN captured as {function_value} for "
@@ -573,7 +579,7 @@ def do_domain_fields(output_dict :dict[str, None | str | float | int | int32 | i
                 logger.error(f"DERIVED exception: {e}")
                 output_dict[field_tag] = None
             except: #Error as er:
-#                logger.error(f"DERIVED error: {e}")
+                logger.error(f"DERIVED error: {e}")
                 output_dict[field_tag] = None
 
     if domain_id == 0: # TODO, we should decide between 0/NMC and None for an unknown domain_id
@@ -1248,8 +1254,11 @@ def reconcile_visit_foreign_keys(data_dict :dict[str,
 
     for meta_tuple in metadata:
         #print(f" reconciling {meta_tuple[1]}")
-        reconcile_visit_FK_with_specific_domain(meta_tuple[0], data_dict[meta_tuple[1]], data_dict[meta_tuple[2]] )
-                          
+        if meta_tuple[1] in data_dict:
+            if meta_tuple[2] in data_dict:
+                reconcile_visit_FK_with_specific_domain(meta_tuple[0], data_dict[meta_tuple[1]], data_dict[meta_tuple[2]] )
+            else:
+                print(f"ERROR in reconcile_visit_foreign_keys() meta_tuple[2]:{meta_tuple[2]} not in data_dict")
                           
 @typechecked
 def parse_doc(file_path, 
@@ -1264,17 +1273,15 @@ def parse_doc(file_path,
     tree = ET.parse(file_path)
     base_name = os.path.basename(file_path)
     for config_name, config_dict in metadata.items():
-#        print(f" {base_name} {config_name}")
         data_dict_list = parse_config_from_xml_file(tree, config_name, config_dict, base_name, pk_dict)
-        if config_name in omop_dict: 
-            omop_dict[config_name] = omop_dict[config_name].extend(data_dict_list)
+        if data_dict_list is None:
+            print(f"WARN: no data in parse_doc for file:{base_name} for config:{config_name}")
         else:
-            omop_dict[config_name] = data_dict_list
+            if config_name in omop_dict: 
+                omop_dict[config_name] = omop_dict[config_name].extend(data_dict_list)
+            else:
+                omop_dict[config_name] = data_dict_list
             
-        #if data_dict_list is not None:
-        #    print(f"...PARSED, got {len(data_dict_list)}")
-        #else:
-        #    print(f"...PARSED, got **NOTHING** {data_dict_list} ")
     return omop_dict
 
 
