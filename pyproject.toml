@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ccda_to_omop"
-version = "0.0.8"
+version = "0.0.9"
 authors = [ 
     { name="Chris Roeder", email="chris@tislab.org" },  
     { name="Chris Roeder", email="roederc@unc.med.edu" },  
@@ -55,6 +55,6 @@ license = "GPL-3.0"
 license-files = ["LICEN[CS]E*"]
 
 [project.urls]
-Homepage = "https://github.com/cladteam/CCDA_OMOP_by_Python"
+Homepage = "https://github.com/cladteam/CCDA_OMOP_Conversion_Package"
 Issues = "https://github.com/cladteam/CCDA_OMOP_by_Python/issues"
 
