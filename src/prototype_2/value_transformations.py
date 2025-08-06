@@ -299,7 +299,7 @@ def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default):
 def _valueset_xwalk_DICT(vocabulary_oid, concept_code, column_name, default):
 
     if get_ccda_value_set_mapping_table_dict() is None:
-        raise Exception("ccda_value_set_mapping_talbe_dict is not initialized in prototype_2/__init__.py for value_transformations.py")
+        raise Exception("ccda_value_set_mapping_table_dict is not initialized in prototype_2/__init__.py for value_transformations.py _valueset_xwalk_DICT()")
 
     ccda_value_set_mapping_dict =  get_ccda_value_set_mapping_table_dict()
     map_dict = ccda_value_set_mapping_dict[(vocabulary_oid, concept_code)]
