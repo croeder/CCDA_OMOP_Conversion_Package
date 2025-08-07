@@ -103,6 +103,10 @@ def get_branch():
         return result.stdout.strip()
     except subprocess.CalledProcessError:
         return None
+    except FileNotFoundError:
+        return None
+    except Exception:
+        return None
 
 def get_meta_dict():
     metadata = meta_dict
