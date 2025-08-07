@@ -1,4 +1,5 @@
 
+import subprocess
 
 import prototype_2.metadata.person      as person
 import prototype_2.metadata.visit_encompassingEncounter_responsibleParty as visit_encompassingEncounter_responsibleParty
@@ -84,13 +85,39 @@ meta_dict =  location.metadata | \
              provider_encompassingEncounter_responsibleParty.metadata 
 
 
+def get_branch():
+    """
+        This code attempts to use git to get a branch name.
+        It will only apply user mappings if it can verify it is not working in a main 
+        or master branch. If git fails, it assumes master and doesn't apply them.
+
+        Suggestions to use an environment variable FOUNDRY_BRANCH_NAME fail because the variable isn't set.
+    """
+    try:
+        result = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            stdout=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+
 def get_meta_dict():
     metadata = meta_dict
-    try:
-        from user_mappings import overlay_mappings
-        metadata = meta_dict | overlay_mappings
-        print("iNFO: got user mappings  and overlaid them.")
-    except Exception as e:
-        print("iNFO: no user mappings available, nothing overlaid, using package mappings as-is.")
-        print(f"    {e}")
-    return metadata
+
+    # Don't apply user mappings if we can't be sure we're not running in master.
+    # i.e. Only apply user mappings in development branches.
+    current_branch = get_branch() 
+    if current_branch is not None and current_branch != 'master' and current_branch != 'main':
+        try:
+            from user_mappings import overlay_mappings
+            metadata = meta_dict | overlay_mappings
+            print("iNFO: got user mappings  and overlaid them.")
+        except Exception as e:
+            print("iNFO: no user mappings available, nothing overlaid, using package mappings as-is.")
+            print(f"    {e}")
+        return metadata
+    else:
+        print("iNFO: it appears this might be running in a main or master branch, so any user mappings will not be applied, using package mappings as-is.")
