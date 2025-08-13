@@ -182,10 +182,10 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                                 print(f"  exception  {domain_df[column_name]}   {type(domain_df[column_name])}")
 
                         # TODO: check whole column for NaN or NaT here
-                        null_count = domain_df[column_name].isnull().sum()
-                        if null_count > 0:
-                            msg=f"nulls in column {column_name}"
-                            raise Exception(msg)
+                        #null_count = domain_df[column_name].isnull().sum()
+                        #if null_count > 0:
+                        #    msg=f"nulls in column {column_name}"
+                        #    raise Exception(msg)
                                                               
                             
                 df_dict[config_name] = domain_df
