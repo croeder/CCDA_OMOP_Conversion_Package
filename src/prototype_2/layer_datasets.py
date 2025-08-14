@@ -113,7 +113,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
             ###print(f"ERROR No data to create dataframe for {config_name} from {filepath}")
         else:
             column_list = find_max_columns(config_name, domain_list)
-            column_dict =  dict((k, []) for k in column_list) #dict.fromkeys(column_list)
+            column_dict = dict((k, []) for k in column_list) #dict.fromkeys(column_list)
 
             # Add the data from all the rows
             for domain_data_dict in domain_list:
@@ -140,7 +140,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                             msg=f"layered_datasets.create_omop_domain_dataframes() NaN/NaT {config_name} {field} {prepared_value} <--"
                             raise Exception(msg)
 
-                        #if prepared_value is None and field == 'condition_start_date':
+                        # if prepared_value is None and field == 'condition_start_date':
                         #    # for debuggin in Spark, raise exception
                         #    msg=f"layered_datasets.create_omop_domain_dataframes() None start-date {config_name} {field} {prepared_value} <--"
                         #    raise Exception(msg)
@@ -150,9 +150,9 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                             # for debuggin in Spark, raise exception
                             msg=f"layered_datasets.create_omop_domain_dataframes() not in dict {config_name} {field} {prepared_value} <--"
                             raise Exception(msg)
-                    column_dict[field].append(None)
-                        
-    
+                    column_dict[field].append(prepared_value)
+
+
             # Use domain_dataframe_colunn_types to cast dataframe columns as directed
             # Create a Pandas dataframe from the data_dict
             try:
@@ -182,10 +182,10 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                                 print(f"  exception  {domain_df[column_name]}   {type(domain_df[column_name])}")
 
                         # TODO: check whole column for NaN or NaT here
-                        #null_count = domain_df[column_name].isnull().sum()
-                        #if null_count > 0:
-                        #    msg=f"nulls in column {column_name}"
-                        #    raise Exception(msg)
+                        null_count = domain_df[column_name].isnull().sum()
+                        if null_count > 0:
+                            msg=f"nulls in column {column_name}"
+                            raise Exception(msg)
                                                               
                             
                 df_dict[config_name] = domain_df
@@ -426,8 +426,11 @@ def do_export_datasets(domain_dataset_dict):
         
 def do_write_csv_files(domain_dataset_dict):
     for domain_id in domain_dataset_dict:
-        print(f"Writing CSV for domain:{domain_id} dim:{domain_dataset_dict[domain_id].shape}")
-        domain_dataset_dict[domain_id].to_csv(f"output/domain_{domain_id}.csv")
+        if domain_id in domain_dataset_dict and domain_dataset_dict[domain_id] is not None:
+            print(f"Writing CSV for domain:{domain_id} dim:{domain_dataset_dict[domain_id].shape}")
+            domain_dataset_dict[domain_id].to_csv(f"output/domain_{domain_id}.csv")
+        else:
+            print(f"Error Writing CSV for domain:{domain_id} no such table in dict")
  
 
         
