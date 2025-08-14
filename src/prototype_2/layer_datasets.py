@@ -190,12 +190,13 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                             
                 df_dict[config_name] = domain_df
             except ValueError as ve:
-                logger.error(f"ERROR when creating dataframe for {config_name} \"{ve}\"")
-                print(f"ERROR when creating dataframe for {config_name} \"{ve}\"")
+                logger.error(f"ERROR when creating dataframe for {config_name} in {filepath} NO DATA RETURNED \"{ve}\"")
+                print(f"ERROR when creating dataframe for {config_name} in {filepath} NO DATA RETURNED \"{ve}\"")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
             except Exception as x:
-                logger.error(f"ERROR exception {config_name}  {x}")
+                logger.error(f"ERROR exception {config_name} in {filepath} NO DATA RETURNED {x}")
+                print(f"ERROR exception {config_name} in {filepath} NO DATA RETURNED  {x}")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
     
