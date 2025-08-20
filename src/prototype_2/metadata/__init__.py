@@ -2,7 +2,6 @@
 import subprocess
 
 import prototype_2.metadata.person      as person
-import prototype_2.metadata.visit_encompassingEncounter_responsibleParty as visit_encompassingEncounter_responsibleParty
 import prototype_2.metadata.visit       as visit
 import prototype_2.metadata.measurement as measurement
 import prototype_2.metadata.measurement_vital_signs as measurement_vs
@@ -55,7 +54,6 @@ meta_dict =  location.metadata | \
              provider_header_documentationOf.metadata | \
              person.metadata | \
              visit_encompassingEncounter.metadata | \
-             visit_encompassingEncounter_responsibleParty.metadata | \
              visit.metadata  | \
              measurement.metadata | \
              measurement_vs.metadata | \
