@@ -117,7 +117,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
 
         # Initialize a dictionary of columns from schema
         if domain_list is None or len(domain_list) < 1:
-            logger.error(f"No data to create dataframe for {config_name} from {filepath}")
+            logger.error(f"(create_omop_domain_dataframes) No data to create dataframe for {config_name} from {filepath} {domain_list}")
         else:
             column_list = find_max_columns(config_name, domain_list)
             column_dict = dict((k, []) for k in column_list) #dict.fromkeys(column_list)
@@ -197,13 +197,14 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                             
                 df_dict[config_name] = domain_df
             except ValueError as ve:
-                logger.error(f"ERROR when creating dataframe for {config_name} in {filepath} NO DATA RETURNED \"{ve}\"")
+                logger.info(f"INFO when creating dataframe for {config_name} in {filepath} HAVE DATA {df_dict}")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
             except Exception as x:
                 logger.error(f"ERROR exception {config_name} in {filepath} NO DATA RETURNED {x}")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
+            logger.error(f"(create_omop_domain_dataframes) No data to create dataframe for {config_name} from {filepath} {domain_list}")
     
 
     return df_dict
@@ -233,9 +234,11 @@ def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame
     """
     base_name = os.path.basename(filepath)
 
-    logging.info(f"parsing string from {filepath}")
+    logger.info(f"parsing string from {filepath}")
     omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
+    logger.info(f"--parsing string from file:{filepath} keys:{omop_data.keys()} p:{len(omop_data['Person'])} m:{len(omop_data['Measurement'])} ")
     DDP.reconcile_visit_foreign_keys(omop_data)
+    logger.info(f"-- after reconcile parsing string from file:{filepath} keys:{omop_data.keys()} p:{len(omop_data['Person'])} m:{len(omop_data['Measurement'])} ")
     if omop_data is not None or len(omop_data) < 1:
         dataframe_dict = create_omop_domain_dataframes(omop_data, filepath)
     else:
@@ -301,7 +304,15 @@ def process_string_to_dict(contents, filepath, write_csv_flag, codemap_dict, vis
 #
 
     omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
+    logger.info(f"LD.process_string_to_dict() parsing string from file:{filepath} keys:{omop_data.keys()} ")
+    #for key, value in omop_data.items(): 
+    #    logger.info(f"LD.process_string_to_dict() {key} {value}")
+
     DDP.reconcile_visit_foreign_keys(omop_data)
+    logger.info(f"LD.process_string_to_dict() after reconcile parsing string from file:{filepath} "
+                 f"keys:{omop_data.keys()} ")
+    #for key, value in omop_data.items():
+    #    logger.info(f"LD.process_string_to_dict() after   {key} {value}")
 
     return omop_data
 
@@ -391,10 +402,13 @@ def combine_datasets(omop_dataset_dict):
     domain_dataset_dict = {}
     for filename in omop_dataset_dict:
         domain_id = file_to_domain_dict[filename]
-        if domain_id in domain_dataset_dict:
-            domain_dataset_dict[domain_id] = pd.concat([ domain_dataset_dict[domain_id], omop_dataset_dict[filename] ])
+        if filename in omop_dataset_dict and omop_dataset_dict[filename] is not None:
+            if domain_id in domain_dataset_dict and domain_dataset_dict[domain_id] is not None:
+                domain_dataset_dict[domain_id] = pd.concat([ domain_dataset_dict[domain_id], omop_dataset_dict[filename] ])
+            else:
+                domain_dataset_dict[domain_id] = omop_dataset_dict[filename]      
         else:
-            domain_dataset_dict[domain_id] = omop_dataset_dict[filename]      
+            logger.error(f"NO DATA for config {filename} in LD.combine_datasets()")
             
     return domain_dataset_dict
 
@@ -572,7 +586,7 @@ def main():
         VT.set_codemap_xwalk_dict(U.create_codemap_dict(codemap_df))
         
         
-        logging.info("Successfully loaded and initialized mapping dictionaries.")
+        logger.info("Successfully loaded and initialized mapping dictionaries.")
 
     except Exception as e:
         logger.error(f"Failed to load mapping datasets from Foundry: {e}")

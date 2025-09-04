@@ -739,7 +739,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     """
     output_dict = {} #  :dict[str, any]  a record
     domain_id = None
-    logger.info((f"  ROOT for config:{config_name}, we have tag:{root_element.tag}"
+    logger.info((f"DDP.parse_config_for_single_root()  ROOT for config:{config_name}, we have tag:{root_element.tag}"
                  f" attributes:{root_element.attrib}"))
 
     do_none_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set)
@@ -752,6 +752,10 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     do_hash_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
     priority_field_names = do_priority_fields(output_dict, root_element, root_path, config_name,  config_dict,
                                               error_fields_set, pk_dict)
+
+    logger.info((f"DDP.parse_config_for_single_root()  ROOT for config:{config_name}, "
+                 f"we have tag:{root_element.tag}"
+                 f" attributes:{root_element.attrib}"))
 
 
     output_dict = sort_output_dict(output_dict, config_dict, config_name)
@@ -879,8 +883,8 @@ def parse_config_from_xml_file(tree, config_name,
         logger.error(f" {config_dict['root']['element']}   {e}")
         
     if root_element_list is None or len(root_element_list) == 0:
-#        logger.error((f"CONFIG couldn't find root element for {config_name}"
-#                      f" with {config_dict['root']['element']}"))
+        logger.info((f"CONFIG couldn't find root element for {config_name}"
+                      f" with {config_dict['root']['element']}"))
         return None
 
     output_list = []
@@ -1203,8 +1207,6 @@ def parse_string(ccda_string, file_path,
               metadata :dict[str, dict[str, dict[str, str]]]) -> dict[str, 
                       list[ dict[str,  None | str | float | int | int64 ] | None  ] | None]:
     """ 
-        * E X P E R I M E N T A L *
-    
         Parses many meta configs from a string instead of a single file, 
         collects them in omop_dict.
         
@@ -1217,10 +1219,21 @@ def parse_string(ccda_string, file_path,
     base_name = os.path.basename(file_path)
     for config_name, config_dict in metadata.items():
         data_dict_list = parse_config_from_xml_file(tree, config_name, config_dict, base_name, pk_dict)
+        if data_dict_list is not None:
+            logger.info(f"DDP.py {config_name} {len(data_dict_list)}")
+        else:
+            logger.info(f"DDP.py {config_name} has None data_dict_list")
         if config_name in omop_dict: 
             omop_dict[config_name] = omop_dict[config_name].extend(data_dict_list)
         else:
             omop_dict[config_name] = data_dict_list
+        
+    for config_name, config_dict in omop_dict.items():
+        if config_dict is not None:
+            logger.info(f"DDP.py resulting omop_dict {config_name} {len(config_dict)}")
+        else:
+            logger.info(f"DDP.py resulting omop_dict {config_name} empty")
+                
     return omop_dict
 
     
