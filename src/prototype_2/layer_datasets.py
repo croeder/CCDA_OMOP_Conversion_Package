@@ -6,6 +6,8 @@ import os
 import pandas as pd
 import re
 from typeguard import typechecked
+import traceback
+
 try:
     from foundry.transforms import Dataset
 except Exception:
@@ -13,7 +15,6 @@ except Exception:
 from collections import defaultdict
 import lxml
 import tempfile
-import traceback
 from numpy import int32
 from numpy import int64
 from numpy import float32
@@ -21,7 +22,7 @@ from numpy import datetime64
 import numpy as np
 import warnings
 from foundry.transforms import Dataset
-
+import datetime as DT
 
 import prototype_2.data_driven_parse as DDP
 import prototype_2.value_transformations as VT
@@ -97,7 +98,7 @@ def find_max_columns(config_name :str, domain_list: list[ dict[str, tuple[ None 
         good_row = True
         for key in sql_import_dict[domain]['column_list']:
             if key not in col_dict:
-                    good_row = False
+                good_row = False
         # Q2: does it have the most extra
         if good_row and len(col_dict.keys()) > num_columns:
             chosen_row = row_num
@@ -136,9 +137,10 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                         elif field[-8:] == "datetime" and domain_data_dict[field] is not None:
                             try:
                                 prepared_value = domain_data_dict[field].replace(tzinfo=None)
+                                logger.info(f"DATETIME conversion  {type(domain_data_dict[field])} {domain_data_dict[field]} {field} ")
                             except Exception as e:
                                 prepared_value = None
-                                logger.error(f"ERROR  TZ {type(domain_data_dict[field])} {domain_data_dict[field]} {field} {e}")
+                                logger.error(f"ERROR  TZ {type(domain_data_dict[field])} {domain_data_dict[field]} {field} {e} TB:{traceback.format_exc(e)}")
                         else:
                             prepared_value = domain_data_dict[field]
 
@@ -152,7 +154,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                         #    msg=f"layered_datasets.create_omop_domain_dataframes() None start-date {config_name} {field} {prepared_value} <--"
                         #    raise Exception(msg)
                     else:
-                        # field is not in dict, so would be null, but odd for other reasons, want to know about this    
+                        # field is not in dict, so would be null, but odd for other reasons, want to know about this
                         if prepared_value is None:
                             # for debuggin in Spark, raise exception
                             msg=f"layered_datasets.create_omop_domain_dataframes() not in dict {config_name} {field} {prepared_value} <--"
@@ -169,21 +171,13 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                 table_name = domain_name_to_table_name[domain_name]
                 if table_name in domain_dataframe_column_types.keys():
                     for column_name, column_type in domain_dataframe_column_types[table_name].items():
-                        if column_type in ['date', 'datetime', datetime64]:
+                        if column_type in [datetime64, DT.date, DT.datetime]:
                             domain_df[column_name] = pd.to_datetime(domain_df[column_name])
-  
-                            if column_type == 'date':
-                                try:
-                                    domain_df[column_name] = domain_df[column_name].dt.date # datetime still
-                                    #domain_df[column_name] = domain_df[column_name].dt.date.astype('object') -- leaves as integer!
-                                except Exception as e:
-                                    logger.error(f"CAST ERROR (to date)  in layer_datasets.py table:{table_name} column:{column_name} type:{column_type}  "
-                                                 f"  exception  {domain_df[column_name]}   {type(domain_df[column_name])}")
                         else:
                             try:
                                 domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)  # generates downcasting wwarnings and doesn't throw, 
                                 # domain_df[column_name] = domain_df[column_name].fillna(cast(column_type, 0)).astype(column_type)  # throwss
-                                #domain_df[column_name] = domain_df[column_name].astype(column_type).fillna(0) # cast errors on the None
+                                # domain_df[column_name] = domain_df[column_name].astype(column_type).fillna(0) # cast errors on the None
                             except Exception as e:
                                 logger.error(f"CAST ERROR in layer_datasets.py table:{table_name} column:{column_name} type:{column_type}  "
                                              f"  exception  {domain_df[column_name]}   {type(domain_df[column_name])}")
@@ -192,21 +186,19 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                         null_count = domain_df[column_name].isnull().sum()
                         if null_count > 0:
                             msg=f"nulls in column {column_name}"
+                            logger.error(f"NULLS in create_omop_domain_dataframes() {msg}")
                             raise Exception(msg)
-                                                              
-                            
+
                 df_dict[config_name] = domain_df
             except ValueError as ve:
-                logger.info(f"INFO when creating dataframe for {config_name} in {filepath} HAVE DATA {df_dict}")
+                logger.info(f"when creating dataframe for {config_name} in {filepath} HAVE DATA {df_dict}")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
             except Exception as x:
-                logger.error(f"ERROR exception {config_name} in {filepath} NO DATA RETURNED {x}")
+                logger.error(f"exception {config_name} in {filepath} NO DATA RETURNED {x}")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
             logger.error(f"(create_omop_domain_dataframes) No data to create dataframe for {config_name} from {filepath} {domain_list}")
-    
-
     return df_dict
 
 
