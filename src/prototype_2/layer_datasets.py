@@ -105,6 +105,16 @@ def find_max_columns(config_name :str, domain_list: list[ dict[str, tuple[ None 
         row_num += 1
     return domain_list[row_num]
 
+# List of columns allowed to be NULL
+NULL_ALLOWED_COLUMNS = {
+    'drug_exposure_end_date',
+    'drug_exposure_end_datetime',
+    'verbatim_end_date',
+    'condition_end_date',
+    'condition_end_datetime',
+    'device_exposure_end_date',
+    'device_exposure_end_datetime'
+}
 
 @typechecked
 def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | str | float | int | int64] | None  ] | None],
@@ -172,32 +182,45 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                 if table_name in domain_dataframe_column_types.keys():
                     for column_name, column_type in domain_dataframe_column_types[table_name].items():
                         if column_type in [datetime64, DT.date, DT.datetime]:
-                            domain_df[column_name] = pd.to_datetime(domain_df[column_name])
+                            domain_df[column_name] = pd.to_datetime(domain_df[column_name], errors='coerce')
                         else:
                             try:
-                                domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)  # generates downcasting wwarnings and doesn't throw, 
-                                # domain_df[column_name] = domain_df[column_name].fillna(cast(column_type, 0)).astype(column_type)  # throwss
-                                # domain_df[column_name] = domain_df[column_name].astype(column_type).fillna(0) # cast errors on the None
+                                # Only fill missing values for non-nullable columns
+                                if column_name in NULL_ALLOWED_COLUMNS:
+                                    # leave as None/NaN
+                                    domain_df[column_name] = domain_df[column_name]
+                                else:
+                                    domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)  # generates downcasting wwarnings and doesn't throw, 
+                                    # domain_df[column_name] = domain_df[column_name].fillna(cast(column_type, 0)).astype(column_type)  # throwss
+                                    # domain_df[column_name] = domain_df[column_name].astype(column_type).fillna(0) # cast errors on the None
                             except Exception as e:
                                 logger.error(f"CAST ERROR in layer_datasets.py table:{table_name} column:{column_name} type:{column_type}  "
                                              f"  exception  {domain_df[column_name]}   {type(domain_df[column_name])}")
 
                         # TODO: check whole column for NaN or NaT here
-                        null_count = domain_df[column_name].isnull().sum()
-                        if null_count > 0:
-                            msg=f"nulls in column {column_name}"
-                            logger.error(f"NULLS in create_omop_domain_dataframes() {msg}")
-                            raise Exception(msg)
+                        # null_count = domain_df[column_name].isnull().sum()
+                        # if null_count > 0 and column_name not in NULL_ALLOWED_COLUMNS:
+                            # msg=f"nulls in column {column_name}"
+                            # logger.error(f"NULLS in create_omop_domain_dataframes() {msg}")
+                            # raise Exception(msg)
+
+                    # After casting datetimes, drop rows with nulls in disallowed columns
+                    disallowed_cols = [col for col in domain_df.columns if col not in NULL_ALLOWED_COLUMNS]
+                    before_dropped = len(domain_df)
+                    domain_df = domain_df.dropna(subset=disallowed_cols)
+                    after_dropped = len(domain_df)
+                    if before_dropped != after_dropped:
+                        logger.warning(f"{config_name}: dropped {before_dropped - after_dropped} rows with missing required fields")
 
                 df_dict[config_name] = domain_df
             except ValueError as ve:
                 logger.info(f"when creating dataframe for {config_name} in {filepath} HAVE DATA {df_dict}")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
-            except Exception as x:
-                logger.error(f"exception {config_name} in {filepath} NO DATA RETURNED {x}")
-                show_column_dict(config_name, column_dict)
-                df_dict[config_name] = None
+            # except Exception as x:
+                # logger.error(f"exception {config_name} in {filepath} NO DATA RETURNED {x}")
+                # show_column_dict(config_name, column_dict)
+                # df_dict[config_name] = None
             logger.error(f"(create_omop_domain_dataframes) No data to create dataframe for {config_name} from {filepath} {domain_list}")
     return df_dict
 

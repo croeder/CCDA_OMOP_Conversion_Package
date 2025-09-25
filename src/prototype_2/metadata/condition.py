@@ -75,28 +75,28 @@ metadata = {
 
         'condition_start_date': {  #20081022, #200810221850-0400
     	    'config_type': 'FIELD',
-            'data_type':'DATE',
+            'data_type': 'DATE',
     	    'element': "hl7:effectiveTime/hl7:low",
     	    'attribute': "value",
             'order': 4
     	},
         'condition_start_datetime': { 
            	'config_type': 'FIELD',
-            'data_type':'DATETIME',
+            'data_type': 'DATETIME',
     	    'element': "hl7:effectiveTime/hl7:low",
     	    'attribute': "value",
             'order': 5
     	},
         'condition_end_date': {
     	    'config_type': 'FIELD',
-            'data_type':'DATE',
+            'data_type': 'DATE',
     	    'element': "hl7:effectiveTime/hl7:high",
     	    'attribute': "value",
             'order': 6
     	},
         'condition_end_datetime': { 
     	    'config_type': 'FIELD',
-            'data_type':'DATETIME',
+            'data_type': 'DATETIME',
     	    'element': "hl7:effectiveTime/hl7:high",
     	    'attribute': "value",
             'order': 7
