@@ -37,7 +37,10 @@ visit_concept_xwalk_mapping_dict = None
 
 
 def set_codemap_xwalk_dict(map):
-    logger.info(f"set_codemap_xwalk_dict {len(map)} {map[next(iter(map))]}")
+    if map is not None:
+        logger.info(f"set_codemap_xwalk_dict {len(map)}")
+    else:
+        logger.info("set_codemap_xwalk_dict None map")
     global codemap_xwalk_dict
     codemap_xwalk_dict = map
 
@@ -46,7 +49,10 @@ def get_codemap_xwalk_dict():
 
 
 def set_ccda_value_set_mapping_table_dict(map):
-    logger.info(f"set_ccda_value_set_mapping_table_dict {len(map)}  {map[next(iter(map))]}")
+    if map is not None:
+        logger.info(f"set_ccda_value_set_mapping_table_dict {len(map)}")
+    else:
+        logger.info("set_codemap_xwalk_dict None map")
     global ccda_value_set_mapping_table_dict
     ccda_value_set_mapping_table_dict = map 
 
@@ -55,7 +61,10 @@ def get_ccda_value_set_mapping_table_dict():
 
 
 def set_visit_concept_xwalk_mapping_dict(map):
-    logger.info(f"set_visit_concept_xwalk_mapping_dict {len(map)}  {map[next(iter(map))]}")
+    if map is not None:
+        logger.info(f"set_visit_concept_xwalk_mapping_dict {len(map)}")
+    else:
+        logger.info("set_codemap_xwalk_dict None map")
     global visit_concept_xwalk_mapping_dict
     visit_concept_xwalk_mapping_dict = map
 
