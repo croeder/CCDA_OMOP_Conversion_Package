@@ -1,39 +1,11 @@
-
 import subprocess
-
-import prototype_2.metadata.person      as person
-import prototype_2.metadata.visit       as visit
-import prototype_2.metadata.measurement as measurement
-import prototype_2.metadata.measurement_vital_signs as measurement_vs
-import prototype_2.metadata.observation as observation
-import prototype_2.metadata.observation_social_history_smoking as observation_social_history_smoking
-import prototype_2.metadata.observation_social_history_pregnancy as observation_social_history_pregnancy
-import prototype_2.metadata.observation_social_history_tobacco_use as observation_social_history_tobacco_use
-import prototype_2.metadata.observation_social_history_cultural as observation_social_history_cultural
-import prototype_2.metadata.observation_social_history_home_environment as observation_social_history_home_environment
-import prototype_2.metadata.condition as condition
-import prototype_2.metadata.location as location
-import prototype_2.metadata.care_site_ee_hcf_location as care_site_ee_hcf_location
-import prototype_2.metadata.care_site_ee_hcf as care_site_ee_hcf
-import prototype_2.metadata.care_site_pr_location as care_site_pr_location
-import prototype_2.metadata.care_site_pr as care_site_pr
-import prototype_2.metadata.provider as provider
-import prototype_2.metadata.provider_encompassingEncounter as provider_encompassingEncounter	
-import prototype_2.metadata. provider_encompassingEncounter_responsibleParty as provider_encompassingEncounter_responsibleParty
-from prototype_2.metadata import visit_encompassingEncounter
-import prototype_2.metadata.provider_header_documentationOf as provider_header_documentationOf
-import prototype_2.metadata.medication_medication_dispense as medication_medication_dispense
-import prototype_2.metadata.medication_medication_activity as medication_medication_activity
-import prototype_2.metadata.immunization_immunization_activity as immunization_immunization_activity
-import prototype_2.metadata.procedure_activity_procedure as procedure_activity_procedure
-import prototype_2.metadata.procedure_activity_observation as procedure_activity_observation
-import prototype_2.metadata.procedure_activity_act as procedure_activity_act
-import prototype_2.metadata.procedure_activity_act_observation as  procedure_activity_act_observation
-import prototype_2.metadata.procedure_activity_act_measurement as  procedure_activity_act_measurement
-import prototype_2.metadata.device_organizer_supply as device_organizer_supply
-import prototype_2.metadata.device_supply as device_supply
-import prototype_2.metadata.device_organizer_procedure as device_organizer_procedure
-import prototype_2.metadata.device_procedure as device_procedure
+import pandas as pd
+import logging
+import sys
+import os
+import importlib.util
+from functools import reduce
+from typing import Dict, Any
 
 """ The meatadata is 3 nested dictionaries:
     - meta_dict: the dict of all domains
@@ -52,41 +24,10 @@ import prototype_2.metadata.device_procedure as device_procedure
 # ***
 #  PKs like person and visit must come before referencing FK configs, like in measurement
 
-meta_dict =  location.metadata | \
-             provider_header_documentationOf.metadata | \
-             person.metadata | \
-             visit_encompassingEncounter.metadata | \
-             visit.metadata  | \
-             measurement.metadata | \
-             measurement_vs.metadata | \
-             observation.metadata  | \
-             observation_social_history_smoking.metadata | \
-             observation_social_history_pregnancy.metadata | \
-             observation_social_history_tobacco_use.metadata | \
-             observation_social_history_cultural.metadata | \
-             observation_social_history_home_environment.metadata | \
-             medication_medication_dispense.metadata | \
-             medication_medication_activity.metadata | \
-             condition.metadata | \
-             care_site_ee_hcf.metadata | \
-             care_site_ee_hcf_location.metadata | \
-             care_site_pr.metadata | \
-             care_site_pr_location.metadata | \
-             provider.metadata | \
-             immunization_immunization_activity.metadata | \
-             procedure_activity_procedure.metadata | \
-             procedure_activity_observation.metadata | \
-             procedure_activity_act.metadata | \
-             procedure_activity_act_measurement.metadata | \
-             procedure_activity_act_observation.metadata | \
-             device_organizer_supply.metadata | \
-             device_supply.metadata | \
-             device_organizer_procedure.metadata | \
-             device_procedure.metadata | \
-             provider_encompassingEncounter.metadata | \
-             provider_encompassingEncounter_responsibleParty.metadata 
+METADATA_DIR = os.path.dirname(__file__)
 
 
+# copied get_branch() from master branch, restored on Sep 17, responding to Chris' comment on GitHub #474
 def get_branch():
     """
         This code attempts to use git to get a branch name.
@@ -110,8 +51,66 @@ def get_branch():
     except Exception:
         return None
 
+
+def discover_and_sort_metadata() -> Dict[str, Any]:
+    """
+    Discovers all metadata files, sorts them with a custom priority,
+    and merges their 'metadata' dictionaries into one.
+    """
+    metadata_dicts = []
+    if not os.path.isdir(METADATA_DIR):
+        logging.error(f"Metadata directory not found at: {METADATA_DIR}")
+        return {}
+
+    def custom_sort_key(filename):
+        """
+        Returns a tuple for sorting based on a multi-level priority:
+        Location, care_site, provider, person,  from Sep 26 with Chris R discussion in Slack and #474
+        """
+        # Group 0: Highest priority
+        if filename == 'location.py':
+            return (0, filename)
+        # Group 1
+        elif filename.startswith('care_site'):
+            return (1, filename)
+        # Group 2
+        elif filename.startswith('provider'):
+            return (2, filename)
+        # Group 3
+        elif filename == 'person.py':
+            return (3, filename)
+        # Group 4: visit
+        elif filename.startswith('visit'):
+            return (4, filename)
+        else:
+            return (5, filename)
+    files_to_skip = ['__init__.py', 'test.py', 'ddl.py', 'util.py']
+    filenames = os.listdir(METADATA_DIR)
+    filenames.sort(key=custom_sort_key)
+    for filename in filenames:
+        if filename.endswith('.py') and filename not in files_to_skip:
+            module_name = filename[:-3]
+            file_path = os.path.join(METADATA_DIR, filename)
+            try:
+                spec = importlib.util.spec_from_file_location(module_name, file_path)
+                module = importlib.util.module_from_spec(spec)
+                if spec is None or module is None:
+                    logging.warning(f"Could not load spec for module: {module_name}")
+                    continue
+                spec.loader.exec_module(module)
+                if hasattr(module, 'metadata'):
+                    metadata_dicts.append(module.metadata)
+                else:
+                    logging.warning(f"Module '{module_name}' does not contain a 'metadata' dictionary.")
+            except Exception as e:
+                logging.error(f"Failed to import metadata from '{filename}': {e}")
+    if not metadata_dicts:
+        return {}
+    return reduce(lambda a, b: a | b, metadata_dicts)
+
+
 def get_meta_dict():
-    metadata = meta_dict
+    metadata = discover_and_sort_metadata()
 
     # Don't apply user mappings if we can't be sure we're not running in master.
     # i.e. Only apply user mappings in development branches.
@@ -119,7 +118,7 @@ def get_meta_dict():
     if current_branch is not None and current_branch != 'master' and current_branch != 'main':
         try:
             from user_mappings import overlay_mappings
-            metadata = meta_dict | overlay_mappings
+            metadata = discover_and_sort_metadata() | overlay_mappings
             print("iNFO: got user mappings  and overlaid them.")
         except Exception as e:
             print("iNFO: no user mappings available, nothing overlaid, using package mappings as-is.")
