@@ -25,9 +25,13 @@ metadata = {
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
             'attribute': "extension"
         },
-        'visit_occurrence_id': { 
+        'visit_occurrence_id': {
             'config_type': 'HASH',
-            'fields' : [ 'visit_occurrence_id_root', 'visit_occurrence_id_extension','person_id','provider_id','visit_concept_id','visit_start_date','visit_end_date'], 
+            'fields' : ['visit_occurrence_id_root', 'visit_occurrence_id_extension',
+                        'person_id', 'provider_id',
+                        'visit_concept_id',
+                        'visit_start_date', 'visit_start_datetime'
+                        'visit_end_date', 'visit_end_datetime'],
             'order' : 1
         },
 
