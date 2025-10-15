@@ -15,44 +15,27 @@ metadata = {
     		   "/../hl7:entry/hl7:act[@moodCode='EVN']/"
                "hl7:statusCode[@code='active' or @code='completed']/..")
         },
-        'source_section': {
-            'config_type': 'CONSTANT',
-            'constant_value': 'RESULTS',
-            'order': 9999
-    	},
-
+        
     	'observation_id_root': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
-            'attribute': 'root',
-            'order': 1001
+            'attribute': 'root'
     	},
     	'observation_id_extension': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
-            'attribute': 'extension',
-            'order': 1002
+            'attribute': 'extension'
     	},
-    	'observation_id_hash': {
+    	'observation_id': {
     	    'config_type': 'HASH',
-            'fields' : [ 'observation_id_root', 'observation_id_extension' ],
-            'priority': ('observation_id', 1)
-    	},
-    	'observation_id_constant': {
-            'config_type': 'CONSTANT',
-            'constant_value' : 999,
-            'priority': ('observation_id', 2)
-        },
-    	'observation_id_field_hash': {
-    	    'config_type': 'HASH',
-            'fields' : ['person_id', 'visit_occurrence_id', 'observation_concept_id', 'observation_time',
-                    'value_as_string', 'value_as_number', 'value_as_concept_id'],
-            'priority': ('observation_id', 100)
-    	},
-        'observation_id': {
-            'config_type': 'PRIORITY',
+            'fields' : ['person_id', 'provider_id',
+                        #'visit_occurrence_id',
+                        'observation_concept_code', 'observation_concept_codeSystem',
+                        'observation_date', 'observation_datetime',
+                        'value_as_string', 'value_as_number', 'value_as_concept_id',
+                        'observation_id_extension', 'observation_id_root'],
             'order': 1
-        },
+    	},
 
     	'person_id': {
     	    'config_type': 'FK',
@@ -103,90 +86,50 @@ metadata = {
     	    'config_type': None,
             'order': 5
     	},
-        'observation_time': { 
-            'config_type': 'CONSTANT',
-            'constant_value' : '',
-            'order': 6 
-        },
         'observation_type_concept_id': {
             'config_type': 'CONSTANT',
             'constant_value' : int32(32827),
-            'order': 7
+            'order': 6
         },
-        'operator_concept_id': {
-    	    'config_type': 'CONSTANT',
-    	    'constant_value': "0",
-            'order': 8 
-        },
-
-    	'value_type': {
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:value",
-    	    'attribute': "{http://www.w3.org/2001/XMLSchema-instance}type",
-    	},
-   
     	'value_as_number': {
     	    'config_type': None,
-            'order': 9
-    	},
-    	'value_as_concept_id': {
+            'order': 7
+    	},	
+		'value_as_string': {
     	    'config_type': None,
-            'order':  10
+            'order': 8
     	},
-
-    	'unit_concept_id': { 'config_type': None, 'order':  11 },
-    	'range_low': { 'config_type': None, 'order':  12 },
-    	'range_high': { 'config_type': None, 'order':  13 },
-    	'provider_id': { 'config_type': None, 'order':  14 },
-
-    	'visit_occurrence_id':	{
-    	    'config_type': 'FK',
-    	    'FK': 'visit_occurrence_id',
-            'order':  15
+		'value_as_concept_id': {
+    	    'config_type': None,
+            'order':  9
     	},
-    	'visit_detail_id':	{ 'config_type': None, 'order':  16 },
+        'qualifier_concept_id' : { 'config_type': None, 'order': 10 },
+        'unit_concept_id': { 'config_type': None, 'order': 11 },
+        'provider_id': { 'config_type': None, 'order': 12 },
+		'visit_occurrence_id':	{'config_type': None, 'order':  13},
+    	'visit_detail_id':	{ 'config_type': None, 'order':  14 },
 
-    	'observation_source_value':	{
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:code" ,
-    	    'attribute': "code",
-            'order':  17
-        },
 
-    	'observation_source_concept_id':	{ 'config_type': None, 'order':  18 },
+'observation_source_value': {
+      'config_type': 'DERIVED',
+      'FUNCTION': VT.concat_fields,
+      'argument_names': {
+        'first_field': 'observation_concept_code',
+        'second_field': 'observation_concept_codeSystem',
+        'default': 0
+      },
+      'order' : 15
+    },
+
+    	'observation_source_concept_id':	{ 'config_type': None, 'order':  16 },
 
     	'unit_source_value':	{ 
-    	    'config_type': 'CONSTANT',
-            'constant_value': '',
-            'order':  19 
+    	    'config_type': None,
+            'order':  17
         },
-
-    	'value_source_value_constant': {
-    	    'config_type': 'CONSTANT',
-            'constant_value': 'n/a',
-            'priority': ['value_source_value', 4],
-        },
-    	#'value_source_value_text': {
-    	#    'config_type': 'FIELD',
-    	#    'element': 'hl7:value[@xsi:type="ST"]' ,
-    	#    'attribute': "#text",
-        #    'priority': ['value_source_value', 3],
-        #},
-    	'value_source_value_code': {
-    	    'config_type': 'FIELD',
-    	    'element': 'hl7:value[@xsi:type="CD"]' ,
-    	    'attribute': "code",
-            'priority': ['value_source_value', 2],
-        },
-    	'value_source_value_value': {
-    	    'config_type': 'FIELD',
-    	    'element': 'hl7:value[@xsi:type="PQ"]' ,
-    	    'attribute': "value",
-            'priority': ['value_source_value', 1],
-        },
-        'value_source_value' : {
-            'config_type': 'PRIORITY',
-            'order':20
+  'qualifier_source_value': { 
+            'config_type': None,
+            'order': 18 
         },
 		
         'filename' : {
