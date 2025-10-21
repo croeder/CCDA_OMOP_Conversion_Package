@@ -96,29 +96,20 @@ metadata = {
             'order': 6
         },
 
-    	'value_type': {
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:value",
-    	    'attribute': "{http://www.w3.org/2001/XMLSchema-instance}type",
-    	},
-
-
-    	'value_as_string': {
-    	    'config_type': 'FIELD',
-            'element': 'hl7:value[@xsi:type="ST"]' , # TODO TEST these
-    	    'attribute': "#text",
-            'order': 7
-    	},
-
-
     	'value_as_number': {
     	    'config_type': 'FIELD',
             'data_type':'FLOAT',
     	    'element': 'hl7:value[@xsi:type="PQ"]' ,
     	    'attribute': "value",
-            'order':8
+            'order': 7
     	},
 
+    	'value_as_string': {
+    	    'config_type': 'FIELD',
+            'element': 'hl7:value[@xsi:type="ST"]' , # TODO TEST these
+    	    'attribute': "#text",
+            'order': 8
+    	},
 
     	'value_as_code_CD': {
     	    'config_type': 'FIELD',
