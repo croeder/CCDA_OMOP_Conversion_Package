@@ -266,24 +266,6 @@ def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame
 
 
 @typechecked
-def process_string_to_dict_no_codemap(contents, filepath, write_csv_flag, visit_map_dict, valueset_map_dict) -> dict[str, list[dict]]:
-    """
-        Processes an XML CCDA string, returns data as Python structures.
-
-        Requires python dictionaries for mapping, brought in here, initialized to the package as 
-        part of making them available to executors in Spark.
-
-        Returns  dict of column lists
-    """
-    VT.set_ccda_value_set_mapping_table_dict(valueset_map_dict)
-    VT.set_visit_concept_xwalk_mapping_dict(visit_map_dict)
-
-    omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
-    DDP.reconcile_visit_foreign_keys(omop_data)
-
-    return omop_data
-
-@typechecked
 def process_string_to_dict(contents, filepath, write_csv_flag, codemap_dict, visit_map_dict, valueset_map_dict) -> dict[str, list[dict]]:
     """
         Processes an XML CCDA string, returns data as Python structures.
@@ -293,43 +275,34 @@ def process_string_to_dict(contents, filepath, write_csv_flag, codemap_dict, vis
 
         Returns  dict of column lists
     """
-    VT.set_codemap_xwalk_dict(codemap_dict)
-    VT.set_ccda_value_set_mapping_table_dict(visit_map_dict)
-    VT.set_visit_concept_xwalk_mapping_dict(valueset_map_dict)
+    VT.set_codemap_dict(codemap_dict)
+    VT.set_valueset_dict(valueset_map_dict)
+    VT.set_visitmap_dict(visit_map_dict)
 
-#    # * TEST CONCEPT MAP INITIALIZATON *
-#    # initing the maps is not working, test here, quickly, fail severly
-#    try:
-#        retval = codemap_dict[('2.16.840.1.113883.6.96', 608837004)]
-#    except KeyError as e:
-#        msg=f"key error in layer_datasets. {codemap_dict.keys()}"
-#        raise Exception(msg)
-#    msg2 = f"no key error in layer_datasets {retval}"
-#    raise Exception(msg2)
-#
-#    try:
-#        test_value = value_transformations.codemap_xwalk_concept_id({'vocabulary_oid': '2.16.840.1.113883.6.96', 'concept_code': 608837004, 'default': 'XXX'})
-#    except KeyError as e:
-#        msg=f"key error in layer_datasets. {codemap_dict.keys()}"
-#        raise Exception(msg)
-#    if test_value is None or test_value == 'XXX' or test_value == 'None':
-#        raise Exception("codemap_xwalk test failed with some form of None")
-#    if test_value != 1340204:
-#        msg="codemap_xwalk test failed to deliver correct code, got: {test_value}"
-#        raise Exception(msg)
-#
+    if len(VT.get_codemap_dict()) < 1:
+        raise Exception(f"codemap length {len(VT.get_codemap_dict())}")
+    if len(VT.get_valueset_dict() ) < 1:    
+        raise Exception(f"valueset map length {len(VT.get_valueset_dict())}" )
+    if len(VT.get_visitmap_dict() ) < 1:
+        raise Exception(f"visit map length {len(VT.get_visitmap_dict())}" )
+
+    test_value = codemap_dict[('2.16.840.1.113883.6.96', '608837004')]
+    if test_value[0]['target_concept_id'] != 1340204:
+        msg=f"codemap_xwalk test failed to deliver correct code, got: {test_value}"
+        raise Exception(msg)
+
+    test_value = valueset_map_dict[('2.16.840.1.113883.6.238','2106-3')]
+    if test_value[0]['target_concept_id'] != '8527':
+                msg=f"valueset map test failed to deliver correct code, got: {test_value}"
+                raise Exception(msg)
+
+    test_value = visit_map_dict[('2.16.840.1.113883.6.259','1026-4')]
+    if test_value[0]['target_concept_id'] != '9201':
+                msg=f"visit map test failed to deliver correct code, got: {test_value}"
+                raise Exception(msg)
 
     omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
-    logger.info(f"LD.process_string_to_dict() parsing string from file:{filepath} keys:{omop_data.keys()} ")
-    #for key, value in omop_data.items(): 
-    #    logger.info(f"LD.process_string_to_dict() {key} {value}")
-
     DDP.reconcile_visit_foreign_keys(omop_data)
-    logger.info(f"LD.process_string_to_dict() after reconcile parsing string from file:{filepath} "
-                 f"keys:{omop_data.keys()} ")
-    #for key, value in omop_data.items():
-    #    logger.info(f"LD.process_string_to_dict() after   {key} {value}")
-
     return omop_data
 
 
@@ -593,13 +566,13 @@ def main():
         visit_map_df = Dataset.get("visit_concept_xwalk_mapping_dataset").read_table(format="pandas")
         visitmap_dict = U.create_visit_dict(visit_map_df)
         logger.error(f"VISITMAP  {len(visitmap_dict)}")
-        VT.set_visit_concept_xwalk_mapping_dict(visitmap_dict)
+        VT.set_visitmap_dict(visitmap_dict)
 
         logger.info("xwalk valuesetmap")
         valueset_map_df = Dataset.get("ccda_value_set_mapping_table_dataset").read_table(format="pandas")
         valueset_dict = U.create_valueset_dict(valueset_map_df)
         logger.error(f"VALUESET  {len(valueset_dict)}")
-        VT.set_ccda_value_set_mapping_table_dict(valueset_dict)
+        VT.set_valueset_dict(valueset_dict)
         
         logger.info("xwalk codemap")
         codemap_df = Dataset.get("codemap_xwalk").read_table(format="pandas")

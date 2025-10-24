@@ -298,10 +298,10 @@ metadata = {
         
      
         # --- Default / Fallback values (Lowest Priority 9) ---
-        'visit_concept_id_default': { 
-            'config_type': 'CONSTANT', 
-            'constant_value': 0, 
-            'priority': ['visit_concept_id', 9] 
+        'visit_concept_id_default': {
+            'config_type': 'CONSTANT',
+            'constant_value': 0,
+            'priority': ['visit_concept_id', 9]
         },
         'visit_source_value_default': { 
             'config_type': 'CONSTANT', 

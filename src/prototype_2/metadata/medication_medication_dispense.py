@@ -80,7 +80,7 @@ metadata = {
     	    'argument_names': {
     		    'concept_code': 'drug_concept_code',
     		    'vocabulary_oid': 'drug_concept_codeSystem',
-                'default': 'n/a'
+                'default': 0
     	    }
     	},
         'drug_exposure_start_date_value': {

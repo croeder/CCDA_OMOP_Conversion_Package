@@ -69,7 +69,7 @@ metadata = {
     	    'argument_names': {
     		    'concept_code': 'condition_concept_code',
     		    'vocabulary_oid': 'condition_concept_codeSystem',
-                'default': 'n/a'
+                'default': 0
     	    }
     	},
 

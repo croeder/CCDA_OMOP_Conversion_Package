@@ -69,7 +69,7 @@ metadata = {
     	    'argument_names': {
     		    'concept_code': 'observation_concept_code',
     		    'vocabulary_oid': 'observation_concept_codeSystem',
-                'default': 'n/a'
+                'default': 0
     	    }
     	},
 
@@ -154,7 +154,7 @@ metadata = {
     	    'argument_names': {
        		    'first_field': 'value_as_codeSystem',
     		    'second_field': 'value_as_code',
-                'default': '0'
+                'default': 'n/a'
             },
             'order':  21
     	},

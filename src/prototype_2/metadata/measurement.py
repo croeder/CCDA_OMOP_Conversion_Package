@@ -71,7 +71,7 @@ metadata = {
     	    'argument_names': {
     		    'concept_code': 'measurement_concept_code',
     		    'vocabulary_oid': 'measurement_concept_codeSystem',
-                'default': 'n/a'
+                'default': 0
     	    }
     	},
     	# FIX same issue as above. Is it always just a single value, or do we ever get high and low?
@@ -206,7 +206,7 @@ metadata = {
             'argument_names': {
                 'first_field': 'measurement_concept_code',
                 'second_field': 'measurement_concept_codeSystem',
-                'default': 0
+                'default': 'n/a'
             },
             'order':  17
         },

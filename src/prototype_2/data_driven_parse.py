@@ -766,7 +766,13 @@ def parse_config_for_single_root(root_element, root_path, config_name,
 
 
     expected_domain_id = config_dict['root']['expected_domain_id']
-    if (expected_domain_id == domain_id or domain_id is None):
+
+    # Loose: roll with not having concept mapping
+    # if (expected_domain_id == domain_id or domain_id is None):
+
+    # Strict
+    if (expected_domain_id == domain_id):
+
         if expected_domain_id == "Observation":
             logger.warning((f"ACCEPTING {domain_id} "
                             f"id:{output_dict['observation_id']} "
