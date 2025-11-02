@@ -2,9 +2,15 @@
 # foundry: CCDA_OMOP_Conversion_Package
 
 This code is for converting HL7 CCDA documents to OHDSI OMOP.
-
 This is a python package with associated files to support publishing it
-in Palantir Foundry as well as PyPi. Currentl a work in progess, adding PyPi.
+in Palantir Foundry as well as PyPi. Currently a work in progess, adding PyPi.
+
+## PyPi Notes
+- rm dist/*
+- update the version number in the toml file
+- build __python3 -m build__ creates the packages and deposits them in the dist folder
+- upload __python3 -m twine upload dist/* 
+- check on pypi.org https://pypi.org/project/YOURPACKAGENAME
 
 ## Sub Projects/Directories
 This repositor has siblings that might be of interest.
