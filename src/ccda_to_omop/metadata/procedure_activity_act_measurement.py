@@ -1,41 +1,57 @@
-
 from numpy import int32
 from numpy import float32
-import ccda_to_omop.value_transformations as VT
-
+import prototype_2.value_transformations as VT
+# Rulebook solution for creating a measurement from a procedure.Technically correct but will not have a value as number.
 metadata = {
-    'Measurement_results': {
+    'Procedure_activity_act_measurement': {
     	'root': {
     	    'config_type': 'ROOT',
             'expected_domain_id': 'Measurement',
             # Results section
     	    'element':
     		  ("./hl7:component/hl7:structuredBody/hl7:component/hl7:section/"
-    		   "hl7:templateId[@root='2.16.840.1.113883.10.20.22.2.3.1' or @root='2.16.840.1.113883.10.20.22.2.3']"
-    		   "/../hl7:entry/hl7:organizer/hl7:component/hl7:observation")
-    		    # FIX: another template at the observation level here: "2.16.840.1.113883.10.20.22.4.2  Result Observation is an entry, not a section
+    		   "hl7:templateId[@root='2.16.840.1.113883.10.20.22.2.7' or @root='2.16.840.1.113883.10.20.22.2.7.1']"
+    		   "/../hl7:entry/hl7:act[@moodCode='EVN']/"
+               "hl7:statusCode[@code='active' or @code='completed']/..")
         },
-        
+        'source_section': {
+            'config_type': 'CONSTANT',
+            'constant_value': 'RESULTS',
+            'order': 9999
+    	},
+
     	'measurement_id_root': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
-            'attribute': 'root'
+            'attribute': 'root',
+            'order': 1001
     	},
     	'measurement_id_extension': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
-            'attribute': 'extension'
+            'attribute': 'extension',
+            'order': 1002
     	},
-    	'measurement_id': {
+    	'measurement_id_hash': {
     	    'config_type': 'HASH',
-            'fields' : ['person_id',  'provider_id',
-						#'visit_occurrence_id',
-						'measurement_concept_code', 'measurement_concept_codeSystem',
-						'measurement_date', 'measurement_datetime',
-                        'value_as_number', 'value_as_concept_id',
-				        'measurement_id_root', 'measurement_id_extension'],
-            'order': 1
+            'fields' : [ 'measurement_id_root', 'measurement_id_extension' ],
+            'priority': ('measurement_id', 1)
     	},
+    	'measurement_id_constant': {
+            'config_type': 'CONSTANT',
+            'constant_value' : 999,
+            'priority': ('measurement_id', 2)
+        },
+    	'measurement_id_field_hash': {
+    	    'config_type': 'HASH',
+            'fields' : ['person_id', 'visit_occurrence_id', 'measurement_concept_id', 'measurement_time',
+                    'value_as_number', 'value_as_concept_id'],
+            'priority': ('measurement_id', 100)
+    	},
+        'measurement_id': {
+            'config_type': 'PRIORITY',
+            'order': 1
+        },
 
     	'person_id': {
     	    'config_type': 'FK',
@@ -110,13 +126,6 @@ metadata = {
     	    'element': "hl7:value",
     	    'attribute': "{http://www.w3.org/2001/XMLSchema-instance}type",
     	},
-
-    	#'value_as_string': {
-    	#    'config_type': 'FIELD',
-    	#    'element': 'hl7:value[@xsi:type="ST"]' ,
-    	#    'attribute': "#text",
-        #    # field not present in measurement table
-    	#},
 
 
     	'value_as_number_pq': {
@@ -200,28 +209,14 @@ metadata = {
     	},
     	'visit_detail_id':	{ 'config_type': None, 'order':  16 },
 
-        'measurement_source_value':     {
-            'config_type': 'DERIVED',
-            'FUNCTION': VT.concat_fields,
-            'argument_names': {
-                'first_field': 'measurement_concept_code',
-                'second_field': 'measurement_concept_codeSystem',
-                'default': 'n/a'
-            },
+    	'measurement_source_value':	{
+    	    'config_type': 'FIELD',
+    	    'element': "hl7:code" ,
+    	    'attribute': "code",
             'order':  17
         },
 
-
-    	'measurement_source_concept_id': {
-    	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.codemap_xwalk_source_concept_id,
-    	    'argument_names': {
-    		    'concept_code': 'measurement_concept_code',
-    		    'vocabulary_oid': 'measurement_concept_codeSystem',
-                'default': 0
-    	    },
-            'order': 18
-    	},
+    	'measurement_source_concept_id':	{ 'config_type': None, 'order':  18 },
 
     	'unit_source_value':	{ 
     	    'config_type': 'CONSTANT',
@@ -256,15 +251,15 @@ metadata = {
             'config_type': 'PRIORITY',
             'order':20
         },
-		
-        'filename' : {
-            'config_type': 'FILENAME',
-            'order':100
-	    },
+
+	    'filename' : {
+		    'config_type': 'FILENAME',
+		    'order':100
+        },
         'cfg_name' : { 
 			'config_type': 'CONSTANT', 
-            'constant_value': 'Measurement_results',
+            'constant_value': 'Procedure_activity_act_measurement',
 			'order':101
-		} 	
+		} 
     }
 }

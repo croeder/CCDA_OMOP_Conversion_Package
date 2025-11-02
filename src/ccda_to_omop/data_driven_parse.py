@@ -84,7 +84,6 @@ from typeguard import typechecked
 
 from ccda_to_omop import value_transformations as VT
 from ccda_to_omop.metadata import get_meta_dict
- 
 
 logger = logging.getLogger(__name__)
 
@@ -745,7 +744,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     """
     output_dict = {} #  :dict[str, any]  a record
     domain_id = None
-    logger.info((f"  ROOT for config:{config_name}, we have tag:{root_element.tag}"
+    logger.info((f"DDP.parse_config_for_single_root()  ROOT for config:{config_name}, we have tag:{root_element.tag}"
                  f" attributes:{root_element.attrib}"))
 
     do_none_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set)
@@ -755,16 +754,31 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     do_derived_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set)
     domain_id = do_domain_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set)
     do_foreign_key_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
-    do_hash_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
-    priority_field_names = do_priority_fields(output_dict, root_element, root_path, config_name,  config_dict,
+
+    # NOTE: Order of operations is important here. do_priority_fields() must run BEFORE do_hash_fields().
+    # Many hash fields (e.g., *_ids) depend on values that are resolved through priority logic.
+    # This means that a priority chain should not include any hash fields.
+    do_priority_fields(output_dict, root_element, root_path, config_name,  config_dict,
                                               error_fields_set, pk_dict)
+    do_hash_fields(output_dict, root_element, root_path, config_name,  config_dict, error_fields_set, pk_dict)
+
+    logger.info((f"DDP.parse_config_for_single_root()  ROOT for config:{config_name}, "
+                 f"we have tag:{root_element.tag}"
+                 f" attributes:{root_element.attrib}"))
 
 
     output_dict = sort_output_dict(output_dict, config_dict, config_name)
 
 
     expected_domain_id = config_dict['root']['expected_domain_id']
-    if (expected_domain_id == domain_id or domain_id is None):
+
+    # Loose: roll with not having concept mapping
+    # if (expected_domain_id == domain_id or domain_id is None):
+
+    # Strict, don't expect a domain id from non-domain tables
+    if (expected_domain_id == domain_id
+        or expected_domain_id in ['Person', 'Location', 'Care_Site', 'Provider', 'Visit']):
+
         if expected_domain_id == "Observation":
             logger.warning((f"ACCEPTING {domain_id} "
                             f"id:{output_dict['observation_id']} "
@@ -858,12 +872,12 @@ def parse_config_from_xml_file(tree, config_name,
     """
 
     # log to a file per file/config
-    base_name = os.path.basename(filename)
-    logging.basicConfig(
-        format='%(levelname)s: %(message)s',
-#        filename=f"logs/log_config_{base_name}_{config_name}.log",
-        #force=True, level=logging.WARNING)
-        force=True, level=logging.ERROR)
+#    base_name = os.path.basename(filename)
+#    logging.basicConfig(
+#        format='%(levelname)s: %(message)s',
+##        filename=f"logs/log_config_{base_name}_{config_name}.log",
+#        #force=True, level=logging.WARNING)
+#        force=True, level=logging.ERROR)
 
     # Find root
     if 'root' not in config_dict:
@@ -885,8 +899,8 @@ def parse_config_from_xml_file(tree, config_name,
         logger.error(f" {config_dict['root']['element']}   {e}")
         
     if root_element_list is None or len(root_element_list) == 0:
-#        logger.error((f"CONFIG couldn't find root element for {config_name}"
-#                      f" with {config_dict['root']['element']}"))
+        logger.info((f"CONFIG couldn't find root element for {config_name}"
+                      f" with {config_dict['root']['element']}"))
         return None
 
     output_list = []
@@ -974,121 +988,71 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
         logger.error(f"no data for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
         return
     
+    # Only Measurement, Observation, Condition, Procedure, Drug, and Device participate in Visit FK reconciliation
     if domain not in domain_dates:
         logger.error(f"no metadata for domain {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
-        
-     # Q: does this domain NEED to have it's visit foreign key reconcileed??!!!! TODO
-     # (in this project things are called a domain and passed in here that are not really domains in OMOP, locations, providers, care-sites, etc. )
+        return
 
-     # Q: do they have different IDs??? (not in Patient-502.xml)
-     # A: it will get caught in the PK constraints when loaded to duckdb
-
-     # Q: do these strings parse, and so compare as dates??? 
-     # A: All parsing done upstream with datatype constraints on the FIELD configs
-        
     if 'date' in domain_dates[domain].keys():
         # Logic for domains with just one date
-            for thing in domain_dict:
+        for thing in domain_dict:
 
-                date_field_name = domain_dates[domain]['date'][0]
-                datetime_field_name = domain_dates[domain]['date'][1]
-                # Q: what if you have dates in one place and datetimes in the other? TODO
-                # A: work with the most-specific value you have.
-                # TODO: make a test case that has different combinations, check that parsing populates them.
-                # TODO: check for a second visit that fits
-                # TODO: the bennis_shauna file has UNK for the end date.
-                date_field_value = thing[date_field_name]
-                if thing[datetime_field_name] is not None and isinstance(thing[datetime_field_name], datetime.datetime):
-                    date_field_value = strip_tz(thing[datetime_field_name])
-                
-                if date_field_value is not None :
-                    # compare dates
-                                    
-                    have_visit = False
-                    for visit in visit_dict:
-                        try:
-                            start_visit_date = visit['visit_start_date']
-                            ##if visit['visit_start_datetime'] is not None:
-                            ##    start_visit_date = visit['visit_start_datetime']
-                             
-                            start_visit_datetime = strip_tz(visit['visit_start_datetime'])
-                            end_visit_date = visit['visit_end_date']
-                            ##if visit['visit_end_datetime'] is not None:
-                            ##    end_visit_date = visit['visit_end_datetime']
-                            end_visit_datetime = strip_tz(visit['visit_end_datetime'])
-                            
-                            ### Normalize all to datetime.date
-                            ###if isinstance(start_visit_date, datetime.datetime):
-                            ###    start_visit_date = start_visit_date.date()
-                            
-                            ###if isinstance(end_visit_date, datetime.datetime):
-                            ###    end_visit_date = end_visit_date.date()
-                                
-                            ###if isinstance(date_field_value, datetime.datetime):
-                            ###    date_field_value = date_field_value.date()
+            date_field_name = domain_dates[domain]['date'][0]
+            datetime_field_name = domain_dates[domain]['date'][1]
 
-                            ### Remove timezone info by converting all to naive datetime
-                            ##if start_visit_date.tzinfo is not None:
-                            ##    start_visit_date = start_visit_date.replace(tzinfo=None)
+            # Start with the plain date. If a datetime value is present, prefer it (more specific)
+            date_field_value = thing[date_field_name]
+            if thing[datetime_field_name] is not None and isinstance(thing[datetime_field_name], datetime.datetime):
+                date_field_value = strip_tz(thing[datetime_field_name])
 
-                            if isinstance(date_field_value, datetime.datetime):
-                                if start_visit_datetime != end_visit_datetime:
-                                    if start_visit_datetime <= date_field_value <= end_visit_datetime:
-                                        if not have_visit:
-                                            # update the visit_occurrence_id in that domain record
-                                            thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                            have_visit = True
-                                else:
-                                    end_visit_datetime_adjusted = datetime.datetime.combine(end_visit_date,
-                                                                                            datetime.time(23, 59, 59))
-                                    if start_visit_datetime <= date_field_value <= end_visit_datetime_adjusted:
-                                        if not have_visit:
-                                            # update the visit_occurrence_id in that domain record
-                                            thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                            have_visit = True
+            if date_field_value is not None:
+                matches = []
 
-                            
-                            ##if end_visit_date.tzinfo is not None:
-                            ##    end_visit_date = end_visit_date.replace(tzinfo=None)
-                                
-                            ##if date_field_value.tzinfo is not None:
-                            ##    date_field_value = date_field_value.replace(tzinfo=None)
-                            # Match using only dates
-                            elif isinstance(date_field_value, datetime.date):
-                                if start_visit_date <= date_field_value <= end_visit_date:
-                                    if not have_visit:
-                                        # update the visit_occurrence_id in that domain record
-                                        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                        have_visit = True
-                            
-                            ##if start_visit_date <= date_field_value and date_field_value <= end_visit_date:
-                            ##    ###print(f"MATCHED visit: v_start:{start_visit_date} d_date:{date_field_value} v_end:{end_visit_date}")
-                            ##    # got one! ....is it the first?
-                            ##    if not have_visit:
-                            ##        # update the visit_occurrence_id in that domain record
-                            ##        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                            ##    ###else:
-                            ##        ###print("WARNING got a second fitting visit for {domain} {thing[domain_dates['id']]}")
-                        except KeyError as ke:
-                           logger.error(f"missing field  \"{ke}\", in visit reconcilliation, see warnings for detail")
-                           logger.warning(f"missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")
-                        except Exception as e:
-                            pass
-#                            logger.error(f"something wrong in visit reconciliation \"{e}\" see warnings for detail ")
-#                            logger.warning(f"something wrong in visit reconciliation \"{e}\" {type(e)} ")
-                    ###if not have_visit:
-                        ###print(f"WARNING wasn't able to reconcile {domain} {thing}")
-                        ###print("")
-                    if not have_visit:
-                        logger.error(f" couldn't reconcile visit for {domain} event: {thing}")
-                        print(f"WARNING couldn't reconcile visit for {domain} event: {thing}")
-                        print("")
-                        
+                for visit in visit_dict:
+                    try:
+                        start_visit_date = visit['visit_start_date']
+                        start_visit_datetime = strip_tz(visit['visit_start_datetime'])
+                        end_visit_date = visit['visit_end_date']
+                        end_visit_datetime = strip_tz(visit['visit_end_datetime'])
+
+                        in_window = False
+                        # Match using datetime
+                        if isinstance(date_field_value, datetime.datetime):
+                            if start_visit_datetime != end_visit_datetime:
+                                in_window = start_visit_datetime <= date_field_value <= end_visit_datetime
+                            else:
+                                end_visit_datetime_adjusted = datetime.datetime.combine(end_visit_date,
+                                                                                        datetime.time(23, 59, 59))
+                                in_window = start_visit_datetime <= date_field_value <= end_visit_datetime_adjusted
+
+                        # Match using only dates
+                        elif isinstance(date_field_value, datetime.date):
+                            in_window = start_visit_date <= date_field_value <= end_visit_date
+
+                        if in_window:
+                            matches.append(visit['visit_occurrence_id'])
+
+                    except KeyError as ke:
+                        logger.error(f"missing field  \"{ke}\", in visit reconcilliation, see warnings for detail")
+                        logger.warning(f"missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")
+                    except Exception as e:
+                        pass
+
+                if len(matches) == 1:
+                    thing['visit_occurrence_id'] = matches[0]
+                elif len(matches) == 0:
+                    logger.error(f" couldn't reconcile visit for {domain} event: {thing}")
                 else:
-                    # S.O.L.
-                    ### print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
-                    logger.error(f"no date available for visit reconcilliation in domain {domain} for {thing}")
-                
+                    logger.warning(
+                        "Ambiguous visit match for %s (id=%s): %d candidates; leaving visit_occurrence_id unset",
+                        domain, thing.get(domain_dates[domain]['id']), len(matches)
+                    )
+                    thing['__visit_candidates'] = matches
+
+            else:
+                # S.O.L.
+                logger.error(f"no date available for visit reconcilliation in domain {domain} for {thing}")
+
     # Logic for domains with start and end date/dateime
     elif 'start' in domain_dates[domain].keys() and 'end' in domain_dates[domain].keys():
         for thing in domain_dict:
@@ -1096,17 +1060,9 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
             start_datetime_field_name = domain_dates[domain]['start'][1]
             end_date_field_name = domain_dates[domain]['end'][0]
             end_datetime_field_name = domain_dates[domain]['end'][1]
-            
-            ##start_date_value = thing[start_date_field_name]
-            ##end_date_value = thing[end_date_field_name]
+
             start_date_value = None
             end_date_value = None
-            
-            ##if thing[start_datetime_field_name] is not None:
-            ##        start_date_value = thing[start_datetime_field_name]
-            ##        
-            ##if thing[end_datetime_field_name] is not None:
-            ##        end_date_value = thing[end_datetime_field_name]
 
             # Prefer datetime if available
             if thing[start_datetime_field_name] is not None and isinstance(thing[start_datetime_field_name],
@@ -1114,103 +1070,108 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                 start_date_value = strip_tz(thing[start_datetime_field_name])
             else:
                 start_date_value = thing[start_date_field_name]
-            
+
             # Prefer datetime if available, else use end_date field, else fallback to start_date
             if thing[end_datetime_field_name] is not None and isinstance(thing[end_datetime_field_name],
                                                                          datetime.datetime):
                 end_date_value = strip_tz(thing[end_datetime_field_name])
             elif thing[end_date_field_name] is not None:
-               end_date_value = thing[end_date_field_name]
+                end_date_value = thing[end_date_field_name]
             else:
                 end_date_value = start_date_value
-            
+
             if start_date_value is not None and end_date_value is not None:
-                have_visit = False
+                matches = []
+
                 for visit in visit_dict:
                     try:
                         start_visit_date = visit['visit_start_date']
                         start_visit_datetime = strip_tz(visit['visit_start_datetime'])
-                        ##if visit['visit_start_datetime'] is not None:
-                        ##    start_visit_date = visit['visit_start_datetime']
-                                
                         end_visit_date = visit['visit_end_date']
                         end_visit_datetime = strip_tz(visit['visit_end_datetime'])
-                        ##if visit['visit_end_datetime'] is not None:
-                        ##    end_visit_date = visit['visit_end_datetime']
-                        ##
-                        ##if start_visit_date and end_visit_date:
-                        ##    # Check if event overlaps with the visit period
 
-
+                        in_window = False
                         # Adjust datetime comparisons for start and end values
                         if isinstance(start_date_value, datetime.datetime) and isinstance(end_date_value,
                                                                                           datetime.datetime):
                             if start_visit_datetime != end_visit_datetime:
-                                if (
+                                in_window = (
                                         (start_visit_datetime <= start_date_value <= end_visit_datetime) and
                                         (start_visit_datetime <= end_date_value <= end_visit_datetime)
-                                ):
-                                    print(
-                                        f"MATCHED visit: v_start:{start_visit_datetime} event_start:{start_date_value} event_end:{end_date_value} v_end:{end_visit_datetime}")
-                                    if not have_visit:
-                                        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                        have_visit = True
+                                )
                             else:
                                 end_visit_datetime_adjusted = datetime.datetime.combine(end_visit_date,
                                                                                         datetime.time(23, 59, 59))
-                                if (
+                                in_window = (
                                         (start_visit_datetime <= start_date_value <= end_visit_datetime_adjusted) and
                                         (start_visit_datetime <= end_date_value <= end_visit_datetime_adjusted)
-                                ):
-                                    print(
-                                        f"MATCHED visit: v_start:{start_visit_datetime} event_start:{start_date_value} event_end:{end_date_value} adjusted v_end:{end_visit_datetime_adjusted}")
-                                    if not have_visit:
-                                        thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                        have_visit = True
-
+                                )
                         # Compare with dates if datetime is not available
                         elif isinstance(start_date_value, datetime.date) and isinstance(end_date_value, datetime.date):
-
-
-
-                            if (
-                                ##(start_visit_date <= start_date_value <= end_visit_date) or
-                                ##(start_visit_date <= end_date_value <= end_visit_date) or
-                                ##(start_date_value <= start_visit_date and end_visit_date <= end_date_value)
+                            in_window = (
                                     (start_visit_date <= start_date_value <= end_visit_date) and
                                     (start_visit_date <= end_date_value <= end_visit_date)
-                            ):
-###                                print(f"MATCHED visit: v_start:{start_visit_date} event_start:{start_date_value} event_end:{end_date_value} v_end:{end_visit_date}")
-                                if not have_visit:
-                                    thing['visit_occurrence_id'] = visit['visit_occurrence_id']
-                                ##else:
-                                ##    print(f"WARNING multiple fitting visits for {domain} {thing[domain_dates['id']]}")
-                                    have_visit = True
+                            )
+
+                        if in_window:
+                            matches.append(visit['visit_occurrence_id'])
+
                     except KeyError as ke:
-                        print(f"WARNING missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")   
+                        print(f"WARNING missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")
                     except Exception as e:
                         print(f"WARNING something wrong in visit reconciliation: {e}")
 
-                if not have_visit:
+                if len(matches) == 1:
+                    thing['visit_occurrence_id'] = matches[0]
+                elif len(matches) == 0:
                     logger.error(f" couldn't reconcile visit for {domain} event: {thing}")
-                    print(f"WARNING couldn't reconcile visit for {domain} event: {thing}")
-                    print("")
-            
+                else:
+                    logger.warning(
+                        "Ambiguous visit match for %s (id=%s): %d candidates; leaving visit_occurrence_id unset",
+                        domain, thing.get(domain_dates[domain]['id']), len(matches)
+                    )
+                    thing['__visit_candidates'] = matches
+
             else:
-                    # S.O.L.
-                    print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
-                    logger.error(f" no date available for visit reconcilliation in domain {domain} for {thing}")
+                # S.O.L.
+                print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
+                logger.error(f" no date available for visit reconcilliation in domain {domain} for {thing}")
 
     else:
         logger.error("??? bust in domain_dates for reconcilliation")
-        
+    
+    
+@typechecked
+def reconcile_visit_foreign_keys(data_dict :dict[str, 
+                                                 list[ dict[str,  None | str | float | int |int64 | datetime.datetime | datetime.date] | None  ] | None]) :
+    # data_dict is a dictionary of config_names to a list of record-dicts
+    # Only Measurement, Observation, Condition, Procedure, Drug, and Device participate in Visit FK reconciliation
+    metadata = [
+        ('Measurement', 'Measurement_results'),
+        ('Measurement', 'Measurement_vital_signs'),
+        ('Observation', 'Observation'),
+        ('Condition',   'Condition'),
+        ('Procedure',   'Procedure_activity_procedure'),
+        ('Procedure',   'Procedure_activity_observation'),
+        ('Procedure',   'Procedure_activity_act'),
+        ('Drug',        'Medication_medication_activity'),
+        ('Drug',        'Medication_medication_dispense'),
+        ('Drug',        'Immunization_immunization_activity'),
+        ('Device',      'Device_organizer_supply'),
+        ('Device',      'Device_supply'),
+        ('Device',      'Device_organizer_procedure'),
+        ('Device',      'Device_procedure'),
+    ]
+
+    for meta_tuple in metadata:
+        reconcile_visit_FK_with_specific_domain(meta_tuple[0], data_dict[meta_tuple[1]], data_dict['Visit'])
+                          
+
 @typechecked
 def parse_string(ccda_string, file_path,
               metadata :dict[str, dict[str, dict[str, str]]]) -> dict[str, 
                       list[ dict[str,  None | str | float | int | int64 ] | None  ] | None]:
     """ 
-        * E X P E R I M E N T A L *
-    
         Parses many meta configs from a string instead of a single file, 
         collects them in omop_dict.
         
@@ -1223,42 +1184,24 @@ def parse_string(ccda_string, file_path,
     base_name = os.path.basename(file_path)
     for config_name, config_dict in metadata.items():
         data_dict_list = parse_config_from_xml_file(tree, config_name, config_dict, base_name, pk_dict)
+        if data_dict_list is not None:
+            logger.info(f"DDP.py {config_name} {len(data_dict_list)}")
+        else:
+            logger.info(f"DDP.py {config_name} has None data_dict_list")
         if config_name in omop_dict: 
             omop_dict[config_name] = omop_dict[config_name].extend(data_dict_list)
         else:
             omop_dict[config_name] = data_dict_list
+        
+    for config_name, config_dict in omop_dict.items():
+        if config_dict is not None:
+            logger.info(f"DDP.py resulting omop_dict {config_name} {len(config_dict)}")
+        else:
+            logger.info(f"DDP.py resulting omop_dict {config_name} empty")
+                
     return omop_dict
 
-    
-    
-@typechecked
-def reconcile_visit_foreign_keys(data_dict :dict[str, 
-                                                 list[ dict[str,  None | str | float | int |int64 | datetime.datetime | datetime.date] | None  ] | None]) :
-    # data_dict is a dictionary of config_names to a list of record-dicts
-    metadata = [
-        ('Measurement', 'Measurement_results', 'Visit' ),
-        ('Measurement', 'Measurement_vital_signs', 'Visit' ),
-        ('Observation', 'Observation', 'Visit' ),
-        ('Condition', 'Condition', 'Visit' ),
-        ('Procedure', 'Procedure_activity_procedure', 'Visit'),
-        ('Procedure', 'Procedure_activity_observation', 'Visit'),
-        ('Procedure', 'Procedure_activity_act', 'Visit'),
-        ('Drug', 'Medication_medication_activity', 'Visit'),
-        ('Drug', 'Medication_medication_dispense', 'Visit'),
-        ('Drug', 'Immunization_immunization_activity', 'Visit'),
-        ('Device', 'Device_organizer_supply', 'Visit'),
-        ('Device', 'Device_supply', 'Visit'),
-        ('Device', 'Device_organizer_procedure', 'Visit'),
-        ('Device', 'Device_procedure', 'Visit')
-    ]
 
-    for meta_tuple in metadata:
-        #print(f" reconciling {meta_tuple[1]}")
-        if meta_tuple[1] in data_dict:
-            if meta_tuple[2] in data_dict:
-                reconcile_visit_FK_with_specific_domain(meta_tuple[0], data_dict[meta_tuple[1]], data_dict[meta_tuple[2]] )
-            else:
-                print(f"ERROR in reconcile_visit_foreign_keys() meta_tuple[2]:{meta_tuple[2]} not in data_dict")
                           
 @typechecked
 def parse_doc(file_path, 
@@ -1323,19 +1266,19 @@ def process_file(filepath :str, print_output: bool):
     """
     print(f"PROCESSING {filepath} ")
     logger.info(f"PROCESSING {filepath} ")
-    base_name = os.path.basename(filepath)
-
-    logging.basicConfig(
-        format='%(levelname)s: %(message)s',
-#        filename=f"logs/log_file_{base_name}.log",
-#        force=True,
-        # level=logging.ERROR
-        level=logging.WARNING
-        # level=logging.INFO
-        # level=logging.DEBUG
-    )
+#    base_name = os.path.basename(filepath)
+#    logging.basicConfig(
+#        format='%(levelname)s: %(message)s',
+##        filename=f"logs/log_file_{base_name}.log",
+##        force=True,
+#        # level=logging.ERROR
+#        level=logging.WARNING
+#        # level=logging.INFO
+#        # level=logging.DEBUG
+#    )
 
     metadata = get_meta_dict()
+
     print(f"    {filepath} parse_doc() ")
     omop_data = parse_doc(filepath, metadata)
     print(f"    {filepath} reconcile_visit()() ")

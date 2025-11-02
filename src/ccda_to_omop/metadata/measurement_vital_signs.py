@@ -70,7 +70,7 @@ metadata = {
     	    'argument_names': {
     		    'concept_code': 'measurement_concept_code',
     		    'vocabulary_oid': 'measurement_concept_codeSystem',
-                'default': 'n/a'
+                'default': 0
     	    }
     	},
 
@@ -197,7 +197,7 @@ metadata = {
            'argument_names': {
                    'first_field': 'measurement_concept_code',
                    'second_field': 'measurement_concept_codeSystem',
-                'default': 0
+                'default': 'n/a'
            },
             'order':  17
         },
@@ -247,10 +247,15 @@ metadata = {
             'config_type': 'PRIORITY',
             'order':20
         },
-
-	'filename' : {
-		'config_type': 'FILENAME',
-		'order':100
-	} 
+		
+	    'filename' : {
+		    'config_type': 'FILENAME',
+		    'order':100
+        },
+        'cfg_name' : { 
+			'config_type': 'CONSTANT', 
+            'constant_value': 'Measurement_vital_signs',
+			'order':101
+		} 	
     }
 }

@@ -1,7 +1,6 @@
-
 from numpy import int32
 import ccda_to_omop.value_transformations as VT
-
+from numpy import float32
 metadata = {
     'Procedure_activity_procedure': {
     	'root': {
@@ -137,9 +136,15 @@ metadata = {
             'constant_value' : '',
             'order': 14
         },
+        
         'filename' : {
             'config_type': 'FILENAME',
             'order':100
-		}
+		},
+        'cfg_name' : { 
+			'config_type': 'CONSTANT', 
+            'constant_value': 'Procedure_activity_procedure',
+			'order':101
+		} 
     }
 }

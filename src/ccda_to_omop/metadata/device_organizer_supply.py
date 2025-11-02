@@ -74,23 +74,62 @@ metadata = {
                 'default': 0
     	    }
     	},
-        
         'device_exposure_start_date': {
-    	    'config_type': 'FIELD',
-            'data_type':'DATE',
-    	    'element': "../../hl7:effectiveTime/hl7:low",
-    	    'attribute': "value",
+            'config_type': 'PRIORITY',
             'order': 4
-    	},
-        
-        'device_exposure_start_datetime': {
+        },        
+        'device_exposure_start_date_supply_low': {
     	    'config_type': 'FIELD',
-            'data_type':'DATETIME',
+            'data_type': 'DATE',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+            'priority': ('device_exposure_start_date', 1)
+    	},
+        'device_exposure_start_date_supply_value': {
+    	    'config_type': 'FIELD',
+            'data_type': 'DATE',
+    	    'element': "hl7:effectiveTime",
+    	    'attribute': "value",
+            'priority': ('device_exposure_start_date', 2)
+    	},
+        'device_exposure_start_date_organizer_low': {
+    	    'config_type': 'FIELD',
+            'data_type': 'DATE',
     	    'element': "../../hl7:effectiveTime/hl7:low",
     	    'attribute': "value",
+            'priority': ('device_exposure_start_date', 3)
+    	},
+
+        'device_exposure_start_datetime': {
+            'config_type': 'PRIORITY',
             'order': 5
+        },              
+        'device_exposure_start_datetime_supply_low': {
+    	    'config_type': 'FIELD',
+            'data_type': 'DATETIME',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+            'priority': ('device_exposure_start_datetime', 1)
+    	},
+        'device_exposure_start_datetime_supply_value': {
+    	    'config_type': 'FIELD',
+            'data_type': 'DATETIME',
+    	    'element': "hl7:effectiveTime",
+    	    'attribute': "value",
+            'priority': ('device_exposure_start_datetime', 2)
+    	},
+        'device_exposure_start_datetime_organizer_low': {
+    	    'config_type': 'FIELD',
+            'data_type': 'DATETIME',
+    	    'element': "../../hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+            'priority': ('device_exposure_start_datetime', 3)
     	},
         
+        'device_exposure_end_date': {
+            'config_type': 'PRIORITY',
+            'order': 6
+        },        
         'device_exposure_end_date_supply': {
             'config_type': 'FIELD',
             'element': "hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
@@ -98,7 +137,6 @@ metadata = {
             'data_type': 'DATE',
             'priority': ('device_exposure_end_date', 1)
         },        
-
         'device_exposure_end_date_organizer': {
             'config_type': 'FIELD',
             'element': "../../hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
@@ -106,12 +144,11 @@ metadata = {
             'data_type': 'DATE',
             'priority': ('device_exposure_end_date', 2)
         },        
-       
-        'device_exposure_end_date': {
+
+        'device_exposure_end_datetime': {
             'config_type': 'PRIORITY',
-            'order': 6
-        },
-        
+            'order': 7
+        },        
         'device_exposure_end_datetime_supply': {
             'config_type': 'FIELD',
             'element': "hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
@@ -119,7 +156,6 @@ metadata = {
             'data_type': 'DATETIME',
             'priority': ('device_exposure_end_datetime', 1)
         },        
-
         'device_exposure_end_datetime_organizer': {
             'config_type': 'FIELD',
             'element': "../../hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
@@ -127,11 +163,6 @@ metadata = {
             'data_type': 'DATETIME',
             'priority': ('device_exposure_end_datetime', 2)
         },        
-       
-        'device_exposure_end_datetime': {
-            'config_type': 'PRIORITY',
-            'order': 7
-        },
         
         'device_type_concept_id': {
             'config_type': 'CONSTANT',
@@ -189,9 +220,15 @@ metadata = {
             },
             'order': 15
         },
+        
       	'filename' : {
 		    'config_type': 'FILENAME',
 		    'order':100
-	    }
+	    },
+        'cfg_name' : { 
+			'config_type': 'CONSTANT', 
+            'constant_value': 'Device_organizer_supply',
+			'order':101
+		}         
     }
 }

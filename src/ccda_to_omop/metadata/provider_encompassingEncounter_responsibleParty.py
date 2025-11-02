@@ -16,12 +16,12 @@ metadata = {
       
         'provider_id_extension': {
             'config_type': 'FIELD',
-            'element': 'hl7:id',
+            'element': 'hl7:id[not(@nullFlavor="UNK")]',
             'attribute': "extension"
         },
        'provider_id_root': {
             'config_type': 'FIELD',
-            'element': 'hl7:id',
+            'element': 'hl7:id[not(@nullFlavor="UNK")]',
             'attribute': "root"
         },
         'provider_id_street': {
@@ -155,10 +155,16 @@ metadata = {
             'config_type': None,
             'order' :13
         },
+        
         'filename' : {
             'config_type': 'FILENAME',
             'order':100
-		}
+		},
+        'cfg_name' : { 
+			'config_type': 'CONSTANT', 
+            'constant_value': 'Provider_encompassingEncounter_responsibleParty',
+			'order':101
+		} 
     },
     
 }

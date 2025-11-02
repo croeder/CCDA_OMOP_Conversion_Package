@@ -26,7 +26,7 @@ metadata = {
     	},
     	'observation_id': {
     	    'config_type': 'HASH',
-            'fields' : ['person_id',  'provider_id',
+            'fields' : ['person_id', 'provider_id',
                         #'visit_occurrence_id',
                         'observation_concept_code', 'observation_concept_codeSystem',
                         'observation_date', 'observation_datetime',
@@ -69,7 +69,7 @@ metadata = {
     	    'argument_names': {
     		    'concept_code': 'observation_concept_code',
     		    'vocabulary_oid': 'observation_concept_codeSystem',
-                'default': 'n/a'
+                'default': 0
     	    }
     	},
     	# FIX same issue as above. Is it always just a single value, or do we ever get high and low?
@@ -96,29 +96,20 @@ metadata = {
             'order': 6
         },
 
-    	'value_type': {
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:value",
-    	    'attribute': "{http://www.w3.org/2001/XMLSchema-instance}type",
-    	},
-
-
-    	'value_as_string': {
-    	    'config_type': 'FIELD',
-            'element': 'hl7:value[@xsi:type="ST"]' , # TODO TEST these
-    	    'attribute': "#text",
-            'order': 7
-    	},
-
-
     	'value_as_number': {
     	    'config_type': 'FIELD',
             'data_type':'FLOAT',
     	    'element': 'hl7:value[@xsi:type="PQ"]' ,
     	    'attribute': "value",
-            'order':8
+            'order': 7
     	},
 
+    	'value_as_string': {
+    	    'config_type': 'FIELD',
+            'element': 'hl7:value[@xsi:type="ST"]' , # TODO TEST these
+    	    'attribute': "#text",
+            'order': 8
+    	},
 
     	'value_as_code_CD': {
     	    'config_type': 'FIELD',
@@ -193,7 +184,7 @@ metadata = {
     	    'argument_names': {
     		    'first_field': 'observation_concept_code',
     		    'second_field': 'observation_concept_codeSystem',
-                'default': 0
+                'default': 'n/a'
     	    },
             'order' : 15
     	},
@@ -210,11 +201,16 @@ metadata = {
             'constant_value' : '',
             'order': 18 
         },
-
-	'filename' : {
-		'config_type': 'FILENAME',
-		'order':100
-	} 
+		
+        'filename' : {
+		    'config_type': 'FILENAME',
+		    'order':100
+        },
+        'cfg_name' : { 
+			'config_type': 'CONSTANT', 
+            'constant_value': 'Observation',
+			'order':101
+		} 
     }
 }
 

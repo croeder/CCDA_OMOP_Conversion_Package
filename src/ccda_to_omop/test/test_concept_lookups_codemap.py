@@ -1,6 +1,12 @@
 import unittest
+<<<<<<< HEAD:src/ccda_to_omop/test/test_concept_lookups_codemap.py
 import ccda_to_omop.value_transformations as VT
 
+=======
+import prototype_2.value_transformations as VT
+from foundry.transforms import Dataset
+import prototype_2.util as U
+>>>>>>> master:src/prototype_2/test/test_concept_lookups_codemap.py
 
 # test_data includes keys used in newer codemap and valueset calls so
 # this dictionary can be passed in as args.
@@ -71,6 +77,18 @@ test_data = {
 class TestConceptLookup_codemap (unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        visit_map_df = Dataset.get("visit_concept_xwalk_mapping_dataset").read_table(format="pandas")
+        visitmap_dict = U.create_visit_dict(visit_map_df)
+        VT.set_visitmap_dict(visitmap_dict)
+
+        valueset_map_df = Dataset.get("ccda_value_set_mapping_table_dataset").read_table(format="pandas")
+        valueset_dict = U.create_valueset_dict(valueset_map_df)
+        VT.set_valueset_dict(valueset_dict)
+        
+        codemap_df = Dataset.get("codemap_xwalk").read_table(format="pandas")
+        codemap_dict = U.create_codemap_dict(codemap_df)
+        VT.set_codemap_xwalk_dict(codemap_dict)
+
         
     def test_concept_id_lookup(self):
         for test_case_key, test_case_dict in test_data.items():

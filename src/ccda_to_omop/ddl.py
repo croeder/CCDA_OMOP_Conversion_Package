@@ -20,6 +20,8 @@ import os
 import re
 import logging
 import duckdb
+import importlib.util
+from typing import Dict, Any
 
 conn = duckdb.connect()
 logger = logging.getLogger(__name__)
@@ -34,55 +36,51 @@ logging.basicConfig(
 processing_status = True
 
 
-config_to_domain_name_dict = {
-    'Care_Site': 'Care_Site',
-    'Care_Site_ee': 'Care_Site',
-    'Care_Site_pr': 'Care_Site',
+METADATA_DIR = os.path.join(os.path.dirname(__file__), 'metadata')
 
-    'Condition': 'Condition',
 
-    'Location': 'Location',
-    'Location_ee': 'Location',
-    'Location_pr': 'Location',
+def generate_domain_map_dynamically() -> Dict[str, str]:
+    """
+    Scans all .py files in the metadata directory, inspects their
+    'metadata' variable, and builds a dictionary mapping config names
+    to their 'expected_domain_id'.
+    """
+    domain_map = {}
+    if not os.path.isdir(METADATA_DIR):
+        logging.error(f"Metadata directory not found at: {METADATA_DIR}")
+        return {}
 
-    'Measurement': 'Measurement',
-    'Measurement_vital_signs': 'Measurement',
-    'Measurement_results': 'Measurement', #### filename is measurement.py
+    # Scan the directory for Python files
+    for filename in os.listdir(METADATA_DIR):
+        if filename.endswith('.py') and filename != '__init__.py':
+            module_name = filename[:-3]
+            file_path = os.path.join(METADATA_DIR, filename)
+            try:
+                # Dynamically load the module from its file path
+                spec = importlib.util.spec_from_file_location(module_name, file_path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
-    'Observation': 'Observation',
-    'Observation_social_history_smoking': 'Observation',
-    'Observation_social_history_pregnancy': 'Observation',
-    'Observation_social_history_tobacco_use': 'Observation',
-    'Observation_social_history_cultural': 'Observation',
-    'Observation_social_history_home_environment': 'Observation',
+                # Check if the module has the required 'metadata' dictionary
+                if hasattr(module, 'metadata'):
+                    # --- CORE LOGIC: Extract the mapping ---
+                    # Iterate through the top-level keys in the metadata dict
+                    for config_name, domain_details in module.metadata.items():
+                        # Safely get the nested 'expected_domain_id'
+                        root_info = domain_details.get('root', {})
+                        expected_domain = root_info.get('expected_domain_id')
+                        if expected_domain:
+                            domain_map[config_name] = expected_domain
+                        else:
+                            logging.warning(f"'{config_name}' in '{filename}' is missing 'expected_domain_id'.")
+                else:
+                    logging.warning(f"Module '{module_name}' does not contain a 'metadata' dictionary.")
+            except Exception as e:
+                logging.error(f"Failed to process metadata from '{filename}': {e}")
+    return domain_map
 
-    'Person': 'Person',
-    
-    'Provider': 'Provider',
-    'Provider_header_documentationOf': 'Provider',
-    'Provider_encompassingEncounter': 'Provider',
-    'Provider_encompassingEncounter_responsibleParty': 'Provider',
 
-    'Visit': 'Visit',
-    'Visit_encompassingEncounter': 'Visit',
-    'Visit_encompassingEncounter_responsibleParty': 'Visit',
-
-    'Drug': 'Drug', 
-    'Medication_medication_activity' : 'Drug',
-    'Medication_medication_dispense' : 'Drug',
-    'Immunization_immunization_activity' : 'Drug',
-
-    'Procedure': 'Procedure', 
-    'Procedure_activity_procedure' : 'Procedure',
-    'Procedure_activity_observation' : 'Procedure',
-    'Procedure_activity_act' : 'Procedure',
-    'Device' : 'Device',
-    'Device_organizer_supply' : 'Device',
-    'Device_supply' : 'Device',
-    'Device_organizer_procedure' : 'Device',
-    'Device_procedure' : 'Device'
-
-}
+config_to_domain_name_dict = generate_domain_map_dynamically()
 
 domain_name_to_table_name = {
     'Care_Site'  : 'care_site',
