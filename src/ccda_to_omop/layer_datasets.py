@@ -21,7 +21,10 @@ from numpy import float32
 from numpy import datetime64
 import numpy as np
 import warnings
-from foundry.transforms import Dataset
+try:
+    from foundry.transforms import Dataset
+except Exception as e:
+    print("foundry.transforms.Dataset not imported") 
 import datetime as DT
 
 import ccda_to_omop.data_driven_parse as DDP
@@ -32,7 +35,7 @@ from ccda_to_omop.ddl import config_to_domain_name_dict
 from ccda_to_omop.ddl import domain_name_to_table_name
 from ccda_to_omop.metadata import get_meta_dict
 from ccda_to_omop.domain_dataframe_column_types import domain_dataframe_column_types 
-from ccda_to_omp.domain_dataframe_column_types import domain_dataframe_column_required
+from ccda_to_omop.domain_dataframe_column_types import domain_dataframe_column_required
 
 
 """ layer_datasets.py

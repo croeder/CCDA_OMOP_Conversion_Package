@@ -10,6 +10,8 @@ in Palantir Foundry as well as PyPi. Currently a work in progess, adding PyPi.
 - update the version number in the toml file
 - build __python3 -m build__ creates the packages and deposits them in the dist folder
 - upload __python3 -m twine upload dist/* 
+  - for test: python3 -m twine upload --repository tstpypy dist/*
+- specific files:  __python3 -m twine upload dist/ccda_to_omop-0.0.11-py3-none-any.whl dist/ccda_to_omop-0.0.11.tar.gz
 - check on pypi.org https://pypi.org/project/YOURPACKAGENAME
 
 ## Sub Projects/Directories

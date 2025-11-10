@@ -1164,7 +1164,11 @@ def reconcile_visit_foreign_keys(data_dict :dict[str,
     ]
 
     for meta_tuple in metadata:
-        reconcile_visit_FK_with_specific_domain(meta_tuple[0], data_dict[meta_tuple[1]], data_dict['Visit'])
+        if meta_tuple[1] in data_dict and 'Visit' in data_dict:
+            reconcile_visit_FK_with_specific_domain(meta_tuple[0], data_dict[meta_tuple[1]], data_dict['Visit'])
+        else:
+            logger.warn(f"Warning: not reconciling with key {meta_tuple}")
+            print(f"Warning: not reconciling with key {meta_tuple}")
                           
 
 @typechecked
