@@ -356,7 +356,7 @@ def do_basic_fields(output_dict :dict[str, None | str | float | int | int32 | in
             try:
                 attribute_value = parse_field_from_dict(field_details_dict, root_element,
                                                     config_name, field_tag, root_path)
-                if attribute_value is str:
+                if isinstance(attribute_value, str):
                     output_dict[field_tag] = attribute_value.strip()
                 else:
                     output_dict[field_tag] = attribute_value
@@ -373,7 +373,7 @@ def do_basic_fields(output_dict :dict[str, None | str | float | int | int32 | in
             logger.info(f"     PK for {config_name}/{field_tag}")
             attribute_value = parse_field_from_dict(field_details_dict, root_element,
                                                     config_name, field_tag, root_path)
-            if attribute_value is str:
+            if isinstance(attribute_value, str):
                 output_dict[field_tag] = attribute_value.strip()
             else:
                 output_dict[field_tag] = attribute_value
