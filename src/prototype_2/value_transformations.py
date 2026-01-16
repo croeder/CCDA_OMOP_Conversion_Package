@@ -528,8 +528,8 @@ def get_data_partner_id(args_dict):
                 return int32(partner_id)
         except (ValueError, TypeError) as e:
             logger.error(f"get_data_partner_id: Conversion error for {fname}: {e}")
-            return int32(default)
-            
+
+    logger.warning(f"get_data_partner_id: filename \"{fname}\" not found. Falling back to default: \"{default}\"")        
     return int32(default)
 
 def set_mspi_map(m):
@@ -558,7 +558,7 @@ def map_filename_to_mspi(args_dict):
                 return int(str(mspi_value))
         except (ValueError, TypeError) as e:
             logger.error(f"map_filename_to_mspi: Conversion error for {fname}: {e}")
-            return default
+    return_val = default if default is not None else 0
     
-    logger.warning(f"map_filename_to_mspi: filename {fname} not found in metadata map. Returning default.")
-    return default
+    logger.warning(f"map_filename_to_mspi: filename \"{fname}\" not found in metadata map. Returning default: \"{return_val}\"")
+    return return_val
