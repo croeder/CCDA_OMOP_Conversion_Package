@@ -333,29 +333,66 @@ def valueset_xwalk_source_concept_id(args_dict):
         return None
 
 
-def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default):
-    # Check Dict
-    if get_valueset_dict() is None:
-        logger.error("valueset_dict is not initialized in prototype_2/value_transformations.py for value_transformations.py _valueset_xwalk_DICT()")
-        raise Exception("valueset_dict is not initialized in prototype_2/value_transformations.py for value_transformations.py _valueset_xwalk_DICT()")
+# def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default):
+#     # Check Dict
+#     if get_valueset_dict() is None:
+#         logger.error("valueset_dict is not initialized in prototype_2/value_transformations.py for value_transformations.py _valueset_xwalk_DICT()")
+#         raise Exception("valueset_dict is not initialized in prototype_2/value_transformations.py for value_transformations.py _valueset_xwalk_DICT()")
 
-    valueset_dict =  get_valueset_dict()
+#     valueset_dict =  get_valueset_dict()
+#     if len(valueset_dict) < 1:
+#         raise Exception("valueset_dict has zero length in prototype_2/value_transformations.py for value_transformations.py _valueset_xwalk_DICT()")
+
+#     # Get and Check results
+#     mapping_rows = valueset_dict[(vocabulary_oid, concept_code)]
+#     if mapping_rows is None:
+#         logger.error(f"valueset_xwalk_dict mapping_rows is None  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
+#         return default
+#     if len(mapping_rows) < 1 :
+#         if  vocabulary_oid is not None and concept_code is not None:
+#            logger.error(f"valueset_xwalk_dict mapping_rows is <1  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
+#         return default
+
+#     if len(mapping_rows) > 1:
+#        logger.warn(f"_valueset_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
+#     return mapping_rows[0][column_name]
+
+def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default=None):
+    """
+    Crosswalk a source code to an OMOP concept_id or other column.
+    
+    Nuances:
+      1. Source code missing (None or empty) -> return None, allowing PRIORITY to continue
+      2. Source code present but unmapped -> return 0, stopping PRIORITY chain
+      3. Source code mapped -> return mapped value, fallback to default if missing
+    """
+
+    # NUANCE 1: Truly missing source code
+    if concept_code is None or str(concept_code).strip() == "":
+        return None
+
+    # Check that the valueset_dict exists
+    valueset_dict = get_valueset_dict()
+    if valueset_dict is None:
+        logger.error("valueset_dict is not initialized.")
+        return default
     if len(valueset_dict) < 1:
-        raise Exception("valueset_dict has zero length in prototype_2/value_transformations.py for value_transformations.py _valueset_xwalk_DICT()")
+        raise Exception("valueset_dict has zero length.")
 
-    # Get and Check results
-    mapping_rows = valueset_dict[(vocabulary_oid, concept_code)]
-    if mapping_rows is None:
-        logger.error(f"valueset_xwalk_dict mapping_rows is None  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
-        return default
-    if len(mapping_rows) < 1 :
-        if  vocabulary_oid is not None and concept_code is not None:
-           logger.error(f"valueset_xwalk_dict mapping_rows is <1  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
-        return default
+    # NUANCE 2: Check mapping
+    mapping_rows = valueset_dict.get((vocabulary_oid, concept_code))
+    
+    if not mapping_rows:
+        logger.info(f"Unmapped concept found: vocab={vocabulary_oid}, code={concept_code}. Returning 0.")
+        return int32(0)  # Stops PRIORITY chain
 
+    # Warn if multiple mappings found
     if len(mapping_rows) > 1:
-       logger.warn(f"_valueset_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
-    return mapping_rows[0][column_name]
+        logger.warn(f"_valueset_xwalk(): more than one concept for column '{column_name}' "
+                    f"from vocab '{vocabulary_oid}' code '{concept_code}', choosing the first.")
+
+    # NUANCE 3: Return mapped value, fallback to default if missing
+    return mapping_rows[0].get(column_name, default)
 
 
 

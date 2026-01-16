@@ -92,7 +92,6 @@ metadata = {
         # Step 3: Define the final field that coalesces the results from the prioritized derived fields
         'gender_concept_id': { 
             'config_type': 'PRIORITY',
-            'default': 0, 
             'order': 2 
         },
 
@@ -191,7 +190,6 @@ metadata = {
         # Step 4: Define the final field that coalesces the results from the prioritized derived fields
         'race_concept_id':{ 
             'config_type': 'PRIORITY', 
-            'default': 0, 
             'order': 7 
         },
 
@@ -258,7 +256,6 @@ metadata = {
         # Step 4: Define the final field that coalesces the results from the prioritized derived fields
         'ethnicity_concept_id': { 
             'config_type': 'PRIORITY', 
-            'default': 0, 
             'order': 8 
         },
         
