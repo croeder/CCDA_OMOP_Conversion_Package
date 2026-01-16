@@ -73,34 +73,109 @@ metadata = {
     	    }
     	},
 
-        'condition_start_date': {  #20081022, #200810221850-0400
-    	    'config_type': 'FIELD',
+      'condition_start_date_value': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime", 
+            'attribute': "value",
             'data_type': 'DATE',
-    	    'element': "hl7:effectiveTime/hl7:low",
-    	    'attribute': "value",
+            'priority': ('condition_start_date', 2)
+        },        
+        'condition_start_date_low': {
+            'config_type': 'FIELD',
+            'element': 'hl7:effectiveTime/hl7:low[not(@nullFlavor="UNK")]', 
+            'attribute': "value",
+            'data_type': 'DATE',
+            'priority': ('condition_start_date', 1)
+        },        
+        'condition_start_date_high': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:high", 
+            'attribute': "value",
+            'data_type': 'DATE',
+            'priority' : ['condition_start_date', 3 ] 
+        },
+        'condition_start_date': {
+            'config_type': 'PRIORITY',
             'order': 4
-    	},
-        'condition_start_datetime': { 
-           	'config_type': 'FIELD',
+        },        
+
+        'condition_start_datetime_value': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime", 
+            'attribute': "value",
             'data_type': 'DATETIME',
-    	    'element': "hl7:effectiveTime/hl7:low",
-    	    'attribute': "value",
+            'priority': ('condition_start_datetime', 2)
+        },        
+        'condition_start_datetime_low': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:low[not(@nullFlavor='UNK')]", 
+            'attribute': "value",
+            'data_type': 'DATETIME',
+            'priority': ('condition_start_datetime', 1)
+        },        
+        'condition_start_datetime_high': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:high", 
+            'attribute': "value",
+            'data_type': 'DATETIME',
+            'priority' : ['condition_start_datetime', 3 ] 
+        },
+        'condition_start_datetime': {
+            'config_type': 'PRIORITY',
             'order': 5
-    	},
-        'condition_end_date': {
-    	    'config_type': 'FIELD',
+        },        
+        
+         'condition_end_date_high': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
+            'attribute': "value",
             'data_type': 'DATE',
-    	    'element': "hl7:effectiveTime/hl7:high",
-    	    'attribute': "value",
+            'priority': ('condition_end_date', 1)
+        },
+        'condition_end_date_value': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime", 
+            'attribute': "value",
+            'data_type': 'DATE',
+            'priority': ('condition_end_date', 2)
+        },
+        'condition_end_date_low': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:low[not(@nullFlavor='UNK')]", 
+            'attribute': "value",
+            'data_type': 'DATE',
+            'priority': ('condition_end_date', 3)
+        },   
+        'condition_end_date': {
+            'config_type': 'PRIORITY',
             'order': 6
-    	},
-        'condition_end_datetime': { 
-    	    'config_type': 'FIELD',
+        },
+
+        'condition_end_datetime_high': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
+            'attribute': "value",
             'data_type': 'DATETIME',
-    	    'element': "hl7:effectiveTime/hl7:high",
-    	    'attribute': "value",
+            'priority': ('condition_end_datetime', 1)
+        },
+        'condition_end_datetime_value': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime", 
+            'attribute': "value",
+            'data_type': 'DATETIME',
+            'priority': ('condition_end_datetime', 2)
+        },
+        'condition_end_datetime_low': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:low[not(@nullFlavor='UNK')]", 
+            'attribute': "value",
+            'data_type': 'DATETIME',
+            'priority': ('condition_end_datetime', 3)
+        },  
+        'condition_end_datetime': {
+            'config_type': 'PRIORITY',
             'order': 7
-    	},
+        },
         'condition_type_concept_id': {
             'config_type': 'CONSTANT',
             'constant_value' : int32(32840), 

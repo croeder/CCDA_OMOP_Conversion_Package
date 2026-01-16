@@ -73,20 +73,57 @@ metadata = {
     	    }
     	},
 
-        'measurement_date': {
+        'measurement_date_eT': {
     	    'config_type': 'FIELD',
             'data_type':'DATE',
     	    'element': "hl7:effectiveTime",
     	    'attribute': "value",
+			'priority' : ['measurement_date', 1]
+    	},
+		'measurement_date_low': { 
+    	    'config_type': 'FIELD',
+            'data_type':'DATE',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+			'priority' : ['measurement_date', 2]
+    	},
+		'measurement_date_high': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATE',
+    	    'element': "hl7:effectiveTime/hl7:high",
+    	    'attribute': "value",
+			'priority' : ['measurement_date', 3]
+    	},
+		'measurement_date': {
+    	    'config_type': 'PRIORITY',
             'order': 4
     	},
-        'measurement_datetime': {
-            'config_type': 'FIELD',
+
+        'measurement_datetime_eT': {
+    	    'config_type': 'FIELD',
             'data_type':'DATETIME',
     	    'element': "hl7:effectiveTime",
     	    'attribute': "value",
-            'order': 5
+			'priority' : ['measurement_datetime', 1]
     	},
+		'measurement_datetime_low': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATETIME',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+			'priority' : ['measurement_datetime', 2]
+    	},
+		'measurement_datetime_high': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATETIME',
+    	    'element': "hl7:effectiveTime/hl7:high",
+    	    'attribute': "value",
+			'priority' : ['measurement_datetime', 3]
+    	},
+		'measurement_datetime': {
+    	    'config_type': 'PRIORITY',
+            'order': 5
+		},
         'measurement_time': { 
             'config_type': 'CONSTANT',
             'constant_value' : '',

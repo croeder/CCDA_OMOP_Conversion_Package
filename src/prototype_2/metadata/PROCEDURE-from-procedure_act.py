@@ -69,22 +69,58 @@ metadata = {
                 'default': 0
     	    }
     	},           
-        
-        'procedure_date': {
-            'config_type': 'FIELD',
-            'element': "hl7:effectiveTime", 
-            'attribute': "value",
-            'data_type': 'DATE',
+       
+        'procedure_date_eT': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATE',
+    	    'element': "hl7:effectiveTime",
+    	    'attribute': "value",
+			'priority' : ['procedure_date', 1]
+    	},
+		'procedure_date_low': { 
+    	    'config_type': 'FIELD',
+            'data_type':'DATE',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+			'priority' : ['procedure_date', 2]
+    	},
+		'procedure_date_high': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATE',
+    	    'element': "hl7:effectiveTime/hl7:high",
+    	    'attribute': "value",
+			'priority' : ['procedure_date', 3]
+    	},
+		'procedure_date': {
+    	    'config_type': 'PRIORITY',
             'order': 4
-        },        
+    	},
 
-        'procedure_datetime': {
-            'config_type': 'FIELD',
-            'element': "hl7:effectiveTime", 
-            'attribute': "value",
-            'data_type': 'DATETIME',
+        'procedure_datetime_eT': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATETIME',
+    	    'element': "hl7:effectiveTime",
+    	    'attribute': "value",
+			'priority' : ['procedure_datetime', 1]
+    	},
+		'procedure_datetime_low': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATETIME',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+			'priority' : ['procedure_datetime', 2]
+    	},
+		'procedure_datetime_high': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATETIME',
+    	    'element': "hl7:effectiveTime/hl7:high",
+    	    'attribute': "value",
+			'priority' : ['procedure_datetime', 3]
+    	},
+		'procedure_datetime': {
+    	    'config_type': 'PRIORITY',
             'order': 5
-        },        
+		},    
 
         'procedure_type_concept_id': {
             'config_type': 'CONSTANT',

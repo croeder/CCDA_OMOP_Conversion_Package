@@ -73,22 +73,61 @@ metadata = {
     	    }
     	},
 
-    	'observation_date': {
+       	'observation_date_effectiveTime': {
     	    'config_type': 'FIELD',
             'data_type':'DATE',
     	    'element': "hl7:effectiveTime",
     	    'attribute': "value",
+			'priority': ['observation_date', 1]
+    	},
+    	'observation_date_low': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATE',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+			'priority': ['observation_date', 2]
+    	},
+       	'observation_date_high': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATE',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+			'priority': ['observation_date', 3]
+    	},
+    	'observation_date': {
+    	    'config_type': 'PRIORITY',
             'order': 4
     	},
-    	# FIX same issue as above. Is it always just a single value, or do we ever get high and low?
-    	# 'observation_datetime': { 'config_type': None, 'order': 5 },
-        'observation_datetime': {
+		
+		'observation_datetime_effectiveTime': {
             'config_type': 'FIELD',
             'element': "hl7:effectiveTime", 
             'attribute': "value",
             'data_type': 'DATETIME',
+			'priority': ['observation_datetime', 1]
+        },  
+        'observation_datetime_low': {
+            'config_type': 'FIELD',
+            'element': "hl7:effectiveTime/hl7:low", 
+            'attribute': "value",
+            'data_type': 'DATETIME',
+			'priority': ['observation_datetime', 2]
+        },  
+     	'observation_datetime_high': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATETIME',
+    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'attribute': "value",
+			'priority': ['observation_datetime', 3]
+    	},
+        'observation_datetime': {
+    	    'config_type': 'PRIORITY',
             'order': 5
         },               
+
+
+
+
         
     	'observation_type_concept_id': {
             'config_type': 'CONSTANT',

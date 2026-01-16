@@ -314,12 +314,8 @@ metadata = {
         'gender_source_value': {
        	    'config_type': 'PRIORITY',
             'order': 13 
-         },
-        'gender_source_concept_id': {
-			'config_type': 'CONSTANT', 
-            'constant_value': 0,
-            'order': 14 
         },
+        'gender_source_concept_id': { 'config_type': None, 'order': 14 },
         
         'race_source_value_direct': { 
             'config_type': 'FIELD', 
@@ -343,11 +339,8 @@ metadata = {
       	    'config_type': 'PRIORITY',
             'order': 15
         },
-        'race_source_concept_id': {
-			'config_type': 'CONSTANT', 
-            'constant_value': 0,
-            'order': 16 
-        },
+        'race_source_concept_id': { 'config_type': None, 'order': 16 },
+
 
         'ethnicity_source_value_direct': { 
             'config_type': 'FIELD', 
@@ -371,11 +364,7 @@ metadata = {
        	    'config_type': 'PRIORITY',
             'order': 17
         },
-        'ethnicity_source_concept_id': {
-			'config_type': 'CONSTANT', 
-            'constant_value': 0,
-            'order': 18 
-        },
+        'ethnicity_source_concept_id': { 'config_type': None, 'order': 18 },
 
         'filename' : {
 		    'config_type': 'FILENAME',
