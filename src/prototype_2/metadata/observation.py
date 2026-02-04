@@ -90,7 +90,7 @@ metadata = {
     	'observation_date_high': {
     	    'config_type': 'FIELD',
             'data_type':'DATE',
-    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'element': "hl7:effectiveTime/hl7:high",
     	    'attribute': "value",
 			'priority': ['observation_date', 3]
     	},
@@ -116,7 +116,7 @@ metadata = {
 		'observation_datetime_high': {
     	    'config_type': 'FIELD',
             'data_type':'DATETIME',
-    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'element': "hl7:effectiveTime/hl7:high",
     	    'attribute': "value",
 			'priority': ['observation_datetime', 3]
     	},
@@ -141,7 +141,7 @@ metadata = {
 
     	'value_as_string': {
     	    'config_type': 'FIELD',
-            'element': 'hl7:value[@xsi:type="ST"]' , # TODO TEST these
+            'element': 'hl7:value', #'element': 'hl7:value[@xsi:type="ST"]', 
     	    'attribute': "#text",
             'order': 8
     	},

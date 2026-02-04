@@ -82,8 +82,11 @@ metadata = {
     	    'attribute': "value",
             'order': 4
     	},
-        'observation_datetime': {
-    	    'config_type': None,
+		'observation_datetime': {
+    	    'config_type': 'FIELD',
+            'data_type':'DATETIME',
+    	    'element': "hl7:effectiveTime",
+    	    'attribute': "value",
             'order': 5
     	},
         'observation_type_concept_id': {
@@ -92,11 +95,16 @@ metadata = {
             'order': 6
         },
     	'value_as_number': {
-    	    'config_type': None,
+    	    'config_type': 'FIELD',
+            'data_type':'FLOAT',
+    	    'element': 'hl7:value[@xsi:type="PQ"]' ,
+    	    'attribute': "value",
             'order': 7
-    	},	
-		'value_as_string': {
-    	    'config_type': None,
+    	},
+    	'value_as_string': {
+    	    'config_type': 'FIELD',
+            'element': 'hl7:value', #'element': 'hl7:value[@xsi:type="ST"]', 
+    	    'attribute': "#text",
             'order': 8
     	},
 		'value_as_concept_id': {

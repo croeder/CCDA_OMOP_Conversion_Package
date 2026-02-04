@@ -70,14 +70,25 @@ metadata = {
         },
         # FIX same issue as above. Is it always just a single value, or do we ever get high and low?
         # 'observation_datetime': { 'config_type': None, 'order': 5 },
-        'observation_datetime': { 'config_type': None, 'order': 7 },
-
+       'observation_datetime': {
+            'config_type': 'FIELD',
+            'data_type':'DATETIME',
+            'element': "hl7:effectiveTime",
+            'attribute': "value",
+            'order': 5 
+        },
         'observation_type_concept_id': {
             'config_type': 'CONSTANT',
             'constant_value' : int32(32827),
             'order': 6
         },
-
+       	'value_as_number': {
+    	    'config_type': 'FIELD',
+            'data_type':'FLOAT',
+    	    'element': 'hl7:value[@xsi:type="PQ"]' ,
+    	    'attribute': "value",
+            'order': 7
+    	},
         'text_value': {
             'config_type': 'FIELD',
             'data_type': 'STRING',
@@ -102,7 +113,6 @@ metadata = {
             'order': 8 
         },
 
-    	'value_as_number': { 'config_type': None, 'order': 7 },
     	'value_as_concept_id': { 'config_type': None, 'order':  9 },
         'qualifier_concept_id' : { 'config_type': None, 'order': 10 },
         'unit_concept_id': { 'config_type': None, 'order': 11 },

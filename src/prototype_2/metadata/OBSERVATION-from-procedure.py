@@ -90,7 +90,7 @@ metadata = {
         'observation_date_high': {
     	    'config_type': 'FIELD',
             'data_type':'DATE',
-    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'element': "hl7:effectiveTime/hl7:high",
     	    'attribute': "value",
 			'priority': ['observation_date', 3]
     	},
@@ -116,7 +116,7 @@ metadata = {
     	'observation_datetime_high': {
     	    'config_type': 'FIELD',
             'data_type':'DATETIME',
-    	    'element': "hl7:effectiveTime/hl7:low",
+    	    'element': "hl7:effectiveTime/hl7:high",
     	    'attribute': "value",
 			'priority': ['observation_datetime', 3]
     	},
@@ -130,9 +130,19 @@ metadata = {
             'constant_value' : int32(32827),
             'order': 6
         },
-
-    	'value_as_number': { 'config_type': None, 'order': 7 },
-    	'value_as_string': { 'config_type': None, 'order': 8 },
+     	'value_as_number': {
+    	    'config_type': 'FIELD',
+            'data_type':'FLOAT',
+    	    'element': 'hl7:value[@xsi:type="PQ"]' ,
+    	    'attribute': "value",
+            'order': 7
+		},
+    	'value_as_string': {
+    	    'config_type': 'FIELD',
+            'element': 'hl7:value',  #'element': 'hl7:value[@xsi:type="ST"]', 
+    	    'attribute': "#text",
+            'order': 8
+    	},
     	'value_as_concept_id': { 'config_type': None, 'order':  9 },
         'qualifier_concept_id' : { 'config_type': None, 'order': 10 },
         'unit_concept_id': { 'config_type': None, 'order': 11 },
