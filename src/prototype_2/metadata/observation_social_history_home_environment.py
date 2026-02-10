@@ -32,7 +32,7 @@ metadata = {
                         'observation_concept_code', 'observation_concept_codeSystem',
                         'observation_date', 'observation_datetime',
                         'value_as_string', 'value_as_number', 'value_as_concept_id',
-                        'observation_id_extension', 'observation_id_root'],
+                        'observation_id_extension', 'observation_id_root','unit_source_value'],
             'order': 1
     	},
 

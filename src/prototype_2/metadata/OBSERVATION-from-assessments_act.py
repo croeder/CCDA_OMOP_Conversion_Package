@@ -20,7 +20,7 @@ metadata = {
     	    'config_type': 'HASH',
             'fields' : ['person_id', 'provider_id',
                         'observation_concept_code', 'observation_concept_codeSystem',
-                        'observation_date', 'value_as_string'],
+                        'observation_date', 'value_as_string','unit_source_value'],
             'order': 1
     	},
 
