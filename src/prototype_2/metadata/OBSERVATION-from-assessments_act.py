@@ -69,13 +69,30 @@ metadata = {
             'order': 4
         },
         # FIX same issue as above. Is it always just a single value, or do we ever get high and low?
-        # 'observation_datetime': { 'config_type': None, 'order': 5 },
-       'observation_datetime': {
+        'observation_datetime_effectiveTime': {
             'config_type': 'FIELD',
-            'data_type':'DATETIME',
+            'data_type': 'DATETIME_LOW',
             'element': "hl7:effectiveTime",
             'attribute': "value",
-            'order': 5 
+            'priority': ['observation_datetime_raw', 1]
+        },
+        'observation_datetime_low': {
+            'config_type': 'FIELD',
+            'data_type': 'DATETIME_LOW',
+            'element': "hl7:effectiveTime/hl7:low",
+            'attribute': "value",
+            'priority': ['observation_datetime_raw', 2]
+        },
+        'observation_datetime_high': {
+            'config_type': 'FIELD',
+            'data_type': 'DATETIME_HIGH',
+            'element': "hl7:effectiveTime/hl7:high",
+            'attribute': "value",
+            'priority': ['observation_datetime_raw', 3]
+        },
+		'observation_datetime_raw': {
+            'config_type': 'PRIORITY',
+            'order': 5
         },
         'observation_type_concept_id': {
             'config_type': 'CONSTANT',

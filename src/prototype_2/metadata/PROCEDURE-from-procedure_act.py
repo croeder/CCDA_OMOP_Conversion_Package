@@ -16,7 +16,7 @@ metadata = {
     	'procedure_occurrence_id_root': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
-            'attribute': 'root',
+			'attribute': 'root',
     	},
     	'procedure_occurrence_id_extension': {
             'config_type': 'FIELD',

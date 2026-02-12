@@ -237,6 +237,21 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                     attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                     print(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+            elif field_details_dict['data_type'] == 'DATETIME_LOW':
+                try:
+                    args = {'input_value': attribute_value, 'default': None}
+                    attribute_value = VT.transform_datetime_low(args)
+                except Exception as e:
+                    attribute_value = None
+                    logger.error(f"DATETIME_LOW conversion failed for {config_name}/{field_tag}: {e}")
+
+            elif field_details_dict['data_type'] == 'DATETIME_HIGH':
+                try:
+                    args = {'input_value': attribute_value, 'default': None}
+                    attribute_value = VT.transform_datetime_high(args)
+                except Exception as e:
+                    attribute_value = None
+                    logger.error(f"DATETIME_HIGH conversion failed for {config_name}/{field_tag}: {e}")
             elif field_details_dict['data_type'] == 'LONG':
                 try:
                     attribute_value = int64(attribute_value)

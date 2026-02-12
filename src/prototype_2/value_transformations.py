@@ -333,7 +333,50 @@ def concat_fields(args_dict):
     else :
         values_to_concat = [ args_dict['first_field'], args_dict['second_field'] ]
         return delimiter.join(values_to_concat)
+
+def transform_datetime_low(args):
+    """
+    Transforms a date-only string into a full ISO 8601 datetime defaulting to 00:00:00.
     
+    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD) 
+    format. We can make this assumption because this transformation is typically 
+    called after 'parseutils.parser' has already standardized the raw input.
+    """
+    val = args.get('input_value')
+    if not val:
+        return args.get('default')
+    
+    val_str = str(val).strip()
+    # HL7 format (YYYYMMDD)
+    if len(val_str) == 8 and val_str.isdigit():
+        return f"{val_str[:4]}-{val_str[4:6]}-{val_str[6:]}T00:00:00.000Z"
+    # ISO 8601 format (YYYY-MM-DD)
+    if len(val_str) == 10 and '-' in val_str:
+        return f"{val_str}T00:00:00.000Z"
+    
+    return val_str
+
+def transform_datetime_high(args):
+    """
+    Transforms a date-only string into a full ISO 8601 datetime defaulting to 23:59:59.
+    
+    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD) 
+    format. We can make this assumption because this transformation is typically 
+    called after 'parseutils.parser' has already standardized the raw input.
+    """
+    val = args.get('input_value')
+    if not val:
+        return args.get('default')
+    
+    val_str = str(val).strip()
+    # HL7 format (YYYYMMDD)
+    if len(val_str) == 8 and val_str.isdigit():
+        return f"{val_str[:4]}-{val_str[4:6]}-{val_str[6:]}T23:59:59.000Z"
+    # ISO 8601 format (YYYY-MM-DD)
+    if len(val_str) == 10 and '-' in val_str:
+        return f"{val_str}T23:59:59.000Z"
+    
+    return val_str
 ####################################################################################################
 
 partner_map = None

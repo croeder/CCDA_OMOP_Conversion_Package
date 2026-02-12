@@ -67,11 +67,29 @@ metadata = {
             'attribute': "value",
             'order': 4
         },
-        'observation_datetime': {
+        'observation_datetime_effectiveTime': {
             'config_type': 'FIELD',
-            'data_type':'DATETIME',
+            'data_type': 'DATETIME_LOW',
             'element': "hl7:effectiveTime",
             'attribute': "value",
+            'priority': ['observation_datetime_raw', 1]
+        },
+        'observation_datetime_low': {
+            'config_type': 'FIELD',
+            'data_type': 'DATETIME_LOW',
+            'element': "hl7:effectiveTime/hl7:low",
+            'attribute': "value",
+            'priority': ['observation_datetime_raw', 2]
+        },
+        'observation_datetime_high': {
+            'config_type': 'FIELD',
+            'data_type': 'DATETIME_HIGH',
+            'element': "hl7:effectiveTime/hl7:high",
+            'attribute': "value",
+            'priority': ['observation_datetime_raw', 3]
+        },
+		'observation_datetime_raw': {
+            'config_type': 'PRIORITY',
             'order': 5
         },
         'observation_type_concept_id': {
