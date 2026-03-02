@@ -3,7 +3,9 @@ from numpy import int32
 from numpy import float32
 import prototype_2.value_transformations as VT
 
-metadata = {
+metadata = {}
+not_running_this_one = {
+
     'VISIT-from-procedure_procedure': {
     	'root': {
     	    'config_type': 'ROOT',

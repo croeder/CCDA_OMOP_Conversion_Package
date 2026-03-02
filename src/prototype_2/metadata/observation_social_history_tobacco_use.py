@@ -87,23 +87,23 @@ metadata = {
             'data_type': 'DATETIME_LOW',
             'element': "hl7:effectiveTime",
             'attribute': "value",
-            'priority': ['observation_datetime_raw', 1]
+            'priority': ['observation_datetime', 1]
         },
         'observation_datetime_low': {
             'config_type': 'FIELD',
             'data_type': 'DATETIME_LOW',
             'element': "hl7:effectiveTime/hl7:low",
             'attribute': "value",
-            'priority': ['observation_datetime_raw', 2]
+            'priority': ['observation_datetime', 2]
         },
         'observation_datetime_high': {
             'config_type': 'FIELD',
             'data_type': 'DATETIME_HIGH',
             'element': "hl7:effectiveTime/hl7:high",
             'attribute': "value",
-            'priority': ['observation_datetime_raw', 3]
+            'priority': ['observation_datetime', 3]
         },
-		'observation_datetime_raw': {
+		'observation_datetime': {
             'config_type': 'PRIORITY',
             'order': 5
         },

@@ -1,6 +1,10 @@
 
 from collections import defaultdict
 import logging 
+from typeguard import typechecked
+from dateutil.parser import parse
+import datetime
+
 logging.basicConfig(
         filename="layer_datasets.log",
         filemode="w",
@@ -75,3 +79,33 @@ def create_visit_dict(codemap_df):
             'target_concept_id': row['target_concept_id'] })
 
     return codemap_dict
+
+
+@typechecked
+def cast_to_date(string_value) ->  datetime.date | None:
+    # TODO does CCDA always do dates as YYYYMMDD ?
+    # https://build.fhir.org/ig/HL7/CDA-ccda/StructureDefinition-USRealmDateTimeInterval-definitions.html
+    # doc says YYYMMDD... examples show ISO-8601. Should use a regex and detect parse failure.
+    # TODO  when  is it date and when datetime
+
+    try:
+        datetime_val = parse(string_value)
+        return datetime_val.date()
+    except Exception as x:
+        print(f"ERROR couldn't parse {string_value} as date. Exception:{x}")
+        return None
+        #return  datetime.date.fromisoformat("1970-01-01")
+    except ValueError as ve:
+        print(f"ERROR couldn't parse {string_value} as date. ValueError:{ve}")
+        return None
+        #return  datetime.date.fromisoformat("1970-01-01")
+
+
+def cast_to_datetime(string_value) -> datetime.datetime | None:
+    try:
+        datetime_val = parse(string_value)
+        return datetime_val
+    except Exception as x:
+        print(f"ERROR couldn't parse {string_value} as datetime. {x}")
+        return None
+        #return  datetime.date.fromisoformat("1970-01-01T00:00:00"

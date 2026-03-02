@@ -1,4 +1,3 @@
-
 """ Table-Driven ElementTree parsing in Python
 
  This version puts the paths into a data structure and explores using
@@ -84,6 +83,9 @@ from prototype_2 import value_transformations as VT
 from prototype_2.metadata import get_meta_dict
 from prototype_2 import ddl as DDL
 
+from prototype_2.util import cast_to_date
+from prototype_2.util import cast_to_datetime
+
 from prototype_2 import visit_reconcilliation as VR
 import re
 
@@ -125,33 +127,6 @@ def create_hash_too_long(input_string):
 
 
 
-@typechecked
-def cast_to_date(string_value) ->  datetime.date | None:
-    # TODO does CCDA always do dates as YYYYMMDD ?
-    # https://build.fhir.org/ig/HL7/CDA-ccda/StructureDefinition-USRealmDateTimeInterval-definitions.html
-    # doc says YYYMMDD... examples show ISO-8601. Should use a regex and detect parse failure.
-    # TODO  when  is it date and when datetime
-
-    try:
-        datetime_val = parse(string_value)
-        return datetime_val.date()
-    except Exception as x:
-        print(f"ERROR couldn't parse {string_value} as date. Exception:{x}")
-        #return None
-        return  datetime.date.fromisoformat("1970-01-01")
-    except ValueError as ve:
-        print(f"ERROR couldn't parse {string_value} as date. ValueError:{ve}")
-        #return None
-        return  datetime.date.fromisoformat("1970-01-01")
-
-def cast_to_datetime(string_value) -> datetime.datetime | None:
-    try:
-        datetime_val = parse(string_value)
-        return datetime_val
-    except Exception as x:
-        print(f"ERROR couldn't parse {string_value} as datetime. {x}")
-        #return None
-        return  datetime.date.fromisoformat("1970-01-01T00:00:00")
 
 
 @typechecked
@@ -209,24 +184,29 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
     if 'data_type' in field_details_dict:
         if attribute_value is not None and attribute_value == attribute_value:
             if field_details_dict['data_type'] == 'DATE':
-                #attribute_value = cast_to_date(attribute_value)
                 try:
                     attribute_value = cast_to_date(attribute_value)
                     if attribute_value != attribute_value:
-                        attribute_value = datetime.date.fromisoformat("1970-01-01")
+                        attribute_value = None
+                        #attribute_value = datetime.date.fromisoformat("1970-01-01")
                 except Exception as e:
-                    attribute_value = datetime.date.fromisoformat("1970-01-01")
+                    attribute_value = None
+                    #attribute_value = datetime.date.fromisoformat("1970-01-01")
                     print(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+
             elif field_details_dict['data_type'] == 'DATETIME':
                 try:
                     attribute_value = cast_to_datetime(attribute_value)
                     if attribute_value != attribute_value:
-                        attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
+                        attribute_value = None
+                        #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                 except Exception as e:
-                    attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
+                    attribute_value = None
+                    #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                     print(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+
             elif field_details_dict['data_type'] == 'DATETIME_LOW':
                 try:
                     args = {'input_value': attribute_value, 'default': None}
@@ -242,36 +222,42 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 except Exception as e:
                     attribute_value = None
                     logger.error(f"DATETIME_HIGH conversion failed for {config_name}/{field_tag}: {e}")
+
             elif field_details_dict['data_type'] == 'LONG':
                 try:
                     attribute_value = int64(attribute_value)
                 except Exception as e:
                     print(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+
             elif field_details_dict['data_type'] == 'INTEGER':
                 try:
                     attribute_value = int32(attribute_value)
                 except Exception as e:
                     print(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+
             elif field_details_dict['data_type'] == 'BIGINTHASH':
                 try:
                     attribute_value = create_hash(attribute_value)
                 except Exception as e:
                     print(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+
             elif field_details_dict['data_type'] == 'TEXT':
                 try:
                     attribute_value = str(attribute_value)
                 except Exception as e:
                     print(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+
             elif field_details_dict['data_type'] == 'FLOAT':
                 try:
                     attribute_value = float(attribute_value)
                 except Exception as e:
                     print(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    
             else:
                 print(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
                 logger.error(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
