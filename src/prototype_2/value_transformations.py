@@ -4,6 +4,7 @@ from numpy import int32
 import pandas as pd
 from prototype_2.util import cast_to_date
 from prototype_2.util import cast_to_datetime
+from prototype_2 import package_constant_access
 import logging
 
 logging.basicConfig(
@@ -117,12 +118,15 @@ def cast_as_concept_id(args_dict):  # TBD FIX TODO
 def codemap_xwalk_concept_id(args_dict):
     """ expects: vocabulary_oid, concept_code
         returns: concept_id AS INTEGER (because that's what's in the table), not necessarily standard
+                 If NMC is disallowed, it will return None instead of 0. 
+                 Control this via set_allow_no_macthing_concept() in package_constant_access.
         throws/raises when codemap_xwalk is None
     """
+    
     id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'], 
-                'target_concept_id', args_dict['default']) 
+                'target_concept_id', args_dict.get('default')) 
 
-    if id_value is not None:
+    if id_value is not None and (id_value != 0 or package_constant_access.get_allow_no_matching_concept()):
         logger.debug(f"codemap_xwalk_concept_id concept_id is {id_value}  for {args_dict}")
         return int32(id_value)
     else:
@@ -132,11 +136,11 @@ def codemap_xwalk_concept_id(args_dict):
 
 def codemap_xwalk_domain_id(args_dict):
     """ expects: vocabulary_oid, concept_code
-        returns: domain_id
+        returns: always returns domain_id
         throws/raises when codemap_xwalk is None
     """
     id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'], 
-                'target_domain_id', args_dict['default']) 
+                'target_domain_id', args_dict.get('default')) 
 
     if id_value is not None:
         return str(id_value)
@@ -150,9 +154,9 @@ def codemap_xwalk_source_concept_id(args_dict):
         throws/raises when codemap_xwalk is None
     """
     id_value =  _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'], 
-                'source_concept_id', args_dict['default']) 
+                'source_concept_id', args_dict.get('default')) 
 
-    if id_value is not None:
+    if id_value is not None and (id_value != 0 or package_constant_access.get_allow_no_matching_concept()):
         return int32(id_value)
     else:
         return None
@@ -187,6 +191,11 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
     else:
         logger.error(f"value_transformations.py _codemap_xwalk doens't have the column{column_name}....{mapping_rows[0]}")
         logger.error("f (cont) {mapping_rows}")
+
+    # if NMC is disallowed, and there is a default specified, return the default
+    if column_value is not None and column_value == 0 and not package_constant_access.get_allow_no_matching_concept():
+        return default
+
     return column_value
 
 

@@ -4,6 +4,9 @@ import logging
 import sys
 import os
 
+ALLOW_NO_MATCHING_CONCEPT=False
+
+
 MIN_PYTHON = (3, 10)
 if sys.version_info < MIN_PYTHON:
     sys.exit(f"Python version {MIN_PYTHON}  or later is required.")

@@ -2,6 +2,7 @@ import numpy as np
 import prototype_2.value_transformations as VT
 import prototype_2.data_driven_parse as DDP
 
+
 def test_race_nuance_logic():
     '''
     Tests the fix for PRIORITY logic:
@@ -14,6 +15,7 @@ def test_race_nuance_logic():
         ('2.16.840.1.113883.5.1', 'M'): [{'target_concept_id': np.int32(8532)}]
     }
     VT.set_valueset_dict(mock_map)
+    VT.set_codemap_dict(mock_map)
 
     # Common config used for all scenarios below
     race_config = {
