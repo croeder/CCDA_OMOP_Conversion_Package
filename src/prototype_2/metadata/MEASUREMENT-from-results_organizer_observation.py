@@ -163,11 +163,6 @@ metadata = {
     	    'attribute': "value",
             'priority': ['value_as_number', 1]
         },
-    	'value_as_number_na': {
-    	    'config_type': 'CONSTANT',
-            'constant_value': float32(0),
-            'priority': ['value_as_number', 100]
-        },
     	'value_as_number': {
     	    'config_type': 'PRIORITY',
             'order': 9
