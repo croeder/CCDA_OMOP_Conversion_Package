@@ -242,11 +242,11 @@ metadata = {
     	},
         'unit_codeSystem':  {
     	    'config_type': 'CONSTANT',
-			'constant_value' : 'http://unitsofmeasure.org',
+			'constant_value' : '2.16.840.1.113883.6.8'
     	},
         'unit_concept_id': { 
 			'config_type': 'DERIVED', 
-    	    'FUNCTION': VT.valueset_xwalk_concept_id,
+    	    'FUNCTION': VT.codemap_xwalk_concept_id,
     	    'argument_names': {
     		    'concept_code': 'unit_source_value',
     		    'vocabulary_oid': 'unit_codeSystem',

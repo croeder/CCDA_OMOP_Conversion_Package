@@ -232,9 +232,27 @@ metadata = {
     	    'config_type': 'PRIORITY',
             'order':  10
     	},
+		'unit_source_value':  {
+    	    'config_type': 'FIELD',
+    	    'element': 'hl7:value',
+    	    'attribute': 'unit',
+            'order':  19
+    	},
+        'unit_codeSystem':  {
+    	    'config_type': 'CONSTANT',
+			'constant_value' : '2.16.840.1.113883.6.8',
+    	},
+        'unit_concept_id': { 
+			'config_type': 'DERIVED', 
+    	    'FUNCTION': VT.codemap_xwalk_concept_id,
+    	    'argument_names': {
+    		    'concept_code': 'unit_source_value',
+    		    'vocabulary_oid': 'unit_codeSystem',
+                'default': None
+            },
+			'order': 11 
+		},
 
-
-    	'unit_concept_id': { 'config_type': None, 'order':  11 },
     	'range_low': { 'config_type': None, 'order':  12 },
     	'range_high': { 'config_type': None, 'order':  13 },
     	'provider_id': { 'config_type': None, 'order':  14 },
@@ -268,12 +286,6 @@ metadata = {
     	    },
             'order': 18
     	},
-
-    	'unit_source_value':	{ 
-    	    'config_type': 'CONSTANT',
-            'constant_value': '',
-            'order':  19 
-        },
 
     	 'value_source_value_text': {
     	    'config_type': 'FIELD',
