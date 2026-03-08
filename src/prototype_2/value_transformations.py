@@ -32,6 +32,7 @@ logging.basicConfig(
 """    
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 # --- Start of Moved Code from __init__.py ---
 # These dictionaries are now defined and handled here.

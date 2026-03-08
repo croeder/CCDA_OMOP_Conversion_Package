@@ -90,6 +90,7 @@ from prototype_2 import visit_reconcilliation as VR
 import re
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 DO_VISIT_DETAIL = False
 MAX_FIELD_LENGTH=50
@@ -192,7 +193,6 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 except Exception as e:
                     attribute_value = None
                     #attribute_value = datetime.date.fromisoformat("1970-01-01")
-                    print(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'DATETIME':
@@ -204,7 +204,6 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 except Exception as e:
                     attribute_value = None
                     #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
-                    print(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'DATETIME_LOW':
@@ -227,39 +226,33 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 try:
                     attribute_value = int64(attribute_value)
                 except Exception as e:
-                    print(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'INTEGER':
                 try:
                     attribute_value = int32(attribute_value)
                 except Exception as e:
-                    print(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'BIGINTHASH':
                 try:
                     attribute_value = create_hash(attribute_value)
                 except Exception as e:
-                    print(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'TEXT':
                 try:
                     attribute_value = str(attribute_value)
                 except Exception as e:
-                    print(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'FLOAT':
                 try:
                     attribute_value = float(attribute_value)
                 except Exception as e:
-                    print(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     logger.error(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     
             else:
-                print(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
                 logger.error(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
 
             #if attribute_value is None or attribute_value != attribute_value:
@@ -270,7 +263,6 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             return attribute_value
 
         else:
-            print(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
             logger.error(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
 
         #if attribute_value is None or attribute_value != attribute_value:
@@ -424,7 +416,6 @@ def do_foreign_key_fields(output_dict :dict[str, None | str | float | int | int3
                     output_dict[field_tag] = pk_dict[field_tag][0]
                 else:
                     # can't really choose the correct value here. Is attempted in reconcile_visit_FK_with_specific_domain() later, below.
-                    ###print(f"WARNING FK has more than one value {field_tag}, tagging with 'RECONCILE FK' ")
                     logger.info(f"WARNING FK has more than one value {field_tag}, tagging with 'RECONCILE FK'")
                     # original hack:
                     output_dict[field_tag] = None;
@@ -481,14 +472,14 @@ def do_derived_fields(output_dict: dict[str, None | str | float | int | int32 | 
                         try:
                             args_dict[arg_name] = output_dict[field_name]
                         except Exception as e:
-                            print(f"-------error field_name:{field_name}  arg_name:{arg_name}  {e}")
-                            print(traceback.format_exc(e))
+                            #print(f"-------error field_name:{field_name}  arg_name:{arg_name}  {e}")
+                            #print(traceback.format_exc(e))
                             error_fields_set.add(field_tag)
                             logger.error((f"DERIVED {field_tag} arg_name: {arg_name} field_name:{field_name}"
                                         f" args_dict:{args_dict} output_dict:{output_dict}"))
                             logger.error(f"DERIVED exception {e}")
                     except TypeError as te:
-                        print(f"-------error field_name:{field_name}  arg_name:{arg_name}  {te}")
+                        logger.error(f"-------error field_name:{field_name}  arg_name:{arg_name}  {te}")
                         print(traceback.format_exc(te))
             allowed_length = field_details_dict.get('length', MAX_FIELD_LENGTH)
             try:
@@ -509,14 +500,12 @@ def do_derived_fields(output_dict: dict[str, None | str | float | int | int32 | 
             except KeyError as e:
                 #print(traceback.format_exc(e))
                 error_fields_set.add(field_tag)
-                print(f"DERIVED key error on: {e}")
                 logger.error(f"DERIVED key error on: {e}")
                 logger.error(f"DERIVED KeyError {field_tag} function can't find key it expects in {args_dict}")
                 output_dict[field_tag] = None
             except TypeError as e:
                 #print(traceback.format_exc(e))
                 error_fields_set.add(field_tag)
-                print(f"DERIVED type error exception: {e}")
                 logger.error(f"DERIVED type error exception: {e}")
                 logger.error((f"DERIVED TypeError {field_tag} possibly calling something that isn't a function"
                               " or that function was passed a null value." 
@@ -525,7 +514,6 @@ def do_derived_fields(output_dict: dict[str, None | str | float | int | int32 | 
                               f"string: {type(field_details_dict['FUNCTION'])}"))
                 output_dict[field_tag] = None
             except Exception as e:
-                print(f"DERIVED exception: {e}")
                 logger.error(f"DERIVED exception: {e}")
                 output_dict[field_tag] = None
 
@@ -549,8 +537,9 @@ def do_derived2_fields(output_dict :dict[str, list | None | str | float | int | 
                 function_value = field_details_dict['FUNCTION'](field_details_dict, output_dict)
                 output_dict[field_tag] = function_value
             except Exception as e:
-                print(f"Error in do_derived2_fields {config_name} {field_tag}")
-                print(traceback.format_exc(e))
+                logger.error(f"Error in do_derived2_fields {config_name} {field_tag}")
+                #print(f"Error in do_derived2_fields {config_name} {field_tag}")
+                #print(traceback.format_exc(e))
 
 
 
@@ -579,7 +568,6 @@ def do_hash_fields(output_dict: dict[str, None | str | float | int | int32 | int
                     value_list.append(output_dict[field_name])
                 else:
                     logger.error(f"unknown HASH field  {field_name}")
-                    print(f"unknown HASH field  {field_name}")
             hash_input =  "|".join(map(str, value_list))
             #hash_value = create_hash_part1(hash_input)
             hash_value = create_hash(hash_input)
@@ -655,7 +643,7 @@ def do_priority_fields(output_dict: dict[str, None | str | float | int | int32 |
                 default_value = config_dict['default']
             output_dict[priority_name] = default_value
             pk_dict[priority_name].append(default_value)
-            print(f"  PRIORITY config:\"{config_name}\" defaulting {priority_name} to {default_value}")
+            logger.warning(f"  PRIORITY config:\"{config_name}\" defaulting {priority_name} to {default_value}")
     return priority_fields
     
     
@@ -756,7 +744,6 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     # Strict: null domain_id is not good, but don't expect a domain id from non-domain tables
     if (expected_domain_id == domain_id
         or expected_domain_id in ['Person', 'Location', 'Care_Site', 'Provider']):
-        print(f"ACCEPTING \"{expected_domain_id}\"=\"{domain_id}\" {config_name}")
         if expected_domain_id == "Observation":
             logger.warning((f"ACCEPTING {domain_id} in config: {config_name} "
                             f"row id:{output_dict['observation_id']} "
@@ -785,13 +772,10 @@ def parse_config_for_single_root(root_element, root_path, config_name,
             logger.warning((f"ACCEPTING {domain_id} in config: {config_name} "
                             f"row id:{output_dict['visit_occurrence_id']} "
                             f"concept code:{output_dict['visit_concept_id']}") )
-            print((f"ACCEPTING {domain_id} in config: {config_name} "
-                            f"row id:{output_dict['visit_occurrence_id']} "
-                            f"concept code:{output_dict['visit_concept_id']}") )
 
         return output_dict
     else:
-        print(f"REJECTING \"{expected_domain_id}\"!=\"{domain_id}\" {config_name}")
+        logger.warning(f"REJECTING \"{expected_domain_id}\"!=\"{domain_id}\" {config_name}")
         if expected_domain_id == "Observation":
             logger.warning((f"DENYING/REJECTING have:{domain_id} domain:{expected_domain_id} in config: {config_name} "
                             f"row id:{output_dict['observation_id']} "
@@ -818,9 +802,6 @@ def parse_config_for_single_root(root_element, root_path, config_name,
                               f"concept code:{output_dict['condition_concept_id']}") )
         elif expected_domain_id == "Visit":
             logger.warning( ( f"DENYING/REJECTING have:{domain_id} expect:{expected_domain_id} in config: {config_name} "
-                              f"row id:{output_dict['visit_occurrence_id']} "
-                              f"concept code:{output_dict['visit_concept_id']}"))
-            print(          ( f"DENYING/REJECTING have:{domain_id} expect:{expected_domain_id} in config: {config_name} "
                               f"row id:{output_dict['visit_occurrence_id']} "
                               f"concept code:{output_dict['visit_concept_id']}"))
         else:
@@ -909,7 +890,6 @@ def parse_config_from_xml_file(tree, config_name,
 
     # report fields with errors
     if len(error_fields_set) > 0:
-        print(f"DOMAIN Fields with errors in config {config_name} {error_fields_set}")
         logger.error(f"DOMAIN Fields with errors in config {config_name} {error_fields_set}")
 
     # distinct: gack, Pandas munges the types
@@ -976,13 +956,12 @@ def parse_doc(file_path,
     base_name = os.path.basename(file_path)
     for config_name, config_dict in metadata.items():
         if parse_config is None or parse_config == '' or parse_config == config_name:
-            print(f"\nPROCESSING config \"{config_name}\" on file:\"{file_path}\" ")
             data_dict_list = parse_config_from_xml_file(tree, config_name, config_dict, base_name, pk_dict)
             if config_name in omop_dict: 
                 omop_dict[config_name] = omop_dict[config_name].extend(data_dict_list)
             else:
                 omop_dict[config_name] = data_dict_list
-            print(f"\nPROCESSED config \"{config_name}\" got:\"{omop_dict[config_name]}\" ")
+            logger.info(f"\nPROCESSED config \"{config_name}\" got:\"{omop_dict[config_name]}\" ")
         #else:
         #    print(f"\nSKIPPING config \"{config_name}\" ")
 

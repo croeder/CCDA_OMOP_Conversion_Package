@@ -12,6 +12,7 @@ logging.basicConfig(
         format='%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d %(message)s')
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 """
     These three functions create dictionaries from the vocabulary xwalk 
     pandas dataframes.
@@ -92,11 +93,11 @@ def cast_to_date(string_value) ->  datetime.date | None:
         datetime_val = parse(string_value, ignoretz=True)
         return datetime_val.date()
     except Exception as x:
-        print(f"ERROR couldn't parse {string_value} as date. Exception:{x}")
+        logger.warning(f"ERROR couldn't parse {string_value} as date. Exception:{x}")
         return None
         #return  datetime.date.fromisoformat("1970-01-01")
     except ValueError as ve:
-        print(f"ERROR couldn't parse {string_value} as date. ValueError:{ve}")
+        logger.warning(f"ERROR couldn't parse {string_value} as date. ValueError:{ve}")
         return None
         #return  datetime.date.fromisoformat("1970-01-01")
 

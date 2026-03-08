@@ -68,7 +68,7 @@ logging.basicConfig(
         format='%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d %(message)s' )
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.ERROR)
 
 @typechecked
 def show_column_dict(config_name, column_dict):
