@@ -28,6 +28,7 @@ from typeguard import typechecked
 from prototype_2 import ddl as DDL
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 
 
@@ -493,7 +494,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                                             domain_dict: list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None , 
                                             visit_dict:  list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None):
     if visit_dict is None:
-        logger.warnging(f"no visits for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
+        logger.warning(f"no visits for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
         return
 
     if domain_dict is None:
