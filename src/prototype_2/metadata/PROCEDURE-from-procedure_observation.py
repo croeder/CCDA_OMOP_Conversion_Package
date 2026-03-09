@@ -27,7 +27,7 @@ metadata = {
     	    'config_type': 'HASH',
             'fields' : ['person_id',  'provider_id',
                         #'visit_occurrence_id',
-                        'procedure_concept_id_code', 'procedure_concept_id_codeSystem',
+                        'procedure_concept_code', 'procedure_concept_codeSystem',
                         'procedure_date', 'procedure_datetime',
                         'procedure_occurrence_id_root', 'procedure_occurrence_id_extension'],
             'order': 1
@@ -39,12 +39,12 @@ metadata = {
             'order': 2
     	},
 
-    	'procedure_concept_id_code': {
+    	'procedure_concept_code': {
     	    'config_type': 'FIELD',
     	    'element': "hl7:code" ,
     	    'attribute': "code"
     	},
-    	'procedure_concept_id_codeSystem': {
+    	'procedure_concept_codeSystem': {
     	    'config_type': 'FIELD',
     	    'element': "hl7:code",
     	    'attribute': "codeSystem"
@@ -53,8 +53,8 @@ metadata = {
     	    'config_type': 'DERIVED',
     	    'FUNCTION': VT.codemap_xwalk_concept_id,  
     	    'argument_names': {
-    		    'concept_code': 'procedure_concept_id_code',
-    		    'vocabulary_oid': 'procedure_concept_id_codeSystem',
+    		    'concept_code': 'procedure_concept_code',
+    		    'vocabulary_oid': 'procedure_concept_codeSystem',
                 'default': 0
             },
             'order': 3

@@ -139,8 +139,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
     """
 
     if 'element' not in field_details_dict:
-#        logger.error(("FIELD could find key 'element' in the field_details_dict:"
-#                     f" {field_details_dict} root:{root_path}"))
+        logger.warning(("FIELD could find key 'element' in the field_details_dict:"
+                     f" {field_details_dict} root:{root_path}"))
         return None
 
     logger.info(f"    FIELD {field_details_dict['element']} for {config_name}/{field_tag}")
@@ -149,16 +149,15 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
         field_element = root_element.xpath(field_details_dict['element'], namespaces=ns)
     except XPathEvalError as p:
         pass
-#        logger.error(f"ERROR (often inconsequential) {field_details_dict['element']} {p}")
-        ###print(f"FAILED often inconsequential  {field_details_dict['element']} {p}")
+        logger.warning(f"ERROR (often inconsequential) {field_details_dict['element']} {p}")
     if field_element is None:
-##        logger.error((f"FIELD could not find field element {field_details_dict['element']}"
-##                      f" for {config_name}/{field_tag} root:{root_path} {field_details_dict} "))
+        logger.warning((f"FIELD could not find field element {field_details_dict['element']}"
+                      f" for {config_name}/{field_tag} root:{root_path} {field_details_dict} "))
         return None
 
     if 'attribute' not in field_details_dict:
-##        logger.error((f"FIELD could not find key 'attribute' in the field_details_dict:"
-##                     f" {field_details_dict} root:{root_path}"))
+        logger.warning((f"FIELD could not find key 'attribute' in the field_details_dict:"
+                     f" {field_details_dict} root:{root_path}"))
         return None
 
     logger.info((f"       ATTRIBUTE   {field_details_dict['attribute']} "
@@ -170,7 +169,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             try:
                 attribute_value = ''.join(field_element[0].itertext())
             except Exception as e:
-                logger.error((f"no text elemeent for field element {field_element} "
+                logger.warning((f"no text elemeent for field element {field_element} "
                         f"for {config_name}/{field_tag} root:{root_path} "
                         f" dict: {field_element[0].attrib} EXCEPTION:{e}"))
         if attribute_value is None:
@@ -193,7 +192,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 except Exception as e:
                     attribute_value = None
                     #attribute_value = datetime.date.fromisoformat("1970-01-01")
-                    logger.error(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'DATETIME':
                 try:
@@ -204,7 +203,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 except Exception as e:
                     attribute_value = None
                     #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
-                    logger.error(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'DATETIME_LOW':
                 try:
@@ -212,7 +211,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                     attribute_value = VT.transform_datetime_low(args)
                 except Exception as e:
                     attribute_value = None
-                    logger.error(f"DATETIME_LOW conversion failed for {config_name}/{field_tag}: {e}")
+                    logger.warning(f"DATETIME_LOW conversion failed for {config_name}/{field_tag}: {e}")
 
             elif field_details_dict['data_type'] == 'DATETIME_HIGH':
                 try:
@@ -220,40 +219,40 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                     attribute_value = VT.transform_datetime_high(args)
                 except Exception as e:
                     attribute_value = None
-                    logger.error(f"DATETIME_HIGH conversion failed for {config_name}/{field_tag}: {e}")
+                    logger.warning(f"DATETIME_HIGH conversion failed for {config_name}/{field_tag}: {e}")
 
             elif field_details_dict['data_type'] == 'LONG':
                 try:
                     attribute_value = int64(attribute_value)
                 except Exception as e:
-                    logger.error(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'INTEGER':
                 try:
                     attribute_value = int32(attribute_value)
                 except Exception as e:
-                    logger.error(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'BIGINTHASH':
                 try:
                     attribute_value = create_hash(attribute_value)
                 except Exception as e:
-                    logger.error(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'TEXT':
                 try:
                     attribute_value = str(attribute_value)
                 except Exception as e:
-                    logger.error(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
 
             elif field_details_dict['data_type'] == 'FLOAT':
                 try:
                     attribute_value = float(attribute_value)
                 except Exception as e:
-                    logger.error(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
                     
             else:
-                logger.error(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
+                logger.warning(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
 
             #if attribute_value is None or attribute_value != attribute_value:
             if attribute_value != attribute_value: # checking for NaN or NaT, but not None
@@ -263,7 +262,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             return attribute_value
 
         else:
-            logger.error(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
+            logger.warning(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
 
         #if attribute_value is None or attribute_value != attribute_value:
         if attribute_value != attribute_value: # checking for NaN or NaT, but not None
@@ -352,9 +351,9 @@ def do_basic_fields(output_dict :dict[str, None | str | float | int | int32 | in
                     output_dict[field_tag] = attribute_value
                 logger.info(f"     FIELD for {config_name}/{field_tag} \"{attribute_value}\"")
             except KeyError as ke:
-                logger.error(f"key erorr: {ke}")
-                logger.error(f"  {field_details_dict}")
-                logger.error(f"  FIELD for {config_name}/{field_tag} \"{attribute_value}\"")
+                logger.warning(f"key erorr: {ke}")
+                logger.warning(f"  {field_details_dict}")
+                logger.warning(f"  FIELD for {config_name}/{field_tag} \"{attribute_value}\"")
                 raise
 
         elif type_tag == 'PK':
@@ -431,10 +430,10 @@ def do_foreign_key_fields(output_dict :dict[str, None | str | float | int | int3
                 else:
                     path = path + "no attribute/"
 
-##                if field_tag in pk_dict and len(pk_dict[field_tag]) == 0:
-###                    logger.error(f"FK no value for {field_tag}  in pk_dict for {config_name}/{field_tag}")
-##                else:
-##                    logger.error(f"FK could not find {field_tag}  in pk_dict for {config_name}/{field_tag}")
+                if field_tag in pk_dict and len(pk_dict[field_tag]) == 0:
+                    logger.warning(f"FK no value for {field_tag}  in pk_dict for {config_name}/{field_tag}")
+                else:
+                    logger.warning(f"FK could not find {field_tag}  in pk_dict for {config_name}/{field_tag}")
                 output_dict[field_tag] = None
                 error_fields_set.add(field_tag)
 
@@ -467,7 +466,7 @@ def do_derived_fields(output_dict: dict[str, None | str | float | int | int32 | 
                     try:
                         if field_name not in output_dict:
                             error_fields_set.add(field_tag)
-                            logger.error((f"DERIVED config:{config_name} field:{field_tag} could not "
+                            logger.warning((f"DERIVED config:{config_name} field:{field_tag} could not "
                                       f"find {field_name} in {output_dict}"))
                         try:
                             args_dict[arg_name] = output_dict[field_name]
@@ -475,11 +474,11 @@ def do_derived_fields(output_dict: dict[str, None | str | float | int | int32 | 
                             #print(f"-------error field_name:{field_name}  arg_name:{arg_name}  {e}")
                             #print(traceback.format_exc(e))
                             error_fields_set.add(field_tag)
-                            logger.error((f"DERIVED {field_tag} arg_name: {arg_name} field_name:{field_name}"
+                            logger.warning((f"DERIVED {field_tag} arg_name: {arg_name} field_name:{field_name}"
                                         f" args_dict:{args_dict} output_dict:{output_dict}"))
-                            logger.error(f"DERIVED exception {e}")
+                            logger.warning(f"DERIVED exception {e}")
                     except TypeError as te:
-                        logger.error(f"-------error field_name:{field_name}  arg_name:{arg_name}  {te}")
+                        logger.warning(f"-------error field_name:{field_name}  arg_name:{arg_name}  {te}")
                         print(traceback.format_exc(te))
             allowed_length = field_details_dict.get('length', MAX_FIELD_LENGTH)
             try:
@@ -500,21 +499,21 @@ def do_derived_fields(output_dict: dict[str, None | str | float | int | int32 | 
             except KeyError as e:
                 #print(traceback.format_exc(e))
                 error_fields_set.add(field_tag)
-                logger.error(f"DERIVED key error on: {e}")
-                logger.error(f"DERIVED KeyError {field_tag} function can't find key it expects in {args_dict}")
+                logger.warning(f"DERIVED key error on: {e}")
+                logger.warning(f"DERIVED KeyError {field_tag} function can't find key it expects in {args_dict}")
                 output_dict[field_tag] = None
             except TypeError as e:
                 #print(traceback.format_exc(e))
                 error_fields_set.add(field_tag)
-                logger.error(f"DERIVED type error exception: {e}")
-                logger.error((f"DERIVED TypeError {field_tag} possibly calling something that isn't a function"
+                logger.warning(f"DERIVED type error exception: {e}")
+                logger.warning((f"DERIVED TypeError {field_tag} possibly calling something that isn't a function"
                               " or that function was passed a null value." 
                               f" {field_details_dict['FUNCTION']}. You may have quotes "
                               "around it in  a python mapping structure if this is a "
                               f"string: {type(field_details_dict['FUNCTION'])}"))
                 output_dict[field_tag] = None
             except Exception as e:
-                logger.error(f"DERIVED exception: {e}")
+                logger.warning(f"DERIVED exception: {e}")
                 output_dict[field_tag] = None
 
 
@@ -537,7 +536,7 @@ def do_derived2_fields(output_dict :dict[str, list | None | str | float | int | 
                 function_value = field_details_dict['FUNCTION'](field_details_dict, output_dict)
                 output_dict[field_tag] = function_value
             except Exception as e:
-                logger.error(f"Error in do_derived2_fields {config_name} {field_tag}")
+                logger.warning(f"Error in do_derived2_fields {config_name} {field_tag}")
                 #print(f"Error in do_derived2_fields {config_name} {field_tag}")
                 #print(traceback.format_exc(e))
 
@@ -562,12 +561,12 @@ def do_hash_fields(output_dict: dict[str, None | str | float | int | int32 | int
         if field_details_dict['config_type'] == 'HASH':
             value_list = []
             if 'fields' not in field_details_dict:
-                logger.error(f"HASH field {field_tag} is missing 'fields' attributes in config:{config_name}")
+                logger.warning (f"HASH field {field_tag} is missing 'fields' attributes in config:{config_name}")
             for field_name in field_details_dict['fields'] :
                 if field_name in output_dict:
                     value_list.append(output_dict[field_name])
                 else:
-                    logger.error(f"unknown HASH field  {field_name}")
+                    logger.error(f"unknown HASH field  {field_name} in config:{config_name}")
             hash_input =  "|".join(map(str, value_list))
             #hash_value = create_hash_part1(hash_input)
             hash_value = create_hash(hash_input)
@@ -857,11 +856,11 @@ def parse_config_from_xml_file(tree, config_name,
 
     # Find root
     if 'root' not in config_dict:
-        logger.error(f"CONFIG {config_dict} lacks a root element.")
+        logger.error(f"CONFIG {config_dict} lacks a root element in config {config_name}.")
         return None
 
     if 'element' not in config_dict['root']:
-        logger.error(f"CONFIG {config_dict} root lacks an 'element' key.")
+        logger.error(f"CONFIG {config_dict} root lacks an 'element' key in config {config_name}.")
         return None
 
     root_path = config_dict['root']['element']
@@ -872,7 +871,7 @@ def parse_config_from_xml_file(tree, config_name,
     try:
         root_element_list = tree.xpath(config_dict['root']['element'], namespaces=ns)
     except Exception as e:
-        logger.error(f" {config_dict['root']['element']}   {e}")
+        logger.error(f" {config_dict['root']['element']} config:{config_name}   {e}")
         
     if root_element_list is None or len(root_element_list) == 0:
         logger.info((f"CONFIG couldn't find root element for {config_name}"
@@ -967,16 +966,17 @@ def parse_doc(file_path,
 
     # Try:
     if DO_VISIT_DETAIL:
-        omop_dict = VR.reclassify_nested_visit_occurrences_as_detail(omop_dict)
+        try:
+            omop_dict = VR.reclassify_nested_visit_occurrences_as_detail(omop_dict)
     # No. Crash loudly and publicly if this threw an exception that is so mysterious
     # we catch with something as broad as Exception.
     # We are not operating on such a tight schedule that glossing over an unknown
     # here, and hoping the error is noticed in the logs.  There is no automated
     # process for scanning them. It's a human effort that never happens in
     # production.
-    #except Exception as e:
-    #    logger.error(f"Error processing visit hierarchy: {e}")
-    #    logger.error(traceback.format_exc())
+        except Exception as e:
+            logger.error(f"Error processing visit hierarchy in file: {e}")
+            logger.error(traceback.format_exc())
     #    # Continue with original data if hierarchy processing fails
 
     return omop_dict

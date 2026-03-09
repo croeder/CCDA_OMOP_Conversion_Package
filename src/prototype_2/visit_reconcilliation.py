@@ -493,16 +493,16 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                                             domain_dict: list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None , 
                                             visit_dict:  list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None):
     if visit_dict is None:
-        logger.error(f"no visits for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
+        logger.warnging(f"no visits for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
         return
 
     if domain_dict is None:
-        logger.error(f"no data for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
+        logger.warning(f"no data for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
         return
 
     # Only Measurement, Observation, Condition, Procedure, Drug, and Device participate in Visit FK reconciliation
     if domain not in domain_dates:
-        logger.error(f"no metadata for domain {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
+        logger.warning(f"no metadata for domain {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
         return
 
     if 'date' in domain_dates[domain].keys():
@@ -545,7 +545,6 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                             matches.append(visit['visit_occurrence_id'])
 
                     except KeyError as ke:
-                        logger.error(f"missing field  \"{ke}\", in visit reconcilliation, see warnings for detail")
                         logger.warning(f"missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")
                     except Exception as e:
                         pass
@@ -553,7 +552,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                 if len(matches) == 1:
                     thing['visit_occurrence_id'] = matches[0]
                 elif len(matches) == 0:
-                    logger.error(f" couldn't reconcile visit for {domain} event: {thing}")
+                    logger.warning(f" couldn't reconcile visit for {domain} event: {thing}")
                 else:
                     logger.warning(
                         "Ambiguous visit match for %s (id=%s): %d candidates; leaving visit_occurrence_id unset",
@@ -563,7 +562,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
 
             else:
                 # S.O.L.
-                logger.error(f"no date available for visit reconcilliation in domain {domain} for {thing}")
+                logger.warning(f"no date available for visit reconcilliation in domain {domain} for {thing}")
 
     # Logic for domains with start and end date/dateime
     elif 'start' in domain_dates[domain].keys() and 'end' in domain_dates[domain].keys():
@@ -636,7 +635,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                 if len(matches) == 1:
                     thing['visit_occurrence_id'] = matches[0]
                 elif len(matches) == 0:
-                    logger.error(f" couldn't reconcile visit for {domain} event: {thing}")
+                    logger.warning(f" couldn't reconcile visit for {domain} event: {thing}")
                 else:
                     logger.warning(
                         "Ambiguous visit match for %s (id=%s): %d candidates; leaving visit_occurrence_id unset",
@@ -647,10 +646,10 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
             else:
                 # S.O.L.
                 print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
-                logger.error(f" no date available for visit reconcilliation in domain {domain} for {thing}")
+                logger.warning(f" no date available for visit reconcilliation in domain {domain} for {thing}")
 
     else:
-        logger.error("??? bust in domain_dates for reconcilliation")
+        logger.info("??? bust in domain_dates for reconcilliation")
 
 
 @typechecked

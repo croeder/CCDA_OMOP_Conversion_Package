@@ -131,7 +131,7 @@ def codemap_xwalk_concept_id(args_dict):
         logger.debug(f"codemap_xwalk_concept_id concept_id is {id_value}  for {args_dict}")
         return int32(id_value)
     else:
-        logger.error(f"codemap_xwalk_concept_id concept_id is None  for {args_dict}")
+        logger.warning(f"codemap_xwalk_concept_id concept_id is None  for {args_dict}")
         return None
 
 
@@ -173,19 +173,19 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
     if (vocabulary_oid, concept_code) in codemap_xwalk_mapping_dict:
         mapping_rows = codemap_xwalk_mapping_dict[(vocabulary_oid, concept_code)]
     else:
-        logger.error(f"value_transformations.py _codemap_xwalk vocabulary_id:\"{vocabulary_oid}\" ,{type(vocabulary_oid)}, code:\"{concept_code}\", {type(concept_code)}  not present or not found")
+        logger.warning(f"value_transformations.py _codemap_xwalk vocabulary_id:\"{vocabulary_oid}\" ,{type(vocabulary_oid)}, code:\"{concept_code}\", {type(concept_code)}  not present or not found")
         return default
 
     if mapping_rows is None:
-        logger.error(f"codemap_dict mapping_rows is None  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
+        logger.warning(f"codemap_dict mapping_rows is None  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
         return default
 
     if len(mapping_rows) < 1:
-        logger.error(f"codemap_dict mapping_rows is <1 for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
+        logger.warning(f"codemap_dict mapping_rows is <1 for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
         return default
 
     if len(mapping_rows) > 1:
-        logger.error(f"_codemap_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
+        logger.warning(f"_codemap_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
 
     if column_name in mapping_rows[0]:
         column_value = mapping_rows[0][column_name]
