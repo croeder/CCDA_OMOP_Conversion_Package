@@ -153,21 +153,21 @@ metadata = {
             'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
             'priority' : ['drug_exposure_start_datetime', 2 ] 
         },        
         'drug_exposure_start_datetime_low': {
             'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime/hl7:low", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
             'priority' : ['drug_exposure_start_datetime', 1 ] 
         },  
         'drug_exposure_start_datetime_high': {
             'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime/hl7:high", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
             'priority' : ['drug_exposure_start_datetime', 3 ] 
         }, 
         'drug_exposure_start_datetime': {
@@ -205,21 +205,21 @@ metadata = {
             'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime/hl7:high", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_HIGH',
             'priority' : ['drug_exposure_end_datetime', 1 ] 
         },   
         'drug_exposure_end_datetime_eT': {
             'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_HIGH',
             'priority' : ['drug_exposure_end_datetime', 2 ] 
         },
         'drug_exposure_end_datetime_low': {
             'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime/hl7:low", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_HIGH',
             'priority' : ['drug_exposure_end_datetime', 3 ] 
         },      
         'drug_exposure_end_datetime': {

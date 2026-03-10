@@ -106,21 +106,21 @@ metadata = {
     },
     'device_exposure_start_datetime_supply_low': {
         'config_type': 'FIELD',
-        'data_type': 'DATETIME',
+        'data_type': 'DATETIME_LOW',
         'element': "../../../hl7:effectiveTime/hl7:low",
         'attribute': "value",
         'priority': ('device_exposure_start_datetime', 1)
     },
     'device_exposure_start_datetime_substanceadmin_low': {
         'config_type': 'FIELD',
-        'data_type': 'DATETIME',
+        'data_type': 'DATETIME_LOW',
         'element': "../../../../../hl7:effectiveTime/hl7:low",
         'attribute': "value",
         'priority': ('device_exposure_start_datetime', 2)
     },
     'device_exposure_start_datetime_substanceadmin_value': {
         'config_type': 'FIELD',
-        'data_type': 'DATETIME',
+        'data_type': 'DATETIME_LOW',
         'element': "../../../../../hl7:effectiveTime",
         'attribute': "value",
         'priority': ('device_exposure_start_datetime', 3)
@@ -151,14 +151,14 @@ metadata = {
     },
     'device_exposure_end_datetime_supply_high': {
         'config_type': 'FIELD',
-        'data_type': 'DATETIME',
+        'data_type': 'DATETIME_HIGH',
         'element': "../../../hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]",
         'attribute': "value",
         'priority': ('device_exposure_end_datetime', 1)
     },
     'device_exposure_end_datetime_substanceadmin_high': {
         'config_type': 'FIELD',
-        'data_type': 'DATETIME',
+        'data_type': 'DATETIME_HIGH',
         'element': "../../../../../hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]",
         'attribute': "value",
         'priority': ('device_exposure_end_datetime', 2)

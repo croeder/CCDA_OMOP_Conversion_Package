@@ -410,14 +410,14 @@ metadata = {
         },
         'visit_start_datetime_low': { 
             'config_type': 'FIELD', 
-            'data_type': 'DATETIME', 
+            'data_type': 'DATETIME_LOW', 
             'element': "hl7:effectiveTime/hl7:low[not(@nullFlavor=\"UNK\")]", 
             'attribute': "value", 
             'priority': ['visit_start_datetime', 1] 
         },
         'visit_start_datetime_value': { 
             'config_type': 'FIELD', 
-            'data_type': 'DATETIME', 
+            'data_type': 'DATETIME_LOW', 
             'element': "hl7:effectiveTime", 
             'attribute': "value", 
             'priority': ['visit_start_datetime', 2] 
@@ -455,21 +455,21 @@ metadata = {
         },
         'visit_end_datetime_high': { 
             'config_type': 'FIELD', 
-            'data_type': 'DATETIME', 
+            'data_type': 'DATETIME_HIGH', 
             'element': "hl7:effectiveTime/hl7:high[not(@nullFlavor=\"UNK\")]", 
             'attribute': "value", 
             'priority': ['visit_end_datetime', 1] 
         },
         'visit_end_datetime_value': { 
             'config_type': 'FIELD', 
-            'data_type': 'DATETIME', 
+            'data_type': 'DATETIME_HIGH', 
             'element': "hl7:effectiveTime", 
             'attribute': "value", 
             'priority': ['visit_end_datetime', 2] 
         },
         'visit_end_datetime_low': { 
             'config_type': 'FIELD', 
-            'data_type': 'DATETIME', 
+            'data_type': 'DATETIME_HIGH', 
             'element': "hl7:effectiveTime/hl7:low", 
             'attribute': "value", 
             'priority': ['visit_end_datetime', 3] 

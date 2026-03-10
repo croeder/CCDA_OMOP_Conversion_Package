@@ -100,14 +100,14 @@ metadata = {
         },
         'device_exposure_start_datetime_low': {
     	    'config_type': 'FIELD',
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
     	    'element': "../../../hl7:effectiveTime/hl7:low",
     	    'attribute': "value",
             'priority': ('device_exposure_start_datetime', 1)
     	},     
         'device_exposure_start_datetime_value': {
     	    'config_type': 'FIELD',
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
     	    'element': "../../../hl7:effectiveTime",
     	    'attribute': "value",
             'priority': ('device_exposure_start_datetime', 2)

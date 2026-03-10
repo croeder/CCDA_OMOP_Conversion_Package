@@ -108,21 +108,21 @@ metadata = {
         },              
         'device_exposure_start_datetime_supply_low': {
     	    'config_type': 'FIELD',
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
     	    'element': "../../../hl7:effectiveTime/hl7:low",
     	    'attribute': "value",
             'priority': ('device_exposure_start_datetime', 1)
     	},
         'device_exposure_start_datetime_supply_value': {
     	    'config_type': 'FIELD',
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
     	    'element': "../../../hl7:effectiveTime",
     	    'attribute': "value",
             'priority': ('device_exposure_start_datetime', 2)
     	},
         'device_exposure_start_datetime_organizer_low': {
     	    'config_type': 'FIELD',
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_LOW',
     	    'element': "../../../../../hl7:effectiveTime/hl7:low",
     	    'attribute': "value",
             'priority': ('device_exposure_start_datetime', 3)
@@ -155,14 +155,14 @@ metadata = {
             'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_HIGH',
             'priority': ('device_exposure_end_datetime', 1)
         },        
         'device_exposure_end_datetime_organizer': {
             'config_type': 'FIELD',
             'element': "../../../../../hl7:effectiveTime/hl7:high[not(@nullFlavor='UNK')]", 
             'attribute': "value",
-            'data_type': 'DATETIME',
+            'data_type': 'DATETIME_HIGH',
             'priority': ('device_exposure_end_datetime', 2)
         },        
         
