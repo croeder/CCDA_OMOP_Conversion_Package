@@ -1,7 +1,13 @@
 import unittest
+import numpy as np
 import prototype_2.value_transformations as VT
 
-
+mock_map = {
+    ('2.16.840.1.113883.6.1', '788-0'): [{'target_concept_id': np.int32(3019897), 'target_domain_id': 'Measurement', 'source_concept_id': np.int32(3019897)}], 
+    ('2.16.840.1.113883.6.12', '99213'): [{'target_concept_id': np.int32(9202), 'target_domain_id': 'Visit', 'source_concept_id': np.int32(2414397)}],
+    ('2.16.840.1.113883.6.96', '266919005'): [{'target_concept_id': np.int32(903653), 'target_domain_id': 'Observation', 'source_concept_id': np.int32(4144272)}] 
+}
+VT.set_codemap_dict(mock_map)
 # test_data includes keys used in newer codemap and valueset calls so
 # this dictionary can be passed in as args.
 test_data = {

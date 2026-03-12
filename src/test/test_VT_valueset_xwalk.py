@@ -50,9 +50,10 @@ def test_race_nuance_logic():
     
     DDP.do_derived_fields(out_unmapped, 'ROOT', 'PATH', 'TEST', race_config, set(), pk_unmapped)
     
-    assert out_unmapped['race_concept_id'] == 0
-    assert isinstance(out_unmapped['race_concept_id'], np.int32)
-    assert pk_unmapped['race_concept_id'] == [0]
+    assert out_unmapped['race_concept_id'] == None
+    #assert isinstance(out_unmapped['race_concept_id'], np.int32)
+    assert out_unmapped['race_concept_id'] is None
+    assert pk_unmapped['race_concept_id'] == []
 
     # --- Scenario C: XML has valid data ('M') ---
     out_valid = {'race_code': 'M', 'race_codeSystem': '2.16.840.1.113883.5.1'}

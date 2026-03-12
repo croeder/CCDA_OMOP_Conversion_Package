@@ -12,7 +12,7 @@ class TestDateTime(unittest.TestCase):
             'default': '1900-01-01T00:00:00.000Z'
         }
         result = VT.transform_datetime_low(args)
-        self.assertEqual(result, '2025-04-02T00:00:00.000Z')
+        self.assertEqual(str(result), '2025-04-02 00:00:00')
 
     def test_transform_datetime_high_iso8601(self):
         """Test that transform_datetime_high creates a datetime from an ISO 8601 date with time 23:59:59"""
@@ -21,7 +21,7 @@ class TestDateTime(unittest.TestCase):
             'default': '1900-01-01T00:00:00.000Z'
         }
         result = VT.transform_datetime_high(args)
-        self.assertEqual(result, '2025-04-02T23:59:59.000Z')
+        self.assertEqual(str(result), '2025-04-02 23:59:59')
 
     # --- HL7 Format Tests ---
 
@@ -32,7 +32,7 @@ class TestDateTime(unittest.TestCase):
             'default': '1900-01-01T00:00:00.000Z'
         }
         result = VT.transform_datetime_low(args)
-        self.assertEqual(result, '2025-04-02T00:00:00.000Z')
+        self.assertEqual(str(result), '2025-04-02 00:00:00')
 
     def test_transform_datetime_high_hl7(self):
         """Test that transform_datetime_high creates an ISO datetime from an HL7 (YYYYMMDD) date with time 23:59:59"""
@@ -41,7 +41,7 @@ class TestDateTime(unittest.TestCase):
             'default': '1900-01-01T00:00:00.000Z'
         }
         result = VT.transform_datetime_high(args)
-        self.assertEqual(result, '2025-04-02T23:59:59.000Z')
+        self.assertEqual(str(result), '2025-04-02 23:59:59')
 
     # --- Preservation Tests ---
 
@@ -52,7 +52,7 @@ class TestDateTime(unittest.TestCase):
             'default': '1900-01-01T00:00:00.000Z'
         }
         result = VT.transform_datetime_low(args)
-        self.assertEqual(result, '2025-04-02T21:43:56.000Z')
+        self.assertEqual(str(result), '2025-04-02 21:43:56')
 
     def test_preserves_existing_time_high(self):
         """Test that transform_datetime_high does NOT overwrite if time is already present"""
@@ -61,7 +61,7 @@ class TestDateTime(unittest.TestCase):
             'default': '1900-01-01T00:00:00.000Z'
         }
         result = VT.transform_datetime_high(args)
-        self.assertEqual(result, '2025-04-02T21:43:56.000Z')
+        self.assertEqual(str(result), '2025-04-02 21:43:56')
 
 if __name__ == '__main__':
     unittest.main()

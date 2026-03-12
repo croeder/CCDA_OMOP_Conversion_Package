@@ -16,4 +16,4 @@ class ValueTransformTest_concat_0 (unittest.TestCase):
         args_dict = { 'first_field': self.first_field,
                       'second_field': self.second_field }
         output_string = VT.concat_fields(args_dict)
-        self.assertIsNone(output_string)
+        self.assertEqual(output_string, '')

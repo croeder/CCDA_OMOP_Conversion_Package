@@ -187,6 +187,7 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
     if len(mapping_rows) > 1:
         logger.warning(f"_codemap_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
 
+    column_value = None
     if column_name in mapping_rows[0]:
         column_value = mapping_rows[0][column_name]
     else:

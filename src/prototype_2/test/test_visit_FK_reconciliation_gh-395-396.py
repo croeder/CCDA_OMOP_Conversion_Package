@@ -1,6 +1,7 @@
 import unittest
 import datetime
-import prototype_2.data_driven_parse as DD
+import numpy as np
+import prototype_2.visit_reconcilliation  as VR
 
 class TestVisitReconciliation(unittest.TestCase):
 
@@ -38,7 +39,7 @@ class TestVisitReconciliation(unittest.TestCase):
             "measurement_datetime": datetime.datetime(2025, 9, 1, 10, 0, 0),
         }]
 
-        DD.reconcile_visit_FK_with_specific_domain("Measurement", domain_dict, self.single_visit)
+        VR.reconcile_visit_FK_with_specific_domain("Measurement", domain_dict, self.single_visit)
         self.assertEqual(domain_dict[0]["visit_occurrence_id"], 1)
 
     def test_no_match_leaves_fk_null(self):
@@ -48,7 +49,7 @@ class TestVisitReconciliation(unittest.TestCase):
             "measurement_datetime": datetime.datetime(2025, 9, 2, 10, 0, 0),
         }]
 
-        DD.reconcile_visit_FK_with_specific_domain("Measurement", domain_dict, self.single_visit)
+        VR.reconcile_visit_FK_with_specific_domain("Measurement", domain_dict, self.single_visit)
         self.assertNotIn("visit_occurrence_id", domain_dict[0])
 
     def test_multiple_matches_leaves_fk_null(self):
@@ -58,7 +59,7 @@ class TestVisitReconciliation(unittest.TestCase):
             "measurement_datetime": datetime.datetime(2025, 9, 1, 10, 30, 0),
         }]
 
-        DD.reconcile_visit_FK_with_specific_domain("Measurement", domain_dict, self.two_overlapping_visits)
+        VR.reconcile_visit_FK_with_specific_domain("Measurement", domain_dict, self.two_overlapping_visits)
         self.assertNotIn("visit_occurrence_id", domain_dict[0])
 
     def test_unk_end_date_event(self):
@@ -71,7 +72,7 @@ class TestVisitReconciliation(unittest.TestCase):
             "drug_exposure_end_datetime": None,
         }]
 
-        DD.reconcile_visit_FK_with_specific_domain("Drug", domain_dict, self.single_visit)
+        VR.reconcile_visit_FK_with_specific_domain("Drug", domain_dict, self.single_visit)
         self.assertEqual(domain_dict[0]["visit_occurrence_id"], 1)
 
 if __name__ == "__main__":

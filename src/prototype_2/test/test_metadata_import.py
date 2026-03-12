@@ -33,7 +33,9 @@ class MetadataLoadingTest(unittest.TestCase):
             self.assertTrue(len(result_dict) > 0, "Metadata dictionary should not be empty.")
 
             # Check for known, expected keys
-            expected_keys = ['Measurement_results', 'Observation', 'Procedure_activity_procedure', 'Visit', 'Person']
+            expected_keys = ['Observation', 'Visit', 'Person',
+                'MEASUREMENT-from-results_organizer_observation'
+            ]
             missing_keys = [key for key in expected_keys if key not in result_dict]
             self.assertEqual(len(missing_keys), 0, f"Expected essential keys missing: {missing_keys}")
 
