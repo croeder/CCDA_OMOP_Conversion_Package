@@ -169,7 +169,7 @@ class TestBasicField(unittest.TestCase):
                 </text_element>
             </grouping_element>
         """
-        the_text = "multi-line                        element"
+        the_text = "multi-line                            element"
     
         output_dict = {}
         config_name="TEST"
@@ -365,7 +365,7 @@ class TestBasicField(unittest.TestCase):
                 </text_element>
             </grouping_element>
         """
-        expected_text = "multi-lines                        element                        with another line "
+        expected_text = "multi-lines                            element                            with another line "
     
         output_dict = {}
         config_name = "TEST"
