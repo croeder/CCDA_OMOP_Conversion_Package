@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 cd src
 for file in test/*py; do 
     base_file=$(basename $file .py)

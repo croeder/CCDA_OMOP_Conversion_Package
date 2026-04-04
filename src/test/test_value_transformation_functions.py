@@ -1,60 +1,63 @@
 
 import ccda_to_omop.value_transformations as VT
 import ccda_to_omop.data_driven_parse as DDP
+import unittest
 
 
-data_dict = {
-    "a": 1, "b": 2, "c":3
-}
+class TestVTFunctions(unittest.TestCase):
 
-
-def test_example():
-    assert 1==1
-
-def this_one_wont_run():
-    assert 1==1
-
-
-
-def test_concat_field_list_values():
-    ''' tests by calling through do_derived2_field()
-    '''
-    output_dict = { "a": 1, "b": 2, "c":3 }
-    root_element='TEST_ROOT'
-    root_path = "a/b/c/"
-    config_name="TEST"
-    config_dict = {
-        'id_values_chris': { 
-            'config_type': 'DERIVED2',
-            'FUNCTION': VT.concat_field_list_values,
-            'argument_list': { 'key_list': ['a', 'c'] },
-           'order': 201  
-        },
+    data_dict = {
+        "a": 1, "b": 2, "c":3
     }
 
-    error_fields_set = set()
-    DDP.do_derived2_fields( output_dict, root_element, root_path, config_name, config_dict, error_fields_set)
-    assert output_dict['id_values_chris'] == '1|3'
 
+    def test_example(self):
+        self.assertTrue(1==1)
     
-
-def test_concat_field_list_names():
-    ''' tests by calling through do_derived2_field()
-    '''
-    output_dict = { "a": 1, "b": 2, "c":3}
-    root_element='TEST_ROOT'
-    root_path = "a/b/c/"
-    config_name="TEST"
-    config_dict = {
-        'id_args': { 
-            'config_type': 'DERIVED2',
-            'FUNCTION': VT.concat_field_list_names,
-            'argument_list': { 'key_list': ['a', 'c']},
-            'order': 202
-        },
-    }
-
-    error_fields_set = set()
-    DDP.do_derived2_fields(output_dict, root_element, root_path, config_name, config_dict, error_fields_set)
-    assert output_dict['id_args'] == 'a|c'
- 
+    def this_one_wont_run(self):
+        self.assertTrue( 1==1)
+    
+    
+    
+    def test_concat_field_list_values(self):
+        ''' tests by calling through do_derived2_field()
+        '''
+        output_dict = { "a": 1, "b": 2, "c":3 }
+        root_element='TEST_ROOT'
+        root_path = "a/b/c/"
+        config_name="TEST"
+        config_dict = {
+            'id_values_chris': { 
+                'config_type': 'DERIVED2',
+                'FUNCTION': VT.concat_field_list_values,
+                'argument_list': { 'key_list': ['a', 'c'] },
+               'order': 201  
+            },
+        }
+    
+        error_fields_set = set()
+        DDP.do_derived2_fields( output_dict, root_element, root_path, config_name, config_dict, error_fields_set)
+        self.assertEqual(output_dict['id_values_chris'], '1|3')
+    
+        
+    
+    def test_concat_field_list_names(self):
+        ''' tests by calling through do_derived2_field()
+        '''
+        output_dict = { "a": 1, "b": 2, "c":3}
+        root_element='TEST_ROOT'
+        root_path = "a/b/c/"
+        config_name="TEST"
+        config_dict = {
+            'id_args': { 
+                'config_type': 'DERIVED2',
+                'FUNCTION': VT.concat_field_list_names,
+                'argument_list': { 'key_list': ['a', 'c']},
+                'order': 202
+            },
+        }
+    
+        error_fields_set = set()
+        DDP.do_derived2_fields(output_dict, root_element, root_path, config_name, config_dict, error_fields_set)
+        self.assertEqual(output_dict['id_args'], 'a|c')
+     
