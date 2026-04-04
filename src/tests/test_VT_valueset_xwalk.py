@@ -68,6 +68,4 @@ class TestVTValueset(unittest.TestCase):
     
         print("Race nuance tests passed!")
     
-    if __name__ == '__main__':
-        test_race_nuance_logic()
      

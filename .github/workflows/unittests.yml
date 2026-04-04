@@ -1,0 +1,17 @@
+name: ccda_to_omop Unit Tests
+run-name: ${{ github.actor }} is testing ccda_to_omop unit tests
+on: [push, workflow_dispatch]
+jobs:
+    Run-unit-tests:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Check out repository code
+            uses: actions/checkout@v4
+            with:
+              ref: main
+          - name: Install packages
+            run: |
+                pip install -r requirements.txt
+          - name: run unit tests
+            run: |
+                bin/run_unittests.sh

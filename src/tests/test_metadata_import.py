@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # --- Define METADATA_DIR for the test ---
 TEST_DIR = os.path.dirname(__file__)
 PROTOTYPE_2_DIR = os.path.dirname(TEST_DIR)
-METADATA_DIR = os.path.join(PROTOTYPE_2_DIR, 'metadata')
+METADATA_DIR = os.path.join(PROTOTYPE_2_DIR, 'ccda_to_omop/metadata')
 
 
 class MetadataLoadingTest(unittest.TestCase):
