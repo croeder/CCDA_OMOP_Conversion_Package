@@ -73,6 +73,7 @@ The bulk of the work is in the prototype_2 directory. Further instruction is in 
 
 ## BADGE
 [![Prototype 2](https://github.com/cladteam/CCDA_OMOP_by_Python/actions/workflows/prototype_2.yml/badge.svg)](https://github.com/cladteam/CCDA_OMOP_by_Python/actions/workflows/prototype_2.yml)
+[![Unit Tests](https://github.com/cladteam/CCDA_OMOP_by_Python/actions/workflows/unittests.yml/badge.svg)](https://github.com/cladteam/CCDA_OMOP_by_Python/actions/workflows/unittests.yml)
 
 ## Sub Projects/Directories
 This repositor has siblings that might be of interest.
