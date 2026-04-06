@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Case 06: Tests a nullFlavor falling back to a non-mappable translation.
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+    <recordTarget>
+        <patientRole>
+            <id extension="test-gender-06" root="2.16.840.1.113883.4.1"/>
+            <patient>
+                <birthTime value="19800106"/>
+                <administrativeGenderCode nullFlavor="OTH">
+                    <translation code="another-bad-code" codeSystem="2.16.840.1.113883.5.1"/>
+                </administrativeGenderCode>
+            </patient>
+        </patientRole>
+    </recordTarget>
+</ClinicalDocument>

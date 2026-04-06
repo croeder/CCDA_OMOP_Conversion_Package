@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Test file for visit.py parsing logic (Ticket #372).
+    This file is designed to validate the priority logic for parsing visit concepts.
+    The test cases are ordered by priority:
+
+    1. Encompassing Encounter: Tests parsing a code from a nested <translation> tag.
+    2. Standard Encounter (Primary Code): Tests a direct mapping from the main <code> tag.
+    3. Standard Encounter (Translation 1): Tests mapping from the first translation.
+    4. Standard Encounter (Translation 2): Tests skipping one bad translation to map from the second.
+    5. Standard Encounter (Translation 3): Tests skipping two bad translations to map from the third.
+    6. Fallback Case: Tests an encounter with no mappable codes, which should default to 0.
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:sdtc="urn:hl7-org:sdtc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <id root="2.16.840.1.113883.19.5" extension="test-doc-372"/>
+    <componentOf>
+        <!-- Test Case 1: Encompassing Encounter - Should map from the second translation -->
+        <encompassingEncounter>
+            <id root="ee-root-1" extension="ee-ext-1"/>
+            <effectiveTime>
+                <low value="20250101"/>
+            </effectiveTime>
+            <code code="BAD-CODE" codeSystem="BAD-CODESYSTEM">
+                <translation code="ALSO-FAKE" codeSystem="1.2.3.4.5.6"/>
+                <translation code="AMB" codeSystem="2.16.840.1.113883.5.4"/> <!-- This one should map to 9202 -->
+            </code>
+        </encompassingEncounter>
+    </componentOf>
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.22.2.22.1"/>
+                    <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="History of Encounters"/>
+                    <title>Encounters</title>
+                    <text>This section tests multiple encounter types based on the updated config.</text>
+
+                    <!-- Test Case 2: Standard Encounter - Should map from primary code -->
+                    <entry>
+                        <encounter moodCode="EVN">
+                            <id root="test-visit-id-2"/>
+                            <code code="99213" codeSystem="2.16.840.1.113883.6.12" displayName="Office outpatient visit 15 minutes" />
+                            <effectiveTime value="20250319" />
+                        </encounter>
+                    </entry>
+
+                    <!-- Test Case 3: Standard Encounter - Should map from first translation -->
+                    <entry>
+                        <encounter moodCode="EVN">
+                            <id root="test-visit-id-3"/>
+                            <code code="BAD_CODE_3" codeSystem="1.2.3.4.5.6" displayName="Hospital Admission">
+                                <translation code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Encounter" />
+                            </code>
+                            <effectiveTime value="20250410" />
+                        </encounter>
+                    </entry>
+                    
+                    <!-- Test Case 4: Standard Encounter - Should map from second translation -->
+                    <entry>
+                        <encounter moodCode="EVN">
+                            <id root="test-visit-id-4"/>
+                            <code code="BAD_CODE_4" codeSystem="1.2.3.4.5.6" displayName="Emergency Room Visit">
+                                <translation code="FAKE_CODE_1" codeSystem="9.9.9.9"/>
+                                <translation code="EMER" codeSystem="2.16.840.1.113883.5.4" displayName="Emergency"/>
+                            </code>
+                            <effectiveTime value="20250425"/>
+                        </encounter>
+                    </entry>
+
+                    <!-- Test Case 5: Standard Encounter - Should map from third translation -->
+                     <entry>
+                        <encounter moodCode="EVN">
+                            <id root="test-visit-id-5"/>
+                            <code code="BAD_CODE_5" codeSystem="1.2.3.4.5.6" displayName="Long Term Stay">
+                                <translation code="FAKE_CODE_1" codeSystem="9.9.9.9"/>
+                                <translation code="FAKE_CODE_2" codeSystem="9.9.9.9"/>
+                                <translation code="1221-1" codeSystem="2.16.840.1.113883.6.259" displayName="Long Term Acute Care Ward"/>
+                            </code>
+                            <effectiveTime value="20250515"/>
+                        </encounter>
+                    </entry>
+                    
+                    <!-- Test Case 6: Standard Encounter - Should fallback to default 0 -->
+                    <entry>
+                        <encounter moodCode="EVN">
+                            <id root="test-visit-id-6" />
+                            <code code="NO-MAP-CODE" codeSystem="NO-MAP-SYSTEM"/>
+                            <effectiveTime value="20250601" />
+                        </encounter>
+                    </entry>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>
+

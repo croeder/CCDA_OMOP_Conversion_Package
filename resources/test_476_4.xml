@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Test File 4 – Drug with High but No Low (End Date but No Start)
+    - Expected: Row dropped.
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:voc="urn:hl7-org:v3/voc" xmlns:sdtc="urn:hl7-org:sdtc">
+
+  <!-- Minimal patient header -->
+	<recordTarget>
+		<patientRole>
+			<id extension="444222222" root="2.16.840.1.113883.4.1"/>
+			<!-- Example Social Security Number using the actual SSN OID. -->
+			<addr use="HP">
+				<!-- HP is "primary home" from codeSystem 2.16.840.1.113883.5.1119 -->
+				<streetAddressLine>2222 Home Street</streetAddressLine>
+				<city>Beaverton</city>
+				<state>OR</state>
+				<postalCode>97867</postalCode>
+				<country>US</country>
+				<!-- US is "United States" from ISO 3166-1 Country Codes: 1.0.3166.1 -->
+			</addr>
+			<telecom value="tel:+1(555)555-2003" use="HP"/>
+			<!-- HP is "primary home" from HL7 AddressUse 2.16.840.1.113883.5.1119 -->
+			<patient>
+				<name use="L">
+					<given>Eve</given>
+					<!-- The "SP" is "Spouse" from HL7 Code System EntityNamePartQualifier 2.16.840.1.113883.5.43 -->
+					<family qualifier="SP">Betterhalf</family>
+				</name>
+				<administrativeGenderCode code="F" displayName="Female" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender"/>
+				<!-- Date of birth need only be precise to the day -->
+				<birthTime value="19750501"/>
+				<maritalStatusCode code="M" displayName="Married" codeSystem="2.16.840.1.113883.5.2" codeSystemName="MaritalStatusCode"/>
+				<religiousAffiliationCode code="1013" displayName="Christian (non-Catholic, non-specific)" codeSystem="2.16.840.1.113883.5.1076" codeSystemName="HL7 Religious Affiliation"/>
+				<!-- CDC Race and Ethnicity code set contains the five minimum race and ethnicity 
+					categories defined by OMB Standards -->
+				<raceCode code="2106-3" displayName="White" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+				<!-- The raceCode extension is only used if raceCode is valued -->
+				<sdtc:raceCode code="2076-8" displayName="Hawaiian or Other Pacific Islander" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+				<ethnicGroupCode code="2186-5" displayName="Not Hispanic or Latino" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+				<guardian>
+					<code code="POWATT" displayName="Power of Attorney" codeSystem="2.16.840.1.113883.1.11.19830" codeSystemName="ResponsibleParty"/>
+					<addr use="HP">
+						<streetAddressLine>2222 Home Street</streetAddressLine>
+						<city>Beaverton</city>
+						<state>OR</state>
+						<postalCode>97867</postalCode>
+						<country>US</country>
+					</addr>
+					<telecom value="tel:+1(555)555-2008" use="MC"/>
+					<guardianPerson>
+						<name>
+							<given>Boris</given>
+							<given qualifier="CL">Bo</given>
+							<family>Betterhalf</family>
+						</name>
+					</guardianPerson>
+				</guardian>
+				<birthplace>
+					<place>
+						<addr>
+							<streetAddressLine>4444 Home Street</streetAddressLine>
+							<city>Beaverton</city>
+							<state>OR</state>
+							<postalCode>97867</postalCode>
+							<country>US</country>
+						</addr>
+					</place>
+				</birthplace>
+				<languageCommunication>
+					<languageCode code="en"/>
+					<!-- "en" is ISO 639-1 alpha-2 code for "English" -->
+					<modeCode code="ESP" displayName="Expressed spoken" codeSystem="2.16.840.1.113883.5.60" codeSystemName="LanguageAbilityMode"/>
+					<proficiencyLevelCode code="G" displayName="Good" codeSystem="2.16.840.1.113883.5.61" codeSystemName="LanguageAbilityProficiency"/>
+					<!-- Patient's preferred language -->
+					<preferenceInd value="true"/>
+				</languageCommunication>
+			</patient>
+			<providerOrganization>
+				<id extension="219BX" root="2.16.840.1.113883.4.6"/>
+				<name>The DoctorsTogether Physician Group</name>
+				<telecom use="WP" value="tel: +1(555)555-5000"/>
+				<addr>
+					<streetAddressLine>1007 Health Drive</streetAddressLine>
+					<city>Portland</city>
+					<state>OR</state>
+					<postalCode>99123</postalCode>
+					<country>US</country>
+				</addr>
+			</providerOrganization>
+		</patientRole>
+  </recordTarget>
+  <component>
+    <structuredBody>
+
+      <!-- Encounter Section -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.22.2.22"/>
+          <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="Encounters"/>
+          <title>Encounter</title>
+          <entry>
+            <encounter moodCode="EVN">
+              <id root="1.2.3.4.5.6.7.8.9.ENC" extension="ENC-008"/>
+              <effectiveTime>
+                <low  value="20140201"/>
+                <high value="20140210"/>
+              </effectiveTime>
+            </encounter>
+          </entry>
+        </section>
+      </component>
+
+      <!-- Medications Section – high only -->
+      <component>
+        <section>
+          <templateId root="2.16.840.1.113883.10.20.22.2.1.1"/>
+          <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" displayName="History of medication use"/>
+          <title>Medications</title>
+          <entry>
+            <substanceAdministration classCode="SBADM" moodCode="EVN">
+              <id root="1.2.3.4.5.6.7.8.9.DRUG" extension="DRUG-HIGHONLY"/>
+              <statusCode code="completed"/>
+              <effectiveTime>
+                <!-- high present, low missing -->
+                <high value="20140207"/>
+              </effectiveTime>
+              <consumable>
+                <manufacturedProduct>
+                  <manufacturedMaterial>
+                    <code code="860975" codeSystem="2.16.840.1.113883.6.88" displayName="Metformin 500 MG Oral Tablet"/>
+                  </manufacturedMaterial>
+                </manufacturedProduct>
+              </consumable>
+              <doseQuantity value="1" unit="tablet"/>
+            </substanceAdministration>
+          </entry>
+        </section>
+      </component>
+
+    </structuredBody>
+  </component>
+</ClinicalDocument>

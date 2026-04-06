@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Case 05: Tests a non-mappable direct code falling back to a non-mappable translation.
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+    <recordTarget>
+        <patientRole>
+            <id extension="test-ethnicity-05" root="2.16.840.1.113883.4.1"/>
+            <patient>
+                <birthTime value="19800105"/>
+                <ethnicGroupCode code="bad-code" codeSystem="2.16.840.1.113883.6.238">
+                    <translation code="another-bad-code" codeSystem="2.16.840.1.113883.6.238"/>
+                </ethnicGroupCode>
+            </patient>
+        </patientRole>
+    </recordTarget>
+</ClinicalDocument>

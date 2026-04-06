@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Test Case: Multi-Level Visit Hierarchy
+    Scenario: Demonstrates complex nested visit relationships
+        
+    1. SIMPLE 2-LEVEL HIERARCHY (Encounters 1-3):
+       - Encounter 1: 30-day Inpatient admission (LAYER 1 - Parent)
+         └─ Encounter 2: 10-day ICU stay (LAYER 2 - Nested child)
+         └─ Encounter 3: 1-day Procedure (LAYER 2 - Nested child)
+
+    2. SIMPLE 3-LEVEL HIERARCHY (Encounters 4-6):
+       - Encounter 4: 20-day Inpatient (LAYER 1 - Longer parent)
+         └─ Encounter 5: 5-day Inpatient (LAYER 2 - Shorter parent, Nested child of Layer 1)
+            └─ Encounter 6: 1-day Procedure (LAYER 3 - Nested child of Layer 2)
+
+    3. COMPLEX 3-LEVEL HIERARCHY (Encounters 7-10):
+       - Encounter 7: 30-day Inpatient admission (LAYER 1 - Top parent)
+         └─ Encounter 8: 10-day ICU stay (LAYER 2 - Mid-level parent)
+            └─ Encounter 9: 1-day Procedure in ICU (LAYER 3 - Nested child of Layer 2)
+         └─ Encounter 10: 2-day Emergency procedure (LAYER 2 - Nested child of Layer 1)
+
+    4. NON-QUALIFYING PARENT (Encounter 11-12):
+       - Encounter 11: 400-day Inpatient (TOO LONG - exceeds 365 day threshold, should remain in visit_occurrence)
+         └─ Encounter 12: 2-day procedure (NO VALID PARENT - should remain in visit_occurrence)
+
+    5. AMBIGUOUS PARENTS AT DIFFERENT HIERARCHY LEVELS (Encounters 13-17):
+       - Encounter 13: 15-day Inpatient (Nov 1-15, LAYER 1)
+         └─ Encounter 14: 4-day Inpatient (Nov 10-13, LAYER 2 nested in Encounter 13)
+            └─ Encounter 16: 1-day (Nov 10, LAYER 3 nested in Encounter 14)
+       - Encounter 15: 10-day Inpatient (Nov 11-20, LAYER 1, NOT in Encounter 13)
+       - Encounter 17: 1-day (Nov 12, AMBIGUOUS - has parents Encounter 13, 14, and 15)
+         Parents Encounter 13 and Encounter 14 are hierarchical chain, but Encounter 15 is sibling to Encounter 13
+         → Encounter 17 stays in visit_occurrence due to ambiguity
+
+    Expected Output:
+    visit_occurrence table:
+    - Encounter 1 (30-day IPD, parent of 2 & 3)
+    - Encounter 4 (20-day IPD, parent of 5)
+    - Encounter 7 (30-day IPD, parent of 8 & 10)
+    - Encounter 11 (400-day IPD, too long to be parent)
+    - Encounter 12 (2-day procedure, no valid parent)
+    - Encounter 13 (15-day IPD, parent of Encounter 14)
+    - Encounter 15 (10-day IPD, standalone)
+    - Encounter 17 (1-day, ambiguous parents)
+    
+    visit_detail table:
+    - Encounter 2 (10-day ICU, visit_occurrence_id=Enc1, visit_detail_parent_id=NULL)
+    - Encounter 3 (1-day Proc, visit_occurrence_id=Enc1, visit_detail_parent_id=NULL)
+    - Encounter 5 (5-day IPD, visit_occurrence_id=Enc4, visit_detail_parent_id=NULL)
+    - Encounter 6 (1-day Proc, visit_occurrence_id=Enc4, visit_detail_parent_id=Enc5)
+    - Encounter 8 (10-day ICU, visit_occurrence_id=Enc7, visit_detail_parent_id=NULL)
+    - Encounter 9 (1-day Proc, visit_occurrence_id=Enc7, visit_detail_parent_id=Enc8)
+    - Encounter 10 (2-day Emg, visit_occurrence_id=Enc7, visit_detail_parent_id=NULL)
+    - Encounter 14 (4-day IPD, visit_occurrence_id=Enc13, visit_detail_parent_id=NULL)
+    - Encounter 16 (1-day, visit_occurrence_id=Enc13, visit_detail_parent_id=Enc14)
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:sdtc="urn:hl7-org:sdtc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <id root="2.16.840.1.113883.19.5" extension="test-visit-hierarchy-001"/>
+    
+    <!-- encompassingEncounter: Encounter 1 - 30-day Inpatient -->
+    <componentOf>
+        <encompassingEncounter>
+            <id root="50905" extension="ENC-001-IPD-30D"/>
+            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" codeSystemName="ActCode" displayName="Inpatient">
+                <originalText>Inpatient Admission</originalText>
+            </code>
+            <effectiveTime>
+                <low value="20240201"/>
+                <high value="20240302"/>
+            </effectiveTime>
+            <dischargeDispositionCode nullFlavor="UNK"/>
+            
+            <encounterParticipant typeCode="ATND">
+                <assignedEntity classCode="ASSIGNED">
+                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-001"/>
+                    <assignedPerson>
+                        <name><family>Smith</family><given>John</given></name>
+                    </assignedPerson>
+                </assignedEntity>
+            </encounterParticipant>
+            
+            <location>
+                <healthCareFacility>
+                    <id root="50905" extension="WARD-GENERAL"/>
+                    <serviceProviderOrganization>
+                        <name>General Hospital</name>
+                    </serviceProviderOrganization>
+                </healthCareFacility>
+            </location>
+        </encompassingEncounter>
+    </componentOf>
+
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.22.2.22.1"/>
+                    <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="History of Encounters"/>
+                    <title>Multi-Level Visit Hierarchy Test Encounters</title>
+                    <text>This section demonstrates complex nested visit hierarchies for OMOP CDM processing.</text>
+
+                    <!-- ========================================
+                         SCENARIO 1: SIMPLE 2-LEVEL HIERARCHY
+                         ======================================== -->
+                    
+                    <!-- Encounter 1: LAYER 1 - 30-day Inpatient Parent -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-001-IPD-30D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240201"/>
+                                <high value="20240302"/><!-- 30 days -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-001"/>
+                                    <assignedPerson>
+                                        <name><family>Smith</family><given>John</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-GENERAL"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 2: LAYER 2 - 10-day ICU nested in Encounter 1 -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-002-ICU-10D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Intensive Care">
+                                <translation code="32037" codeSystem="2.16.840.1.113883.6.238" displayName="Intensive Care"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240205"/>
+                                <high value="20240215"/><!-- 10 days, within Enc 1 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-ICU-001"/>
+                                    <assignedPerson>
+                                        <name><family>Williams</family><given>Sarah</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-ICU"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 3: LAYER 2 - 1-day Procedure nested in Encounter 1 -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-003-PROC-1D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Hospital">
+                                <translation code="262" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Hospital"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240220"/>
+                                <high value="20240221"/><!-- 1 day, within Enc 1 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-SURG-001"/>
+                                    <assignedPerson>
+                                        <name><family>Brown</family><given>Michael</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-SURGERY"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- ========================================
+                         SCENARIO 2: SIMPLE 3-LEVEL HIERARCHY
+                         ======================================== -->
+                    
+                    <!-- Encounter 4: LAYER 1 - 20-day Inpatient (LAYER 1 - Longer parent) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-004-IPD-20D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240401"/>
+                                <high value="20240421"/><!-- 20 days -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-003"/>
+                                    <assignedPerson>
+                                        <name><family>Wilson</family><given>David</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-GENERAL-3"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 5: LAYER 1 - 5-day Inpatient (LAYER 2 - Shorter parent, Nested child of Layer 1) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-005-IPD-5D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240405"/>
+                                <high value="20240410"/><!-- 5 days, within Enc 4 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-004"/>
+                                    <assignedPerson>
+                                        <name><family>Taylor</family><given>Amanda</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-SPECIAL"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 6: LAYER 2 - 1-day Procedure (LAYER 3 - Nested child of Layer 2) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-006-PROC-1D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Hospital">
+                                <translation code="262" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Hospital"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240407"/>
+                                <high value="20240408"/><!-- 1 day, within Enc 5 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-SURG-003"/>
+                                    <assignedPerson>
+                                        <name><family>Thomas</family><given>James</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-PROC-ROOM"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- ========================================
+                         SCENARIO 3: COMPLEX 3-LEVEL HIERARCHY
+                         ======================================== -->
+                    
+                    <!-- Encounter 7: LAYER 1 - 30-day Inpatient Top Parent -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-007-IPD-30D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240301"/>
+                                <high value="20240331"/><!-- 30 days -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-002"/>
+                                    <assignedPerson>
+                                        <name><family>Davis</family><given>Robert</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-GENERAL-2"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 8: LAYER 2 - 10-day ICU nested in Encounter 7 (will be parent of Enc 9) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-008-ICU-10D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Intensive Care">
+                                <translation code="32037" codeSystem="2.16.840.1.113883.6.238" displayName="Intensive Care"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240305"/>
+                                <high value="20240315"/><!-- 10 days, within Enc 7 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-ICU-002"/>
+                                    <assignedPerson>
+                                        <name><family>Martinez</family><given>Lisa</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-ICU-2"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 9: LAYER 3 - 1-day Procedure nested in Encounter 8 (ICU) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-009-PROC-1D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Hospital">
+                                <translation code="262" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Hospital"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240310"/>
+                                <high value="20240311"/><!-- 1 day, within Enc 8 (ICU) -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-SURG-002"/>
+                                    <assignedPerson>
+                                        <name><family>Garcia</family><given>Carlos</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-ICU-PROC"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 10: LAYER 2 - 2-day Emergency procedure nested in Encounter 7 (not in Enc 8) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-010-EMG-2D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Hospital">
+                                <translation code="262" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Hospital"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240320"/>
+                                <high value="20240322"/><!-- 2 days, within Enc 7 but NOT Enc 8 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-EMERG-001"/>
+                                    <assignedPerson>
+                                        <name><family>Anderson</family><given>Jennifer</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-EMERG"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- ========================================
+                         SCENARIO 4: NON-QUALIFYING PARENT (>365 days)
+                         ======================================== -->
+                    
+                    <!-- Encounter 11: TOO LONG - 400-day Inpatient (exceeds threshold, won't be parent) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-011-IPD-400D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240501"/>
+                                <high value="20250605"/><!-- 400 days - exceeds MAX_PARENT_DURATION_DAYS -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-LONGTERM-001"/>
+                                    <assignedPerson>
+                                        <name><family>Moore</family><given>Patricia</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-LONGTERM"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 12: LAYER 2 - 2-day procedure within Enc 11 (but Enc 11 doesn't qualify) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-012-PROC-2D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Hospital">
+                                <translation code="262" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Hospital"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20240601"/>
+                                <high value="20240603"/><!-- 2 days, within Enc 11 but no valid parent -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-SURG-004"/>
+                                    <assignedPerson>
+                                        <name><family>Jackson</family><given>Christopher</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-PROC-2"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- ========================================
+                         SCENARIO 5: AMBIGUOUS PARENTS AT DIFFERENT HIERARCHY LEVELS
+                         - Enc 13 (Nov 1-15, 15 days) - LAYER 1 Top Parent
+                         - Enc 14 (Nov 10-13, 4 days) - LAYER 2 nested in Enc 13
+                         - Enc 15 (Nov 11-20, 10 days) - LAYER 1 Standalone (not contained by Enc 13)
+                         - Enc 16 (Nov 10, 1 day) - LAYER 3 nested in Enc 14 (which is in Enc 13)
+                         - Enc 17 (Nov 12, 1 day) - AMBIGUOUS: has parents Enc 13, Enc 14 (hierarchical chain)
+                           and Enc 15 (sibling to Enc 13) -> stays at current level
+                         ======================================== -->
+                    
+                    <!-- Encounter 13: LAYER 1 - 15-day Inpatient -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-013-15D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20241101"/>
+                                <high value="20241115"/><!-- Nov 1-15, 15 days -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-A"/>
+                                    <assignedPerson>
+                                        <name><family>Anderson</family><given>Alice</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-A"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 14: LAYER 2 - 4-day Inpatient nested in Enc 13 -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-014-4D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20241110"/>
+                                <high value="20241113"/><!-- Nov 10-13, 4 days, within Enc 13 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-B"/>
+                                    <assignedPerson>
+                                        <name><family>Brown</family><given>Brian</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-B"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 15: LAYER 1 - 10-day Inpatient, standalone -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-015-10D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20241111"/>
+                                <high value="20241120"/><!-- Nov 11-20, 10 days, NOT contained by Enc 13 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-C"/>
+                                    <assignedPerson>
+                                        <name><family>Chen</family><given>Carol</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-C"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 16: LAYER 3 - 1-day, nested in Enc 14 -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-016-1D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20241110"/>
+                                <high value="20241110"/><!-- Nov 10, 1 day, within Enc 14 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-D"/>
+                                    <assignedPerson>
+                                        <name><family>Davis</family><given>Diana</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-D"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 17: AMBIGUOUS - 1-day, has parents at different levels -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <id root="50905" extension="ENC-017-1D"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Visit">
+                                <translation code="9201" codeSystem="2.16.840.1.113883.6.238" displayName="Inpatient Visit"/>
+                            </code>
+                            <effectiveTime>
+                                <low value="20241112"/>
+                                <high value="20241112"/><!-- Nov 12, 1 day, within Enc 13, 14, and 15 -->
+                            </effectiveTime>
+                            <performer typeCode="PRF">
+                                <assignedEntity>
+                                    <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-E"/>
+                                    <assignedPerson>
+                                        <name><family>Evans</family><given>Emily</given></name>
+                                    </assignedPerson>
+                                </assignedEntity>
+                            </performer>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <id root="50905" extension="WARD-E"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>

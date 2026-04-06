@@ -1,27 +1,19 @@
 #!/usr/bin/env bash
 
-# install packages into mamba environment
-# 1. shell command from Matt, must be run at start of workspace
-# mamba install -y -q lxml
-# mamba install -y -q duckdb
-# mamba install -y -q pandas 
 
-
-# 2 python repl command from "packages" here in Jupyter (doesn't work)
-# !maestro env pip install lxml==5.2.2
-# !maestro env pip install duckdb
-
+# prep directories
 mkdir logs 2> /dev/null
 mkdir output 2> /dev/null
-
 rm -f logs/*
 rm -f output/*
+
 # run unit tests
+### python3 -m  unittest src.ccda_to_omop.test.test_value_transformations_concat
 
-### python3 -m  unittest prototype_2.test.test_value_transformations_concat
-
-# run the main conversion
-python3 -m prototype_2.layer_datasets -d resources -c
+# run the main conversion and compare
+cd src
+#python3 -m ccda_to_omop.layer_datasets -d resources -c
+python3 -m ccda_to_omop.data_driven_parse -d ../resources 
 
 # load into DuckDB for constraint errors
 ## python3 -m omop.setup_omop

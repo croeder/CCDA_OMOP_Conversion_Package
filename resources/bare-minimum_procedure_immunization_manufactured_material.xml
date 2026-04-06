@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Bare Minimum Procedures
+    This should produce rows for Person, Visit and Procedure. No care_site, no provider. Location for the person.
+    Chris Roeder
+    Oct 29, 2025
+ -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:voc="urn:hl7-org:v3/voc" xmlns:sdtc="urn:hl7-org:sdtc">
+	<realmCode code="US"/>
+	<typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/>
+	<!-- CCD template ID-->
+	<templateId root="2.16.840.1.113883.10.20.22.1.2" extension="2015-08-01"/>
+	<templateId root="2.16.840.1.113883.10.20.22.1.2"/>
+	<!-- Globally unique identifier for the document  -->
+	<id extension="TT988" root="2.16.840.1.113883.19.5.99999.1"/>
+	<code code="34133-9" displayName="Summarization of Episode Note" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+	<!-- Title of this document -->
+	<title>Patient Chart Summary</title>
+	<effectiveTime value="201308151030-0800"/>
+	<confidentialityCode code="N" displayName="normal" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality"/>
+	<languageCode code="en-US"/>
+	<setId extension="sTT988" root="2.16.840.1.113883.19.5.99999.19"/>
+	<!-- Version of this document -->
+	<versionNumber value="1"/>
+
+    <!-- should relate to metadata/person.py -->
+	<recordTarget>
+		<patientRole>
+			<id extension="444222222" root="2.16.840.1.113883.4.1"/>
+			<!-- Example Social Security Number using the actual SSN OID. -->
+			<addr use="HP">
+				<!-- HP is "primary home" from codeSystem 2.16.840.1.113883.5.1119 -->
+				<streetAddressLine>2222 Home Street</streetAddressLine>
+				<city>Beaverton</city>
+				<state>OR</state>
+				<postalCode>97867</postalCode>
+				<country>US</country>
+			</addr>
+			<telecom value="tel:+1(555)555-2003" use="HP"/>
+			<patient>
+				<name use="L">
+					<given>Eve</given>
+					<!-- The "SP" is "Spouse" from HL7 Code System EntityNamePartQualifier 2.16.840.1.113883.5.43 -->
+					<family qualifier="SP">Betterhalf</family>
+				</name>
+				<administrativeGenderCode code="F" displayName="Female" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender"/>
+				<!-- Date of birth need only be precise to the day -->
+				<birthTime value="19750501"/>
+				<maritalStatusCode code="M" displayName="Married" codeSystem="2.16.840.1.113883.5.2" codeSystemName="MaritalStatusCode"/>
+				<religiousAffiliationCode code="1013" displayName="Christian (non-Catholic, non-specific)" codeSystem="2.16.840.1.113883.5.1076" codeSystemName="HL7 Religious Affiliation"/>
+				<!-- CDC Race and Ethnicity code set contains the five minimum race and ethnicity 
+					categories defined by OMB Standards -->
+				<raceCode code="2106-3" displayName="White" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+				<!-- The raceCode extension is only used if raceCode is valued -->
+				<sdtc:raceCode code="2076-8" displayName="Hawaiian or Other Pacific Islander" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+				<ethnicGroupCode code="2186-5" displayName="Not Hispanic or Latino" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+			</patient>
+		</patientRole>
+	</recordTarget>
+
+	<documentationOf>
+        
+		<serviceEvent classCode="PCPR">
+			<!-- The effectiveTime reflects the provision of care summarized in the document. 
+				In this scenario, the provision of care summarized is the lifetime for the patient -->
+			<effectiveTime>
+				<low value="19750501"/>
+				<!-- The low value represents when the summarized provision of care began. 
+					In this scenario, the patient's date of birth -->
+				<high value="20130815"/>
+				<!-- The high value represents when the summarized provision of care being ended. 
+					In this scenario, when chart summary was created -->
+			</effectiveTime>
+			<performer typeCode="PRF">
+				<functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88" codeSystemName="ParticipationFunction" displayName="Primary Care Provider">
+					<originalText>Primary Care Provider</originalText>
+				</functionCode>
+				<assignedEntity>
+					<id extension="5555555555" root="2.16.840.1.113883.4.6"/>
+					<code code="207QA0505X" displayName="Adult Medicine" codeSystem="2.16.840.1.113883.6.101" codeSystemName="Healthcare Provider Taxonomy (HIPAA)"/>
+					<addr>
+						<streetAddressLine>1004 Healthcare Drive </streetAddressLine>
+						<city>Portland</city>
+						<state>OR</state>
+						<postalCode>99123</postalCode>
+						<country>US</country>
+					</addr>
+					<telecom use="WP" value="tel:+1(555)555-1004"/>
+					<assignedPerson>
+						<name>
+							<given>Patricia</given>
+							<given qualifier="CL">Patty</given>
+							<family>Primary</family>
+							<suffix qualifier="AC">M.D.</suffix>
+						</name>
+					</assignedPerson>
+					<representedOrganization>
+						<id extension="219BX" root="1.2.16.840.1.113883.4.6"/>
+						<name>The DoctorsTogether Physician Group</name>
+						<telecom use="WP" value="tel: +1(555)555-5000"/>
+						<addr>
+							<streetAddressLine>1004 Health Drive</streetAddressLine>
+							<city>Portland</city>
+							<state>OR</state>
+							<postalCode>99123</postalCode>
+							<country>US</country>
+						</addr>
+					</representedOrganization>
+				</assignedEntity>
+			</performer>
+		</serviceEvent>
+	</documentationOf>
+
+    
+	<!-- ******************************************************** CDA Body ******************************************************** -->
+	<component>
+		<structuredBody>
+			
+		<!-- ******************** IMMUNIZATIONS ********************* -->
+			<component>
+				<section>
+					<!-- *** Immunizations Section (entries required) (V2) *** -->
+					<templateId root="2.16.840.1.113883.10.20.22.2.2.1" extension="2014-06-09"/>
+					<templateId root="2.16.840.1.113883.10.20.22.2.2.1"/>
+					<code code="11369-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of immunizations"/>
+					<title>IMMUNIZATIONS</title>
+					<entry typeCode="DRIV">
+						<substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+							<!-- ** Immunization Activity (V3) ** -->
+							<templateId root="2.16.840.1.113883.10.20.22.4.52" extension="2015-08-01"/>
+							<templateId root="2.16.840.1.113883.10.20.22.4.52"/>
+							<id root="e6f1ba43-c0ed-4b9b-9f12-f435d8ad8f92"/>
+							<text>Influenza, seasonal, IM</text>
+							<statusCode code="completed"/>
+							<effectiveTime value="199911"/>
+							<routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" codeSystemName="National Cancer Institute (NCI) Thesaurus" displayName="Intramuscular injection"/>
+							<doseQuantity value="50" unit="ug"/>
+							<consumable>
+								<manufacturedProduct classCode="MANU">
+									<!-- ** Immunization Medication Information (V2) ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.54" extension="2014-06-09"/>
+									<templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+									<manufacturedMaterial>
+										<code code="90471" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Immunization administration (includes percutaneous, intradermal, subcutaneous, or intramuscular injections); 1 vaccine (single or combination vaccine/toxoid)"/>
+										<lotNumberText>1</lotNumberText>
+									</manufacturedMaterial>
+									<manufacturerOrganization>
+										<name>Health LS - Immuno Inc.</name>
+									</manufacturerOrganization>
+								</manufacturedProduct>
+							</consumable>
+							<performer>
+								<assignedEntity>
+									<id root="2.16.840.1.113883.19.5.9999.456" extension="2981824"/>
+									<addr>
+										<streetAddressLine>1007 Health Drive</streetAddressLine>
+										<city>Portland</city>
+										<state>OR</state>
+										<postalCode>99123</postalCode>
+										<country>US</country>
+									</addr>
+									<telecom use="WP" value="tel: +1(555)555-1030"/>
+									<assignedPerson>
+										<name>
+											<given>Harold</given>
+											<family>Hippocrates</family>
+										</name>
+									</assignedPerson>
+									<representedOrganization>
+										<id root="2.16.840.1.113883.19.5.9999.1394"/>
+										<name>Good Health Clinic</name>
+										<telecom use="WP" value="tel: +1(555)555-1030"/>
+										<addr>
+											<streetAddressLine>1007 Health Drive</streetAddressLine>
+											<city>Portland</city>
+											<state>OR</state>
+											<postalCode>99123</postalCode>
+											<country>US</country>
+										</addr>
+									</representedOrganization>
+								</assignedEntity>
+							</performer>
+							<entryRelationship typeCode="SUBJ" inversionInd="false">
+								<act classCode="ACT" moodCode="INT">
+									<!-- ** Instruction (V2) ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.20" extension="2014-06-09"/>
+									<templateId root="2.16.840.1.113883.10.20.22.4.20"/>
+									<code code="171044003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="immunization education"/>
+									<text>
+										<reference value="#immunSect"/> Possible flu-like symptoms for three days. </text>
+									<statusCode code="completed"/>
+								</act>
+							</entryRelationship>
+						</substanceAdministration>
+					</entry>
+					<entry typeCode="DRIV">
+						<substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="true">
+							<!-- ** Immunization Activity (V3) ** -->
+							<templateId root="2.16.840.1.113883.10.20.22.4.52" extension="2015-08-01"/>
+							<templateId root="2.16.840.1.113883.10.20.22.4.52"/>
+							<id root="e6f1ba43-c0ed-4b9b-9f12-f435d8ad8f92"/>
+							<text>
+								<reference value="#immun2"/>
+							</text>
+							<statusCode code="completed"/>
+							<effectiveTime value="19981215"/>
+							<routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" codeSystemName="National Cancer Institute (NCI) Thesaurus" displayName="Intramuscular injection"/>
+							<doseQuantity value="50" unit="ug"/>
+							<consumable>
+								<manufacturedProduct classCode="MANU">
+									<!-- ** Immunization Medication Information (V2) ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.54" extension="2014-06-09"/>
+									<templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+									<manufacturedMaterial>
+										<code code="88" codeSystem="2.16.840.1.113883.6.59" displayName="Influenza virus vaccine" codeSystemName="CVX">
+											<!-- i.	This code MAY contain zero or more [0..*] translation, which MAY be selected from ValueSet Vaccine Clinical Drug urn:oid:2.16.840.1.113762.1.4.1010.8 DYNAMIC (CONF:1098-31543).
+												ii.	This code MAY contain zero or more [0..*] translation, which MAY be selected from ValueSet Specific Vaccine Clinical Drug urn:oid:2.16.840.1.113762.1.4.1010.10 DYNAMIC (CONF:1098-31881).
+
+											<translation code="1427027" displayName="Influenza A virus vaccine, A-California-7-2009 (H1N1)-like virus 0.03 MG/ML / Influenza A virus vaccine, A-Victoria-361-2011 (H3N2)-like virus 0.03 MG/ML / Influenza B virus vaccine, B-Brisbane-60-2008-like virus 0.03 MG/ML / Influenza B virus vaccine, B-Massachusetts-2-2012-like virus 0.03 MG/ML Injectable Suspension" codeSystemName="RxNORM" codeSystem="2.16.840.1.113883.6.88"/>
+											-->
+										</code>
+										<lotNumberText>1</lotNumberText>
+									</manufacturedMaterial>
+									<manufacturerOrganization>
+										<name>Health LS - Immuno Inc.</name>
+									</manufacturerOrganization>
+								</manufacturedProduct>
+							</consumable>
+							<performer>
+								<assignedEntity>
+									<id root="2.16.840.1.113883.19.5.9999.456" extension="2981824"/>
+									<addr>
+										<streetAddressLine>1007 Health Drive</streetAddressLine>
+										<city>Portland</city>
+										<state>OR</state>
+										<postalCode>99123</postalCode>
+										<country>US</country>
+									</addr>
+									<telecom use="WP" value="tel: +1(555)555-1030"/>
+									<assignedPerson>
+										<name>
+											<given>Harold</given>
+											<family>Hippocrates</family>
+										</name>
+									</assignedPerson>
+									<representedOrganization>
+										<id root="2.16.840.1.113883.19.5.9999.1394"/>
+										<name>Good Health Clinic</name>
+										<telecom use="WP" value="tel: +1(555)555-1030"/>
+										<addr>
+											<streetAddressLine>1007 Health Drive</streetAddressLine>
+											<city>Portland</city>
+											<state>OR</state>
+											<postalCode>99123</postalCode>
+											<country>US</country>
+										</addr>
+									</representedOrganization>
+								</assignedEntity>
+							</performer>
+							<entryRelationship typeCode="SUBJ" inversionInd="true">
+								<act classCode="ACT" moodCode="INT">
+									<!-- ** Instruction (V2) ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.20" extension="2014-06-09"/>
+									<templateId root="2.16.840.1.113883.10.20.22.4.20"/>
+									<code code="171044003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="immunization education"/>
+									<text>
+										<reference value="#immunSect"/> Possible flu-like symptoms for three days. </text>
+									<statusCode code="completed"/>
+								</act>
+							</entryRelationship>
+						</substanceAdministration>
+					</entry>
+					<entry typeCode="DRIV">
+						<substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+							<!-- ** Immunization Activity (V3) ** -->
+							<templateId root="2.16.840.1.113883.10.20.22.4.52" extension="2015-08-01"/>
+							<templateId root="2.16.840.1.113883.10.20.22.4.52"/>
+							<id root="e6f1ba43-c0ed-4b9b-9f12-f435d8ad8f92"/>
+							<text>
+								<reference value="#immun3"/>
+							</text>
+							<statusCode code="completed"/>
+							<effectiveTime value="19981215"/>
+							<routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" codeSystemName="National Cancer Institute (NCI) Thesaurus" displayName="Intramuscular injection"/>
+							<doseQuantity value="50" unit="ug"/>
+							<consumable>
+								<manufacturedProduct classCode="MANU">
+									<!-- ** Immunization Medication Information (V2) ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.54" extension="2014-06-09"/>
+									<templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+									<manufacturedMaterial>
+										<code code="33" codeSystem="2.16.840.1.113883.6.59" displayName="Pneumococcal polysaccharide vaccine" codeSystemName="CVX">
+											<!-- i.	This code MAY contain zero or more [0..*] translation, which MAY be selected from ValueSet Vaccine Clinical Drug urn:oid:2.16.840.1.113762.1.4.1010.8 DYNAMIC (CONF:1098-31543).
+													ii.	This code MAY contain zero or more [0..*] translation, which MAY be selected from ValueSet Specific Vaccine Clinical Drug urn:oid:2.16.840.1.113762.1.4.1010.10 DYNAMIC (CONF:1098-31881).
+
+											<translation code="854981" displayName="Pneumovax 23 (Pneumococcal vaccine polyvalent) Injectable Solution" codeSystemName="RxNORM" codeSystem="2.16.840.1.113883.6.88"/>
+											-->
+										</code>
+										<lotNumberText>1</lotNumberText>
+									</manufacturedMaterial>
+									<manufacturerOrganization>
+										<name>Health LS - Immuno Inc.</name>
+									</manufacturerOrganization>
+								</manufacturedProduct>
+							</consumable>
+							<performer>
+								<assignedEntity>
+									<id root="2.16.840.1.113883.19.5.9999.456" extension="2981824"/>
+									<addr>
+										<streetAddressLine>1007 Health Drive</streetAddressLine>
+										<city>Portland</city>
+										<state>OR</state>
+										<postalCode>99123</postalCode>
+										<country>US</country>
+									</addr>
+									<telecom use="WP" value="tel: +1(555)555-1030"/>
+									<assignedPerson>
+										<name>
+											<given>Harold</given>
+											<family>Hippocrates</family>
+										</name>
+									</assignedPerson>
+									<representedOrganization>
+										<id root="2.16.840.1.113883.19.5.9999.1394"/>
+										<name>Good Health Clinic</name>
+										<telecom use="WP" value="tel: +1(555)555-1030"/>
+										<addr>
+											<streetAddressLine>1007 Health Drive</streetAddressLine>
+											<city>Portland</city>
+											<state>OR</state>
+											<postalCode>99123</postalCode>
+											<country>US</country>
+										</addr>
+									</representedOrganization>
+								</assignedEntity>
+							</performer>
+						</substanceAdministration>
+					</entry>
+					<entry typeCode="DRIV">
+						<substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="true">
+							<!-- ** Immunization Activity (V3) ** -->
+							<templateId root="2.16.840.1.113883.10.20.22.4.52" extension="2015-08-01"/>
+							<templateId root="2.16.840.1.113883.10.20.22.4.52"/>
+							<id root="e6f1ba43-c0ed-4b9b-9f12-f435d8ad8f92"/>
+							<text>
+								<reference value="#immun4"/>
+							</text>
+							<statusCode code="completed"/>
+							<effectiveTime value="19981215"/>
+							<routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" codeSystemName="National Cancer Institute (NCI) Thesaurus" displayName="Intramuscular injection"/>
+							<doseQuantity value="50" unit="ug"/>
+							<consumable>
+								<manufacturedProduct classCode="MANU">
+									<!-- ** Immunization Medication Information (V2) ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.54" extension="2014-06-09"/>
+									<templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+									<manufacturedMaterial>
+										<code code="103" codeSystem="2.16.840.1.113883.6.59" displayName="Tetanus and diphtheria toxoids - preservative free" codeSystemName="CVX">
+											<!-- i.	This code MAY contain zero or more [0..*] translation, which MAY be selected from ValueSet Vaccine Clinical Drug urn:oid:2.16.840.1.113762.1.4.1010.8 DYNAMIC (CONF:1098-31543).
+													ii.	This code MAY contain zero or more [0..*] translation, which MAY be selected from ValueSet Specific Vaccine Clinical Drug urn:oid:2.16.840.1.113762.1.4.1010.10 DYNAMIC (CONF:1098-31881).
+
+											<translation code="1300310" displayName="Daptacel DTaP (Diphtheria and Tetanus Toxoids and Acellular Pertussis Vaccine Adsorbed) Injectable Suspension" codeSystemName="RxNORM" codeSystem="2.16.840.1.113883.6.88"/>
+											-->
+										</code>
+										<lotNumberText>1</lotNumberText>
+									</manufacturedMaterial>
+									<manufacturerOrganization>
+										<name>Health LS - Immuno Inc.</name>
+									</manufacturerOrganization>
+								</manufacturedProduct>
+							</consumable>
+							<performer>
+								<assignedEntity>
+									<id root="2.16.840.1.113883.19.5.9999.456" extension="2981824"/>
+									<addr>
+										<streetAddressLine>1007 Health Drive</streetAddressLine>
+										<city>Portland</city>
+										<state>OR</state>
+										<postalCode>99123</postalCode>
+										<country>US</country>
+									</addr>
+									<telecom use="WP" value="tel: +1(555)555-1030"/>
+									<assignedPerson>
+										<name>
+											<given>Harold</given>
+											<family>Hippocrates</family>
+										</name>
+									</assignedPerson>
+									<representedOrganization>
+										<id root="2.16.840.1.113883.19.5.9999.1394"/>
+										<name>Good Health Clinic</name>
+										<telecom use="WP" value="tel: +1(555)555-1030"/>
+										<addr nullFlavor="UNK"/>
+									</representedOrganization>
+								</assignedEntity>
+							</performer>
+							<entryRelationship typeCode="RSON">
+								<observation classCode="OBS" moodCode="EVN">
+									<!-- ** Immunization Refusal ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.53"/>
+									<id root="2a620155-9d11-439e-92b3-5d9815ff4dd8"/>
+									<code displayName="Patient Objection" code="PATOBJ" codeSystemName="HL7 ActNoImmunizationReason" codeSystem="2.16.840.1.113883.5.8"/>
+									<statusCode code="completed"/>
+								</observation>
+							</entryRelationship>
+						</substanceAdministration>
+					</entry>
+					<entry typeCode="DRIV">
+						<substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+							<!-- ** Immunization Activity (V3) ** -->
+							<templateId root="2.16.840.1.113883.10.20.22.4.52" extension="2015-08-01"/>
+							<templateId root="2.16.840.1.113883.10.20.22.4.52"/>
+							<id root="de10790f-1496-4719-8fe6-f1b87b6219f7"/>
+							<statusCode code="completed"/>
+							<effectiveTime value="20130801"/>
+							<routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" codeSystemName="National Cancer Institute (NCI) Thesaurus" displayName="Intramuscular injection"/>
+							<consumable>
+								<manufacturedProduct classCode="MANU">
+									<!-- ** Immunization Medication Information (V2) ** -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.54" extension="2014-06-09"/>
+									<templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+									<manufacturedMaterial>
+										<code code="45" codeSystem="2.16.840.1.113883.6.59" displayName="Hepatitis B vaccine" codeSystemName="CVX"/>
+										<lotNumberText>1</lotNumberText>
+									</manufacturedMaterial>
+								</manufacturedProduct>
+							</consumable>
+							<performer>
+								<assignedEntity>
+									<id root="2.16.840.1.113883.19.5.9999.456" extension="2981824"/>
+									<addr>
+										<streetAddressLine>1007 Health Drive</streetAddressLine>
+										<city>Portland</city>
+										<state>OR</state>
+										<postalCode>99123</postalCode>
+										<country>US</country>
+									</addr>
+									<telecom use="WP" value="tel: +1(555)555-1030"/>
+									<assignedPerson>
+										<name>
+											<given>Harold</given>
+											<family>Hippocrates</family>
+										</name>
+									</assignedPerson>
+									<representedOrganization>
+										<id root="2.16.840.1.113883.19.5.9999.1394"/>
+										<name>Good Health Clinic</name>
+										<telecom use="WP" value="tel: +1(555)555-1030"/>
+										<addr>
+											<streetAddressLine>1007 Health Drive</streetAddressLine>
+											<city>Portland</city>
+											<state>OR</state>
+											<postalCode>99123</postalCode>
+											<country>US</country>
+										</addr>
+									</representedOrganization>
+								</assignedEntity>
+							</performer>
+							<entryRelationship typeCode="COMP" inversionInd="true">
+								<sequenceNumber value="3"/>
+								<act classCode="ACT" moodCode="EVN">
+									<!-- Substance Administered Act -->
+									<templateId root="2.16.840.1.113883.10.20.22.4.118"/>
+									<id root="3f998a26-1b8b-4cbf-8e91-16fbb7a7080f"/>
+									<code code="416118004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="administration"/>
+									<statusCode code="completed"/>
+								</act>
+							</entryRelationship>
+						</substanceAdministration>
+					</entry>
+				</section>
+			</component>
+		</structuredBody>
+	</component>
+</ClinicalDocument>

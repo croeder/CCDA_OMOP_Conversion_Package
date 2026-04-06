@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Test Case: Care Site Extraction (#548)
+    Scenario:
+    - One encompassingEncounter
+    - Three encounter entries:
+        * Encounter 1: identical to encompassingEncounter (same care site)
+        * Encounter 2: different care site
+        * Encounter 3: different care site
+    Expected Behavior:
+    - The visit configuration correctly extracts care_site_id using both root and extension.
+    - Encounter 1 should map to the same care_site_id as the encompassingEncounter.
+    - Encounters 2 and 3 should be separate care_site_ids.
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:sdtc="urn:hl7-org:sdtc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <id root="2.16.840.1.113883.19.5" extension="test-doc-372"/>
+    <!-- ===== EncompassingEncounter ===== -->
+    <componentOf>
+        <encompassingEncounter>
+        <id root="50905" extension="50840334065" assigningAuthorityName="50905-EncounterId"/>
+        <code code="IMP" codeSystem="2.16.840.1.113883.5.4" codeSystemName="ActCode" displayName="Inpatient">
+            <originalText>Inpatient Admission</originalText>
+            <translation code="101" codeSystem="1.2.840.114350.1.72.1.30" displayName="Inpatient Admission"/>
+        </code>
+        <effectiveTime>
+            <low value="20241001"/>
+            <high value="20241005"/>
+        </effectiveTime>
+        <dischargeDispositionCode nullFlavor="UNK"/>
+
+        <!-- Provider -->
+        <encounterParticipant typeCode="ATND">
+            <assignedEntity classCode="ASSIGNED">
+            <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-001"/>
+            <assignedPerson>
+                <name use="L">
+                <family>Smith</family>
+                <given>John</given>
+                <suffix>MD</suffix>
+                </name>
+            </assignedPerson>
+            </assignedEntity>
+        </encounterParticipant>
+
+        <!-- Care Site -->
+        <location>
+            <healthCareFacility>
+            <id root="50905" extension="1.2.840.114350.1.13.297.2.7.2.686980.509050001"/>
+            <serviceProviderOrganization>
+                <id root="2.16.840.1.113883.3.7732.100" extension="50905" displayable="true"/>
+                <name>General Hospital</name>
+            </serviceProviderOrganization>
+            </healthCareFacility>
+        </location>
+        </encompassingEncounter>
+    </componentOf>
+
+    <!-- ===== Encounter Entries ===== -->
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.22.2.22.1"/>
+                    <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="History of Encounters"/>
+                    <title>Encounters</title>
+                    <text>This section tests multiple encounter types based on the updated config.</text>
+
+                    <!-- Encounter 1: identical to EncompassingEncounter (same care site) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                        <id root="50905" extension="50840334065"/>
+                        <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient"/>
+                        <effectiveTime>
+                            <low value="20241001"/>
+                            <high value="20241005"/>
+                        </effectiveTime>
+                        <performer typeCode="PRF">
+                            <time nullFlavor="UNK"/>
+                            <assignedEntity classCode="ASSIGNED">
+                                <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-001"/>
+                                <addr nullFlavor="UNK"/>
+                                <telecom nullFlavor="UNK"/>
+                                <assignedPerson>
+                                    <name use="L">
+                                        <family>Smith</family>
+                                        <given>John</given>
+                                        <suffix>MD</suffix>
+                                    </name>
+                                </assignedPerson>
+                            </assignedEntity>
+                        </performer>                        
+                        <participant typeCode="LOC">
+                            <participantRole classCode="SDLOC">
+                            <id root="50905" extension="1.2.840.114350.1.13.297.2.7.2.686980.509050001"/>
+                            </participantRole>
+                        </participant>
+                        </encounter>
+                    </entry>
+
+                    <!-- Encounter 2: different care site -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                        <id root="50905" extension="E002"/>
+                        <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient"/>
+                        <effectiveTime>
+                            <low value="20241002"/>
+                            <high value="20241003"/>
+                        </effectiveTime>
+                        <performer typeCode="PRF">
+                            <time nullFlavor="UNK"/>
+                            <assignedEntity classCode="ASSIGNED">
+                                <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-IPD-002"/>
+                                <addr nullFlavor="UNK"/>
+                                <telecom nullFlavor="UNK"/>
+                                <assignedPerson>
+                                    <name use="L">
+                                        <family>Smith</family>
+                                        <given>Adams</given>
+                                        <suffix>Cardiology</suffix>
+                                    </name>
+                                </assignedPerson>
+                            </assignedEntity>
+                        </performer>                                
+                        <participant typeCode="LOC">
+                            <participantRole classCode="SDLOC">
+                            <id root="99999" extension="1.2.840.114350.1.13.297.2.7.2.999999.888880001"/>
+                            </participantRole>
+                        </participant>
+                        </encounter>
+                    </entry>
+        
+                    <!-- Encounter 3: different care site -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                        <id root="50905" extension="E003"/>
+                        <code code="AMB" codeSystem="2.16.840.1.113883.5.4" displayName="Ambulatory"/>
+                        <effectiveTime>
+                            <low value="20241004"/>
+                            <high value="20241004"/>
+                        </effectiveTime>
+                        <performer typeCode="PRF">
+                            <time nullFlavor="UNK"/>
+                            <assignedEntity classCode="ASSIGNED">
+                                <id root="2.16.840.1.113883.3.86.3.1" extension="PROV-OPD-001"/>
+                                <addr nullFlavor="UNK"/>
+                                <telecom nullFlavor="UNK"/>
+                                <assignedPerson>
+                                    <name use="L">
+                                        <family>Smith</family>
+                                        <given>Brown</given>
+                                        <suffix>Outpatient Clinic</suffix>
+                                    </name>
+                                </assignedPerson>
+                            </assignedEntity>
+                        </performer>                                        
+                        <participant typeCode="LOC">
+                            <participantRole classCode="SDLOC">
+                            <id root="88888" extension="1.2.840.114350.1.13.297.2.7.2.999999.888880001"/>
+                            </participantRole>
+                        </participant>
+                        </encounter>
+                    </entry>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>
+

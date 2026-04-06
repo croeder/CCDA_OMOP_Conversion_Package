@@ -8,10 +8,6 @@ import re
 from typeguard import typechecked
 import traceback
 
-try:
-    from foundry.transforms import Dataset
-except Exception:
-    print("no foundry transforms imported")
 from collections import defaultdict
 import lxml
 import tempfile
@@ -21,7 +17,6 @@ from numpy import float32
 from numpy import datetime64
 import numpy as np
 import warnings
-from foundry.transforms import Dataset
 import datetime as DT
 
 import ccda_to_omop.data_driven_parse as DDP
@@ -394,25 +389,6 @@ def build_file_to_domain_dict(meta_config_dict :dict[str, dict[str, dict[str, st
     return file_domain_map
 
 
-@typechecked
-def export_to_foundry(domain_name, df):
-    """
-    exports domains to datasets in Foundry.
-    """
-    
-    if domain_name not in domain_name_to_table_name:
-        logger.error(f"ERROR: not able to map domain:{domain_name} to dataset/table name")
-
-    dataset_name = domain_name_to_table_name[domain_name]
-    logger.info(f"EXPORTING: {dataset_name}")
-    try:
-        export_dataset = Dataset.get(dataset_name)
-        export_dataset.write_table(df)
-        logger.info(f"Successfully exported dataset '{dataset_name}'")
-    except Exception as e:
-        logger.error(f"    ERROR: {e}")
-        error_message = str(e)
-
         
 def combine_datasets(omop_dataset_dict):    
 
@@ -443,12 +419,6 @@ def combine_datasets(omop_dataset_dict):
     return domain_dataset_dict
 
 
-def do_export_datasets(domain_dataset_dict):
-    # export the datasets to Spark/Foundry
-    for domain_id in domain_dataset_dict:
-        logger.info(f"Exporting dataset for domain:{domain_id} dim:{domain_dataset_dict[domain_id].shape}")
-        export_to_foundry(domain_id, domain_dataset_dict[domain_id])      
-
         
 def do_write_csv_files(domain_dataset_dict):
     for domain_id in domain_dataset_dict:
@@ -460,146 +430,6 @@ def do_write_csv_files(domain_dataset_dict):
  
 
         
-# ENTRY POINT for dataset of files
-def process_dataset_of_files(dataset_name, export_datasets, write_csv_flag, limit, skip, parse_config):
-    logger.info("starting dataset:{dataset_name} export:{export_datasets} csv:{write_csv_flag} limit:{limit}")
-    omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
-    
-    ccda_documents = Dataset.get(dataset_name)
-    logger.info(ccda_documents.files())
-    ccda_documents_generator = ccda_documents.files()
-    skip_count=0
-    file_count=0
-    for filegen in ccda_documents_generator:
-        if skip>0 and skip_count < skip:
-            skip_count+=1
-            logger.info(f"skipping  {skip_count} {type(filegen)}")
-        else:
-            if limit == 0 or file_count < limit:
-                filepath = filegen.download()
-            
-                logger.info(f"PROCESSING {file_count} {os.path.basename(filepath)}  {file_count}  export:{export_datasets} csv:{write_csv_flag} limit:{limit}")
-                new_data_dict = process_file(filepath, write_csv_flag, parse_config)
-                
-                for key in new_data_dict:
-                    if key in omop_dataset_dict and omop_dataset_dict[key] is not None:
-                        if new_data_dict[key] is  not None:
-                            omop_dataset_dict[key] = pd.concat([ omop_dataset_dict[key], new_data_dict[key] ])
-                    else:
-                        omop_dataset_dict[key]= new_data_dict[key]
-                    if new_data_dict[key] is not None:
-                        logger.info(f"{filepath} {key} {len(omop_dataset_dict)} {omop_dataset_dict[key].shape} {new_data_dict[key].shape}")
-                    else:
-                        logger.info(f"{filepath} {key} {len(omop_dataset_dict)} None / no data")
-                file_count += 1
-            else:
-                break
-            
-    domain_dataset_dict = combine_datasets(omop_dataset_dict)
-    if write_csv_flag:
-        logger.info(f"Writing CSV for input dataset: {dataset_name}")
-        do_write_csv_files(domain_dataset_dict)
-
-    if export_datasets:
-        logger.info(f"Exporting dataset for {dataset_name}") 
-        do_export_datasets(domain_dataset_dict)
-
-# ENTRY POINT for a single file in a dataset
-def process_file_from_dataset(dataset_name, export_datasets, write_csv_flag, limit, skip, parse_config, file_name):
-    logger.info("starting dataset:{dataset_name} export:{export_datasets} csv:{write_csv_flag} limit:{limit}")
-    omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
-    
-    ccda_documents = Dataset.get(dataset_name)
-    logger.info(ccda_documents.files())
-    ccda_documents_generator = ccda_documents.files()
-    skip_count=0
-    file_count=0
-    for filegen in ccda_documents_generator:
-        if skip>0 and skip_count < skip:
-            skip_count+=1
-            logger.info(f"skipping  {skip_count} {type(filegen)}")
-        else:
-            if limit == 0 or file_count < limit:
-                filename = filegen.path
-                logger.info(f"filename {filename}")
-
-                if filename == file_name:
-                    filepath = filegen.download()
-                
-                    logger.info(f"PROCESSING {file_count} {os.path.basename(filepath)}  {file_count}  export:{export_datasets} csv:{write_csv_flag} limit:{limit}")
-                    new_data_dict = process_file(filepath, write_csv_flag, parse_config)
-                    
-                    for key in new_data_dict:
-                        if key in omop_dataset_dict and omop_dataset_dict[key] is not None:
-                            if new_data_dict[key] is  not None:
-                                omop_dataset_dict[key] = pd.concat([ omop_dataset_dict[key], new_data_dict[key] ])
-                        else:
-                            omop_dataset_dict[key]= new_data_dict[key]
-                        if new_data_dict[key] is not None:
-                            logger.info(f"{filepath} {key} {len(omop_dataset_dict)} {omop_dataset_dict[key].shape} {new_data_dict[key].shape}")
-                        else:
-                            logger.info(f"{filepath} {key} {len(omop_dataset_dict)} None / no data")
-                file_count += 1
-            else:
-                break
-            
-    domain_dataset_dict = combine_datasets(omop_dataset_dict)
-    if write_csv_flag:
-        logger.info(f"Writing CSV for input dataset: {dataset_name}")
-        do_write_csv_files(domain_dataset_dict)
-
-    if export_datasets:
-        logger.info(f"Exporting dataset for {dataset_name}") 
-        do_export_datasets(domain_dataset_dict)
-    
-# ENTRY POINT for dataset of strings
-def process_dataset_of_strings(dataset_name, export_datasets, write_csv_flag):
-    logger.info(f"DATA SET NAME: {dataset_name}")
-    
-    omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
-    ccda_ds = Dataset.get(dataset_name)
-    ccda_df = ccda_ds.read_table(format='pandas')
-    # columns: 'timestamp', 'mspi', 'site', 'status_code', 'response_text',
-    # FOR EACH ROW 
-    # Iterating through ALL rows, not just the first one
-    for index, row in ccda_df.iterrows():
-        # Using columns from the dataframe to preserve identity
-        text = row['response_text'] 
-        original_filename = row.get('response_file_path', f"generated_{index}.xml")
-        
-        doc_regex = re.compile(r'(<ClinicalDocument.*?</ClinicalDocument>)', re.DOTALL)
-        # (don't close the opening tag because it has attributes)
-        # works: doc_regex = re.compile(r'(<section>.*?</section>)', re.DOTALL)
-        
-        # FOR EACH "DOC" in this row (hopefully just 1)
-        for match in doc_regex.finditer(text):
-            match_tuple = match.groups(0)
-            
-            # We use a directory + the original filename 
-            # This ensures VT.map_filename_to_mspi finds the key in the map!
-            with tempfile.TemporaryDirectory() as temp_dir:
-                file_path = os.path.join(temp_dir, os.path.basename(original_filename))
-                
-                with open(file_path, 'w') as f:
-                    f.write(match_tuple[0]) # .encode())
-                
-                new_data_dict = process_file(file_path, write_csv_flag)
-                
-                if new_data_dict:
-                    for key, df in new_data_dict.items():
-                        if df is not None:
-                            if key in omop_dataset_dict and omop_dataset_dict[key] is not None:
-                                omop_dataset_dict[key] = pd.concat([omop_dataset_dict[key], df], ignore_index=True)
-                            else:
-                                omop_dataset_dict[key] = df
-            
-    domain_dataset_dict = combine_datasets(omop_dataset_dict)
-    if write_csv_flag:
-        do_write_csv_files(domain_dataset_dict)
-
-    if export_datasets:
-        do_export_datasets(domain_dataset_dict)
-    
     
 # ENTRY POINT for directory of files
 def process_directory(directory_path, export_datasets, write_csv_flag, parse_config):

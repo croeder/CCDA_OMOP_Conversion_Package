@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Test Case: visit_occurrence and visit_detail FK Reconciliation
+    
+    This test verifies that clinical domain events 
+    get correctly assigned to both:
+    1. visit_occurrence_id (top-level visit, Layer 1)
+    2. visit_detail_id (most specific nested visit, if applicable)
+    
+    Scenario:
+    - Parent Visit (IPD): Jan 1-30, 2024 → visit_occurrence only
+    - Nested Visit 1 (IPD): Jan 5-15, 2024 → visit_detail (Layer 2)
+    - Nested Visit 2 (PROC): Jan 8 10:00-12:00 → visit_detail (Layer 3)
+    
+    Events:
+    1. Measurement on Jan 3 → vo_id=100, vd_id=NULL (in parent only)
+    2. Measurement on Jan 8 11:00 → vo_id=100, vd_id=300 (in PROC, most specific)
+    3. Measurement on Jan 10 → vo_id=100, vd_id=200 (in Nested Visit 1)
+    4. Measurement on Jan 25 → vo_id=100, vd_id=NULL (in parent only)
+    5. Condition Jan 25-27 → vo_id=100, vd_id=NULL (in parent only)
+    6. Procedure on Feb 5 → vo_id=NULL, vd_id=NULL (no matching visit)
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <id root="2.16.840.1.113883.19.5" extension="test-visit-reconciliation-001"/>
+    <recordTarget>
+        <patientRole>
+            <id extension="PATIENT123" root="2.16.840.1.113883.4.1"/>
+            <patient>
+                <name><given>Test</given><family>Patient</family></name>
+                <birthTime value="19800101"/>
+                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1"/>
+                <raceCode code="2106-3" codeSystem="2.16.840.1.113883.6.238" displayName="White"/>
+            </patient>
+        </patientRole>
+    </recordTarget>
+    <componentOf>
+        <encompassingEncounter>
+            <id root="2.16.840.1.113883.19" extension="100"/>
+            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" codeSystemName="ActCode" displayName="Inpatient">
+                <originalText>Inpatient Admission</originalText>
+            </code>
+            <effectiveTime>
+                <low value="20240101000000"/>
+                <high value="20240130235959"/>
+            </effectiveTime>
+        </encompassingEncounter>
+    </componentOf>
+
+    <!-- ENCOUNTERS SECTION -->
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.22.2.22.1"/>
+                    <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="Encounters"/>
+                    <title>Encounters</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr><th>Visit ID</th><th>Type</th><th>Start</th><th>End</th><th>Description</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr ID="enc-100"><td>100</td><td>Inpatient</td><td>2024-01-01</td><td>2024-01-30</td><td>Parent IPD Visit</td></tr>
+                                <tr ID="enc-200"><td>200</td><td>Inpatient</td><td>2024-01-05</td><td>2024-01-15</td><td>Nested IPD Visit</td></tr>
+                                <tr ID="enc-300"><td>300</td><td>Procedure</td><td>2024-01-08 10:00</td><td>2024-01-08 12:00</td><td>Nested Procedure</td></tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    
+                    <!-- Parent Visit: Jan 1-30 (should be visit_occurrence) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.49"/>
+                            <id extension="100" root="2.16.840.1.113883.19"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Encounter"/>
+                            <effectiveTime>
+                                <low value="20240101000000"/>
+                                <high value="20240130235959"/>
+                            </effectiveTime>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <code code="1026-4" codeSystem="2.16.840.1.113883.6.259" displayName="Inpatient Hospital"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+                    
+                    <!-- Nested Visit 1: Jan 5-15 (should be visit_detail Layer 2) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.49"/>
+                            <id extension="200" root="2.16.840.1.113883.19"/>
+                            <code code="IMP" codeSystem="2.16.840.1.113883.5.4" displayName="Inpatient Encounter"/>
+                            <effectiveTime>
+                                <low value="20240105000000"/>
+                                <high value="20240115235959"/>
+                            </effectiveTime>
+                            <participant typeCode="LOC">
+                                <participantRole classCode="SDLOC">
+                                    <code code="1026-4" codeSystem="2.16.840.1.113883.6.259" displayName="Inpatient Hospital"/>
+                                </participantRole>
+                            </participant>
+                        </encounter>
+                    </entry>
+                    
+                    <!-- Nested Visit 2: Jan 8 10:00-12:00 (should be visit_detail Layer 3) -->
+                    <entry>
+                        <encounter classCode="ENC" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.49"/>
+                            <id extension="300" root="2.16.840.1.113883.19"/>
+                            <code code="AMB" codeSystem="2.16.840.1.113883.5.4" displayName="Ambulatory"/>
+                            <effectiveTime>
+                                <low value="20240108100000"/>
+                                <high value="20240108120000"/>
+                            </effectiveTime>
+                        </encounter>
+                    </entry>
+                </section>
+            </component>
+            
+            <!-- VITAL SIGNS / MEASUREMENTS SECTION -->
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.22.2.4.1"/>
+                    <code code="8716-3" codeSystem="2.16.840.1.113883.6.1" displayName="Vital Signs"/>
+                    <title>Vital Signs</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Date</th><th>Measurement</th><th>Expected Visit Assignment</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr ID="meas-1"><td>1</td><td>2024-01-03 09:00</td><td>Systolic blood Pressure</td><td>vo_id=100, vd_id=NULL (in parent only)</td></tr>
+                                <tr ID="meas-2"><td>2</td><td>2024-01-08 11:00</td><td>Temperature</td><td>vo_id=100, vd_id=300 (in PROC, most specific)</td></tr>
+                                <tr ID="meas-3"><td>3</td><td>2024-01-10 14:00</td><td>Heart Rate</td><td>vo_id=100, vd_id=200 (in Nested Visit 1)</td></tr>
+                                <tr ID="meas-4"><td>4</td><td>2024-01-25 16:00</td><td>Weight</td><td>vo_id=100, vd_id=NULL (in parent only)</td></tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    
+                    <!-- Measurement 1: Jan 3 09:00 - in parent visit only -->
+                    <entry>
+                        <organizer classCode="CLUSTER" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.26"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20240103090000"/>
+                            <component>
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+                                    <id extension="1" root="2.16.840.1.113883.19"/>
+                                    <code code="8480-6" codeSystem="2.16.840.1.113883.6.1" displayName="Systolic blood pressure"/>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime value="20240103090000"/>
+                                    <value xsi:type="PQ" value="120" unit="mm[Hg]"/>
+                                </observation>
+                            </component>
+                        </organizer>
+                    </entry>
+                    
+                    <!-- Measurement 2: Jan 8 11:00 - during PROC (most specific) -->
+                    <entry>
+                        <organizer classCode="CLUSTER" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.26"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20240108110000"/>
+                            <component>
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+                                    <id extension="2" root="2.16.840.1.113883.19"/>
+                                    <code code="8310-5" codeSystem="2.16.840.1.113883.6.1" displayName="Body Temperature"/>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime value="20240108110000"/>
+                                    <value xsi:type="PQ" value="98.6" unit="[degF]"/>
+                                </observation>
+                            </component>
+                        </organizer>
+                    </entry>
+                    
+                    <!-- Measurement 3: Jan 10 14:00 - in Nested Visit 1 -->
+                    <entry>
+                        <organizer classCode="CLUSTER" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.26"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20240110140000"/>
+                            <component>
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+                                    <id extension="3" root="2.16.840.1.113883.19"/>
+                                    <code code="8867-4" codeSystem="2.16.840.1.113883.6.1" displayName="Heart Rate"/>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime value="20240110140000"/>
+                                    <value xsi:type="PQ" value="72" unit="{beats}/min"/>
+                                </observation>
+                            </component>
+                        </organizer>
+                    </entry>
+                    
+                    <!-- Measurement 4: Jan 25 16:00 - in parent visit only -->
+                    <entry>
+                        <organizer classCode="CLUSTER" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.26"/>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20240125160000"/>
+                            <component>
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+                                    <id extension="4" root="2.16.840.1.113883.19"/>
+                                    <code code="29463-7" codeSystem="2.16.840.1.113883.6.1" displayName="Body Weight"/>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime value="20240125160000"/>
+                                    <value xsi:type="PQ" value="70" unit="kg"/>
+                                </observation>
+                            </component>
+                        </organizer>
+                    </entry>
+                </section>
+            </component>
+            
+            <!-- PROBLEM LIST / CONDITIONS SECTION -->
+            <component>
+                <section>
+                    <templateId root="2.16.840.1.113883.10.20.22.2.5.1"/>
+                    <code code="11450-4" codeSystem="2.16.840.1.113883.6.1" displayName="Problem List"/>
+                    <title>Problem List</title>
+                    <text>
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Condition</th><th>Start</th><th>End</th><th>Expected Visit Assignment</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr ID="cond-1"><td>1</td><td>Hypertension</td><td>2024-01-25</td><td>2024-01-27</td><td>vo_id=100, vd_id=NULL (in parent only)</td></tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    
+                    <!-- Condition: Jan 25-27 - in parent visit only (after nested visits ended) -->
+                    <entry>
+                        <act classCode="ACT" moodCode="EVN">
+                            <templateId root="2.16.840.1.113883.10.20.22.4.3"/>
+                            <id extension="1" root="2.16.840.1.113883.19"/>
+                            <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+                            <statusCode code="active"/>
+                            <effectiveTime>
+                                <low value="20240125"/>
+                                <high value="20240127"/>
+                            </effectiveTime>
+                            <entryRelationship typeCode="SUBJ">
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <templateId root="2.16.840.1.113883.10.20.22.4.4"/>
+                                    <id extension="1" root="2.16.840.1.113883.19"/>
+                                    <code code="55607006" codeSystem="2.16.840.1.113883.6.96" displayName="Problem"/>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime>
+                                        <low value="20240125"/>
+                                        <high value="20240127"/>
+                                    </effectiveTime>
+                                    <value xsi:type="CD" code="38341003" codeSystem="2.16.840.1.113883.6.96" displayName="Hypertension"/>
+                                </observation>
+                            </entryRelationship>
+                        </act>
+                    </entry>
+                </section>
+            </component>
+              
+            <!-- Procedure Section -->
+            <component>
+                <section>
+                  <templateId root="2.16.840.1.113883.10.20.22.2.7.1"/>
+                  <code code="47519-4" codeSystem="2.16.840.1.113883.6.1" displayName="Procedure"/>
+                  <title>Procedures</title>
+        
+                    <!-- Procedure: Feb 5 - outside all visits -->
+                    <entry>
+                    <procedure classCode="PROC" moodCode="EVN">
+                      <id root="1.2.3.4.5.6.7.8.9.PROC" extension="PROC-002"/>
+                      <statusCode code="completed"/>
+                      <code code="80146002" codeSystem="2.16.840.1.113883.6.96" displayName="Appendectomy"/>
+                      <effectiveTime value="20240205100000"/>
+                    </procedure>
+                  </entry>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>

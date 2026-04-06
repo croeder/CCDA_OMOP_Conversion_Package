@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Case 07: Tests a non-mappable direct code, forcing a fallback to a good sdtc sibling.
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:sdtc="urn:hl7-org:sdtc">
+    <recordTarget>
+        <patientRole>
+            <id extension="test-race-07" root="2.16.840.1.113883.4.1"/>
+            <patient>
+                <birthTime value="19800107"/>
+                <raceCode code="bad-code" codeSystem="2.16.840.1.113883.6.238"/>
+                <sdtc:raceCode code="1002-5" codeSystem="2.16.840.1.113883.6.238"/>
+            </patient>
+        </patientRole>
+    </recordTarget>
+</ClinicalDocument>

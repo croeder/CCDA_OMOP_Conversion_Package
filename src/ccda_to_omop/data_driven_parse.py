@@ -82,6 +82,7 @@ from typeguard import typechecked
 from ccda_to_omop import value_transformations as VT
 from ccda_to_omop.metadata import get_meta_dict
 from ccda_to_omop import ddl as DDL
+from ccda_to_omop.util import create_codemap_dict_from_csv
 
 from ccda_to_omop.util import cast_to_date
 from ccda_to_omop.util import cast_to_datetime
@@ -1027,12 +1028,13 @@ def process_file(filepath :str, print_output: bool, parse_config :str):
     print(f"    {filepath} reconcile_visit()() ")
     VR.assign_visit_occurrence_ids_to_events(omop_data)
     VR.assign_visit_detail_ids_to_events(omop_data)
-    if print_output and (omop_data is not None or len(omop_data) < 1):
-        print_omop_structure(omop_data, metadata)
-    else:
-        logger.error(f"FILE no data from {filepath} (or printing turned off)")
+#    if print_output and (omop_data is not None or len(omop_data) < 1):
+#        print_omop_structure(omop_data, metadata)
+#    else:
+#        logger.error(f"FILE no data from {filepath} (or printing turned off)")
 
     print(f"done PROCESSING {filepath} ")
+    return omop_data
 
 
 # for argparse
@@ -1060,13 +1062,23 @@ def main() :
             help="print out the output values, -p False to have it not print")
     args = parser.parse_args()
 
+    home="/Users/croeder/git/CCDA/tislab-clad/CCDA_OMOP_Conversion_Package"
+    codemap_dict = create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+    VT.set_codemap_dict(codemap_dict)
+
     if args.filename is not None:
         process_file(args.filename, args.print_output)
     elif args.directory is not None:
         only_files = [f for f in os.listdir(args.directory) if os.path.isfile(os.path.join(args.directory, f))]
         for file in (only_files):
             if file.endswith(".xml"):
-            	process_file(os.path.join(args.directory, file), args.print_output)
+                if False:  # placeholder for doing just one config or not
+                	print("n/a")
+                else:
+                    meta_dict = get_meta_dict()
+                    for key in meta_dict.keys():
+                        omop_dict = process_file(os.path.join(args.directory, file), args.print_output, key)
+                        print(f"{key} : {omop_dict}")
     else:
         logger.error("Did args parse let us  down? Have neither a file, nor a directory.")
 

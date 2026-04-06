@@ -1,8 +1,6 @@
 import unittest
 from ccda_to_omop.domain_dataframe_column_types import domain_dataframe_column_required
 
-# from ccda_to_omop.layer_datasets import NULL_ALLOWED_COLUMNS
-# import not working, so code copied
 NON_NULLABLE_COLUMNS = {
     table: [
         field

@@ -5,7 +5,7 @@ err_count=0
 file_count=0
 missing_count=0
 short_correct_count=0
-for file in $(ls prototype_2/correct_output/*.csv  | grep -v domain_)
+for file in $(ls resources/correct_output/*.csv  | grep -v domain_)
 do
     base_file=$(basename $file)
     compare_file="logs/compare_${base_file}.log"

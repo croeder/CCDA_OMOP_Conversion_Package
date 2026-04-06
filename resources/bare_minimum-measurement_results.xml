@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Bare Minimum Results
+    This should produce rows for Person, Visit and Observation or Measurement. No care_site, no provider. It does support Location for the person.
+    Chris Roeder
+    Oct 29, 2025
+ -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:voc="urn:hl7-org:v3/voc" xmlns:sdtc="urn:hl7-org:sdtc">
+	<realmCode code="US"/>
+	<typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3"/>
+	<!-- CCD template ID-->
+	<templateId root="2.16.840.1.113883.10.20.22.1.2" extension="2015-08-01"/>
+	<templateId root="2.16.840.1.113883.10.20.22.1.2"/>
+	<!-- Globally unique identifier for the document  -->
+	<id extension="TT988" root="2.16.840.1.113883.19.5.99999.1"/>
+	<code code="34133-9" displayName="Summarization of Episode Note" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+	<!-- Title of this document -->
+	<title>Patient Chart Summary</title>
+	<effectiveTime value="201308151030-0800"/>
+	<confidentialityCode code="N" displayName="normal" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality"/>
+	<languageCode code="en-US"/>
+	<setId extension="sTT988" root="2.16.840.1.113883.19.5.99999.19"/>
+	<!-- Version of this document -->
+	<versionNumber value="1"/>
+
+    <!-- should relate to metadata/person.py -->
+	<recordTarget>
+		<patientRole>
+			<id extension="444222222" root="2.16.840.1.113883.4.1"/>
+			<!-- Example Social Security Number using the actual SSN OID. -->
+			<addr use="HP">
+				<!-- HP is "primary home" from codeSystem 2.16.840.1.113883.5.1119 -->
+				<streetAddressLine>2222 Home Street</streetAddressLine>
+				<city>Beaverton</city>
+				<state>OR</state>
+				<postalCode>97867</postalCode>
+				<country>US</country>
+			</addr>
+			<telecom value="tel:+1(555)555-2003" use="HP"/>
+			<patient>
+				<name use="L">
+					<given>Eve</given>
+					<!-- The "SP" is "Spouse" from HL7 Code System EntityNamePartQualifier 2.16.840.1.113883.5.43 -->
+					<family qualifier="SP">Betterhalf</family>
+				</name>
+				<administrativeGenderCode code="F" displayName="Female" codeSystem="2.16.840.1.113883.5.1" codeSystemName="AdministrativeGender"/>
+				<!-- Date of birth need only be precise to the day -->
+				<birthTime value="19750501"/>
+				<maritalStatusCode code="M" displayName="Married" codeSystem="2.16.840.1.113883.5.2" codeSystemName="MaritalStatusCode"/>
+				<religiousAffiliationCode code="1013" displayName="Christian (non-Catholic, non-specific)" codeSystem="2.16.840.1.113883.5.1076" codeSystemName="HL7 Religious Affiliation"/>
+				<!-- CDC Race and Ethnicity code set contains the five minimum race and ethnicity 
+					categories defined by OMB Standards -->
+				<raceCode code="2106-3" displayName="White" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+				<!-- The raceCode extension is only used if raceCode is valued -->
+				<sdtc:raceCode code="2076-8" displayName="Hawaiian or Other Pacific Islander" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+				<ethnicGroupCode code="2186-5" displayName="Not Hispanic or Latino" codeSystem="2.16.840.1.113883.6.238" codeSystemName="Race &amp; Ethnicity - CDC"/>
+			</patient>
+		</patientRole>
+	</recordTarget>
+
+	<documentationOf>
+        
+		<serviceEvent classCode="PCPR">
+			<!-- The effectiveTime reflects the provision of care summarized in the document. 
+				In this scenario, the provision of care summarized is the lifetime for the patient -->
+			<effectiveTime>
+				<low value="19750501"/>
+				<!-- The low value represents when the summarized provision of care began. 
+					In this scenario, the patient's date of birth -->
+				<high value="20130815"/>
+				<!-- The high value represents when the summarized provision of care being ended. 
+					In this scenario, when chart summary was created -->
+			</effectiveTime>
+			<performer typeCode="PRF">
+				<functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88" codeSystemName="ParticipationFunction" displayName="Primary Care Provider">
+					<originalText>Primary Care Provider</originalText>
+				</functionCode>
+				<assignedEntity>
+					<id extension="5555555555" root="2.16.840.1.113883.4.6"/>
+					<code code="207QA0505X" displayName="Adult Medicine" codeSystem="2.16.840.1.113883.6.101" codeSystemName="Healthcare Provider Taxonomy (HIPAA)"/>
+					<addr>
+						<streetAddressLine>1004 Healthcare Drive </streetAddressLine>
+						<city>Portland</city>
+						<state>OR</state>
+						<postalCode>99123</postalCode>
+						<country>US</country>
+					</addr>
+					<telecom use="WP" value="tel:+1(555)555-1004"/>
+					<assignedPerson>
+						<name>
+							<given>Patricia</given>
+							<given qualifier="CL">Patty</given>
+							<family>Primary</family>
+							<suffix qualifier="AC">M.D.</suffix>
+						</name>
+					</assignedPerson>
+					<representedOrganization>
+						<id extension="219BX" root="1.2.16.840.1.113883.4.6"/>
+						<name>The DoctorsTogether Physician Group</name>
+						<telecom use="WP" value="tel: +1(555)555-5000"/>
+						<addr>
+							<streetAddressLine>1004 Health Drive</streetAddressLine>
+							<city>Portland</city>
+							<state>OR</state>
+							<postalCode>99123</postalCode>
+							<country>US</country>
+						</addr>
+					</representedOrganization>
+				</assignedEntity>
+			</performer>
+		</serviceEvent>
+	</documentationOf>
+
+    
+	<!-- ******************************************************** CDA Body ******************************************************** -->
+	<component>
+		<structuredBody>
+			
+			<!-- ************************ ENCOUNTERS *********************** -->
+            <!-- metadata/visit.py -->
+			<component>
+				<section>
+					<!-- *** Encounters section (entries required) (V3) *** -->
+					<templateId root="2.16.840.1.113883.10.20.22.2.22.1" extension="2015-08-01"/>
+					<templateId root="2.16.840.1.113883.10.20.22.2.22.1"/>
+					<code code="46240-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of encounters"/>
+					<title>ENCOUNTERS</title>
+
+					<entry typeCode="DRIV">
+						<encounter classCode="ENC" moodCode="EVN">
+							<!-- ** Encounter Activity (V3) ** -->
+							<templateId root="2.16.840.1.113883.10.20.22.4.49" extension="2015-08-01"/>
+							<templateId root="2.16.840.1.113883.10.20.22.4.49"/>
+							<id root="2a620155-9d11-439e-92b3-5d9815ff4de8"/>
+							<code code="99213" displayName="Office outpatient visit 15 minutes" codeSystemName="CPT-4" codeSystem="2.16.840.1.113883.6.12">
+							</code>
+							<effectiveTime value="201209271300+0500"/>
+                            
+							<performer>
+								<assignedEntity>
+									<!-- Provider NPI "333444555" -->
+									<id extension="333444555" root="2.16.840.1.113883.4.6"/>
+									<code code="59058001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="General Physician"/>
+								</assignedEntity>
+							</performer>
+                            
+						</encounter>
+					</entry>
+				</section>
+			</component>
+
+
+            	<!-- ******************** RESULTS ************************ -->
+			<component>
+				<section>
+					<!-- Results Section (entries required) (V3) -->
+					<templateId root="2.16.840.1.113883.10.20.22.2.3.1" extension="2015-08-01"/>
+					<templateId root="2.16.840.1.113883.10.20.22.2.3.1"/>
+					<code code= "33051-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="SNOMED CT" displayName="Erythrocytes [Presence] in Urine"/>
+					<title>RESULTS</title>
+					<entry typeCode="DRIV">
+						<organizer classCode="BATTERY" moodCode="EVN">
+							<!-- ** Result organizer (V3) ** -->
+							<templateId root="2.16.840.1.113883.10.20.22.4.1" extension="2015-08-01"/>
+							<templateId root="2.16.840.1.113883.10.20.22.4.1"/>
+							<id root="7d5a02b0-67a4-11db-bd13-0800200c9a66"/>
+							<code code="57021-8" displayName="CBC W Auto Differential panel in Blood" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+							<statusCode code="completed"/>
+							<effectiveTime>
+								<low value="200803190830-0800"/>
+								<high value="200803190830-0800"/>
+							</effectiveTime>
+
+                            
+							<component>
+								<procedure classCode="OBS" moodCode="EVN">
+									<id root="107c2dc0-67a5-11db-bd13-0800200c9a66"/>
+									<code code= "33051-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="SNOMED CT" displayName="Erythrocytes [Presence] in Urine"/>
+									<statusCode code="completed"/>
+									<effectiveTime value="200803190830-0800"/>
+									<value xsi:type="PQ" value="13.2" unit="g/dL"/>
+									<interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83"/>
+								</procedure>
+							</component>
+						
+						</organizer>
+					</entry>
+				</section>
+            </component>
+
+		</structuredBody>
+	</component>
+</ClinicalDocument>

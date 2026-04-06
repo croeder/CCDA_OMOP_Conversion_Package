@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<!--
+    Case 10: Tests a nullFlavor falling back to a non-mappable translation.
+-->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:sdtc="urn:hl7-org:sdtc">
+    <recordTarget>
+        <patientRole>
+            <id extension="test-race-10" root="2.16.840.1.113883.4.1"/>
+            <patient>
+                <birthTime value="19800110"/>
+                <raceCode nullFlavor="OTH"/>
+                <sdtc:raceCode code="another-bad-code" codeSystem="2.16.840.1.113883.6.238"/>
+            </patient>
+        </patientRole>
+    </recordTarget>
+</ClinicalDocument>

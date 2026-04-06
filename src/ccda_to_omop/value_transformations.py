@@ -425,4 +425,3 @@ def transform_datetime_high(args) -> datetime.datetime:
         return cast_to_datetime(f"{val_str}T23:59:59.000Z")
 
     return cast_to_datetime(val_str)
-    

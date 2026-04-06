@@ -3,6 +3,7 @@ from collections import defaultdict
 import logging 
 from typeguard import typechecked
 from dateutil.parser import parse
+import csv
 import datetime
 
 logging.basicConfig(
@@ -35,7 +36,32 @@ logger.setLevel(logging.ERROR)
     }
 """
 
+def create_codemap_dict_from_csv(map_csv_filepath):
+    """ creates a dictionary (code_system, code) --> {source_concept_id: n, target_domain_id: m, target_concept_id: o}
+        from a CSV file:
+           OID, code, codeSystem, target_id, target_domain
+    """
+    concept_map = {}
+    with open(map_csv_filepath) as f:                                                                                                                              
+        reader = csv.reader(f)
+        next(reader)  # skip header                                                                                                                        
+        for row in reader:
+            if len(row) < 5 or not row[0].strip():                                                                                                         
+                continue                                                                                                                                   
+            oid, code, _, concept_id, domain = [r.strip() for r in row[:5]]
+            concept_map[(oid, code)] = {                                                                                                                   
+                'source_concept_id': int(concept_id),
+                'target_concept_id': int(concept_id),                                                                                                      
+                'target_domain_id': domain,
+            }                                                                                                                                              
+    return concept_map
+
+
 def create_codemap_dict(codemap_df):
+    """ creates a dictionary (code_system, code) --> {source_concept_id: n, target_domain_id: m, target_concept_id: o}
+        from a spark dataframe
+    """
+
     logger.info(f"w xwalk create_codemap_dict {type(codemap_df)} {len(codemap_df)}")
     codemap_dict = defaultdict(list)
     for _, row in codemap_df.iterrows():
