@@ -518,7 +518,9 @@ def do_derived_fields(output_dict: OMOPRecord,
                               f"string: {type(field_details_dict['FUNCTION'])}"))
                 output_dict[field_tag] = None
             except Exception as e:
-                logger.warning(f"DERIVED exception: {e}")
+                error_fields_set.add(field_tag)
+                logger.warning(f"DERIVED unexpected exception: {e}")
+                logger.warning(traceback.format_exc())
                 output_dict[field_tag] = None
 
 
@@ -541,9 +543,9 @@ def do_derived2_fields(output_dict :dict[str, list | None | str | float | int | 
                 function_value = field_details_dict['FUNCTION'](field_details_dict, output_dict)
                 output_dict[field_tag] = function_value
             except Exception as e:
-                logger.warning(f"Error in do_derived2_fields {config_name} {field_tag}")
-                #print(f"Error in do_derived2_fields {config_name} {field_tag}")
-                #print(traceback.format_exc(e))
+                output_dict[field_tag] = None
+                logger.warning(f"Error in do_derived2_fields {config_name} {field_tag}: {e}")
+                logger.warning(traceback.format_exc())
 
 
 
