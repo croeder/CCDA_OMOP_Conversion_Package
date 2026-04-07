@@ -169,7 +169,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
         if field_details_dict['attribute'] == "#text":
             try:
                 attribute_value = ''.join(field_element[0].itertext())
-            except Exception as e:
+            except (TypeError, AttributeError) as e:
+                attribute_value = None
                 logger.warning((f"no text elemeent for field element {field_element} "
                         f"for {config_name}/{field_tag} root:{root_path} "
                         f" dict: {field_element[0].attrib} EXCEPTION:{e}"))
