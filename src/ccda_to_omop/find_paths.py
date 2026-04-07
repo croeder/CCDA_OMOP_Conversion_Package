@@ -60,7 +60,7 @@ print_order_flag = False
 print_derived_to_base = True
 
 
-def strip_detail(input_string):
+def strip_detail(input_string: str) -> str:
     """ strips namespaces and conditionals out of an XPath
     """
     interim =  re.sub(r'hl7:', '', input_string)
@@ -68,7 +68,7 @@ def strip_detail(input_string):
     return interim
 
 
-def get_base_elements(metadata):
+def get_base_elements(metadata: dict) -> dict:
     """
     Fetches keys of elements that are fetched from XML.
     The types of these keys are FIELD, PK.
@@ -117,7 +117,7 @@ def get_base_elements(metadata):
     return base_field_dict
 
 
-def get_derived_fields(metadata):
+def get_derived_fields(metadata: dict) -> dict:
     """
     Fetches functions and arguments (field names) of elements that are 
     derived from base fields.
@@ -215,7 +215,7 @@ def get_derived_fields(metadata):
     return derived_field_dict
 
 
-def get_hash_fields(metadata, derived_field_dict):
+def get_hash_fields(metadata: dict, derived_field_dict: dict) -> dict:
     """
     	'measurement_id_hash': {
     	    'config_type': 'HASH',
@@ -292,7 +292,7 @@ def get_hash_fields(metadata, derived_field_dict):
     return hash_field_dict
 
 
-def print_data_hash(data_hash):
+def print_data_hash(data_hash: dict) -> None:
     for config_key in sorted(data_hash):
         for field_key in sorted(data_hash[config_key]):
             thing =  data_hash[config_key][field_key]
@@ -311,7 +311,7 @@ def print_data_hash(data_hash):
                                 print(f"  arg:{arg} value:{thing['values-dict'][arg]}")
 
 
-def merge_second_level_dict(dest_dict, additional_dict):    
+def merge_second_level_dict(dest_dict: dict, additional_dict: dict) -> None:
     for key in additional_dict:
         if key in dest_dict:
             dest_dict[key] = dest_dict[key] | additional_dict[key]
@@ -319,7 +319,7 @@ def merge_second_level_dict(dest_dict, additional_dict):
             dest_dict[key] = additional_dict[key]
     
 
-def main():
+def main() -> None:
     # just use the imported metadata from test. Don't need this:
     #metadata = ccda_to_omop.metadata.get_meta_dict()
       # config_key --> field_key --> dict (described in data_driven_parse.py)
