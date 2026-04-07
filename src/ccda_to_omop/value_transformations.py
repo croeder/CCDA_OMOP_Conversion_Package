@@ -57,40 +57,40 @@ def reset_context():
     _context.__init__()
 
 
-def set_codemap_dict(map):
+def set_codemap_dict(map: dict | None) -> None:
     if map is not None:
         logger.info(f"set_codemap_dict {len(map)}")
     else:
         logger.info("set_codemap_dict None map")
     _context.codemap_dict = map
 
-def get_codemap_dict():
+def get_codemap_dict() -> dict | None:
     return _context.codemap_dict
 
 
-def set_valueset_dict(map):
+def set_valueset_dict(map: dict | None) -> None:
     if map is not None:
         logger.info(f"set_valueset_dict {len(map)}")
     else:
         logger.info("set_valueset_dict None map")
     _context.valueset_dict = map
 
-def get_valueset_dict():
+def get_valueset_dict() -> dict | None:
     return _context.valueset_dict
 
 
-def set_visitmap_dict(map):
+def set_visitmap_dict(map: dict | None) -> None:
     if map is not None:
         logger.info(f"set_visitmap_dict {len(map)}")
     else:
         logger.info("set_visitmap_dict None map")
     _context.visitmap_dict = map
 
-def get_visitmap_dict():
+def get_visitmap_dict() -> dict | None:
     return _context.visitmap_dict
 
 
-def cast_as_string(args_dict):
+def cast_as_string(args_dict: dict[str, any]) -> str | None:
     string_value = args_dict['input']
     type_value = args_dict['type']
     if type_value == 'ST':
@@ -99,7 +99,7 @@ def cast_as_string(args_dict):
         return None
 
 
-def cast_as_number(args_dict):
+def cast_as_number(args_dict: dict[str, any]) -> int | None:
     string_value = args_dict['input']
     type_value = args_dict['type']
     if type_value == 'PQ':
@@ -108,7 +108,7 @@ def cast_as_number(args_dict):
         return None
 
 
-def cast_as_concept_id(args_dict):
+def cast_as_concept_id(args_dict: dict[str, any]) -> int32 | None:
     string_value = args_dict['input']
     type_value = args_dict['type']
     if type_value == 'CD' or type_value == 'CE':
@@ -125,10 +125,10 @@ def cast_as_concept_id(args_dict):
     functions: codemap_xwalk...
 """
 
-def codemap_xwalk_concept_id(args_dict):
+def codemap_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
     """ expects: vocabulary_oid, concept_code
         returns: concept_id AS INTEGER (because that's what's in the table), not necessarily standard
-                 If NMC is disallowed, it will return None instead of 0. 
+                 If NMC is disallowed, it will return None instead of 0.
                  Control this via set_allow_no_macthing_concept() in package_constant_access.
         throws/raises when codemap_xwalk is None
     """
@@ -144,7 +144,7 @@ def codemap_xwalk_concept_id(args_dict):
         return None
 
 
-def codemap_xwalk_domain_id(args_dict):
+def codemap_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
     """ expects: vocabulary_oid, concept_code
         returns: always returns domain_id
         throws/raises when codemap_xwalk is None
@@ -158,7 +158,7 @@ def codemap_xwalk_domain_id(args_dict):
         return None
 
 
-def codemap_xwalk_source_concept_id(args_dict):
+def codemap_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
     """ expects: vocabulary_oid, concept_code
         returns: unmapped concept_id AS INTEGER (because that's what's in the table), not necessarily standard
         throws/raises when codemap_xwalk is None
@@ -212,13 +212,13 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
 
 ############################################################################
 
-def visit_xwalk_concept_id(args_dict):
+def visit_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
     return codemap_xwalk_concept_id(args_dict)
 
-def visit_xwalk_domain_id(args_dict):
+def visit_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
     return codemap_xwalk_domain_id(args_dict)
 
-def visit_xwalk_source_concept_id(args_dict):
+def visit_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
     return codemap_xwalk_source_concept_id(args_dict)
 
 def _visit_xwalk(vocabulary_oid, concept_code, column_name, default):
@@ -226,13 +226,13 @@ def _visit_xwalk(vocabulary_oid, concept_code, column_name, default):
 
 ############################################################################
 
-def valueset_xwalk_concept_id(args_dict):
+def valueset_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
     return codemap_xwalk_concept_id(args_dict)
 
-def valueset_xwalk_domain_id(args_dict):
+def valueset_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
     return codemap_xwalk_domain_id(args_dict)
-    
-def valueset_xwalk_source_concept_id(args_dict):
+
+def valueset_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
     return codemap_xwalk_source_concept_id(args_dict)
 
 def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default=None):
@@ -268,7 +268,7 @@ def extract_year_of_birth(args_dict : dict[str, any]) -> int32:
     return None
 
 
-def concat_field_list_names(args_dict, data_dict):
+def concat_field_list_names(args_dict: dict[str, any], data_dict: dict[str, any]) -> str:
     '''
         A DERIVED2 style function.
         Looks for a argument with the name of 'args' under the 'argument_list'
@@ -292,7 +292,7 @@ def concat_field_list_names(args_dict, data_dict):
     return  "|".join(args_dict['argument_list']['key_list'])
 
 
-def concat_field_list_values(args_dict, data_dict):
+def concat_field_list_values(args_dict: dict[str, any], data_dict: dict[str, any]) -> str:
     '''
         A DERIVED2 style function.
         Looks for a argument with the name of 'args' under the 'argument_list'
@@ -317,7 +317,7 @@ def concat_field_list_values(args_dict, data_dict):
 
 
 
-def concat_fields(args_dict):
+def concat_fields(args_dict: dict[str, any]) -> str:
     """
       A DERIVED style function.
       input key "delimiter" is a character to use to separate the fields
@@ -342,14 +342,14 @@ def concat_fields(args_dict):
     
 ####################################################################################################
 
-def set_partner_map(m):
+def set_partner_map(m: dict | None) -> None:
     """Initializes the partner map on the executor."""
     _context.partner_map = m
 
-def get_partner_map():
+def get_partner_map() -> dict | None:
     return _context.partner_map
 
-def get_data_partner_id(args_dict):
+def get_data_partner_id(args_dict: dict[str, any]) -> int32:
     """
     Returns Data Partner ID. Defaults to 0 if filename is not in map.
     Strictly returns an integer per the component contract.
@@ -363,14 +363,14 @@ def get_data_partner_id(args_dict):
     return int32(mapping.get(fname, 0))
 
 
-def set_mspi_map(m):
+def set_mspi_map(m: dict | None) -> None:
     """Initializes the MSPI (person_id) map on the executor."""
     _context.mspi_lookup_map = m
 
-def get_mspi_map():
+def get_mspi_map() -> dict | None:
     return _context.mspi_lookup_map
 
-def map_filename_to_mspi(args_dict):
+def map_filename_to_mspi(args_dict: dict[str, any]) -> int:
     """
     Returns MSPI (person_id). Defaults to 0 if filename is not in map.
     Raises if the MSPI map has not been initialized.
