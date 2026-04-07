@@ -108,7 +108,7 @@ ns = {
 }
 
 
-#@typechecked
+@typechecked
 def create_hash(input_string) -> int64 | None:
     """ matches common SQL code when that code also truncates to 13 characters
         SQL: cast(conv(substr(md5(test_string), 1, 15), 16, 10) as bigint) as hashed_value
@@ -190,10 +190,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                     attribute_value = cast_to_date(attribute_value)
                     if attribute_value is not None and pd.isna(attribute_value):
                         attribute_value = None
-                        #attribute_value = datetime.date.fromisoformat("1970-01-01")
                 except (ValueError, TypeError) as e:
                     attribute_value = None
-                    #attribute_value = datetime.date.fromisoformat("1970-01-01")
                     logger.warning(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}: {e}")
 
             elif field_details_dict['data_type'] == 'DATETIME':
@@ -201,10 +199,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                     attribute_value = cast_to_datetime(attribute_value)
                     if attribute_value is not None and pd.isna(attribute_value):
                         attribute_value = None
-                        #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                 except (ValueError, TypeError) as e:
                     attribute_value = None
-                    #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                     logger.warning(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}: {e}")
 
             elif field_details_dict['data_type'] == 'DATETIME_LOW':
@@ -273,8 +269,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             if field_details_dict['data_type'] == 'DATETIME' or field_details_dict['data_type'] == 'DATE':
                 return None
             else:
-                #raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(1)! {config_name} {field_tag}")
-                wth = f"No NaNs or NaTs allowed(1)! {config_name} {field_tag}" 
+                wth = f"No NaNs or NaTs allowed(1)! {config_name} {field_tag}"
                 raise Exception(wth)
                 return None
     else:
@@ -501,13 +496,11 @@ def do_derived_fields(output_dict: OMOPRecord,
                     if final_value not in pk_dict[field_tag]:
                         pk_dict[field_tag].append(final_value)
             except KeyError as e:
-                #print(traceback.format_exc(e))
                 error_fields_set.add(field_tag)
                 logger.warning(f"DERIVED key error on: {e}")
                 logger.warning(f"DERIVED KeyError {field_tag} function can't find key it expects in {args_dict}")
                 output_dict[field_tag] = None
             except TypeError as e:
-                #print(traceback.format_exc(e))
                 error_fields_set.add(field_tag)
                 logger.warning(f"DERIVED type error exception: {e}")
                 logger.warning((f"DERIVED TypeError {field_tag} possibly calling something that isn't a function"
@@ -535,7 +528,6 @@ def do_derived2_fields(output_dict :dict[str, list | None | str | float | int | 
 
 
     for (field_tag, field_details_dict) in config_dict.items():
-        #output_dict[field_tag] = f"XX:\"{field_tag}\   \"{field_details_dict}\" "
         if field_details_dict['config_type'] == 'DERIVED2':
             output_dict[field_tag] = None
             try:
@@ -871,7 +863,6 @@ def parse_config_from_xml_file(tree, config_name,
     root_path = config_dict['root']['element']
     logger.info((f"CONFIG >>  config:{config_name} root:{config_dict['root']['element']}"
                  f"   ROOT path:{root_path}"))
-    #root_element_list = tree.findall(config_dict['root']['element'], ns)
     root_element_list = []
     try:
         root_element_list = tree.xpath(config_dict['root']['element'], namespaces=ns)
@@ -896,8 +887,6 @@ def parse_config_from_xml_file(tree, config_name,
     if len(error_fields_set) > 0:
         logger.error(f"DOMAIN Fields with errors in config {config_name} {error_fields_set}")
 
-    # distinct: gack, Pandas munges the types
-    #output_list=pd.DataFrame(output_list).drop_duplicates().to_dict('records')
     output_list = make_distinct(output_list)
 
     return output_list
@@ -1016,8 +1005,6 @@ def parse_doc(file_path,
             else:
                 omop_dict[config_name] = data_dict_list
             logger.info(f"\nPROCESSED config \"{config_name}\" got:\"{omop_dict[config_name]}\" ")
-        #else:
-        #    print(f"\nSKIPPING config \"{config_name}\" ")
 
     if DO_VISIT_DETAIL:
         omop_dict = VR.reclassify_nested_visit_occurrences_as_detail(omop_dict)
@@ -1044,12 +1031,8 @@ def print_omop_structure(omop :dict[str, list[ dict[str, None | str | float | in
                     print(f"\n\nDOMAIN: {domain} {domain_data_dict.keys()} ")
                     for field, parts in domain_data_dict.items():
                         print(f"    FIELD:{field}")
-                        #print(f"        parts type {type(parts[0])}")
-                        #print(f"        parts type {type(parts[1])}")
                         print(f"        parts type {type(parts)}")
                         print(f"        VALUE:{parts}")
-                        #print(f"        VALUE:{parts[0]}")
-                        #print(f"        PATH:{parts[1]}")
                         print(f"        ORDER: {metadata[domain][field]['order']}")
                         n = n+1
                     print(f"\n\nDOMAIN: {domain} {n}\n\n")
@@ -1075,18 +1058,13 @@ def process_file(filepath :str, print_output: bool, parse_config :str):
     print(f"    {filepath} reconcile_visit()() ")
     VR.assign_visit_occurrence_ids_to_events(omop_data)
     VR.assign_visit_detail_ids_to_events(omop_data)
-#    if print_output and (omop_data is not None or len(omop_data) < 1):
-#        print_omop_structure(omop_data, metadata)
-#    else:
-#        logger.error(f"FILE no data from {filepath} (or printing turned off)")
 
     print(f"done PROCESSING {filepath} ")
     return omop_data
 
 def write_all_csv_files(data: dict[str, list[dict]]):                                                                                                          
     for domain_id, records in data.items():                                                                                                                 
-        if not records:                                                                                                                                    
-            #print(f"not WRITING {domain_id}.csv {len(records)} ")
+        if not records:
             continue
         with open(f"{domain_id}.csv", 'w', newline='') as f:                                                                                                         
             print(f"WRITING {domain_id}.csv   {len(records)}")
@@ -1098,8 +1076,7 @@ def write_individual_csv_files(out_filename, data: dict[str, list[dict]]):
     """ writes csv files to a folder "output", one folder up
     """
     for domain_id, records in data.items():                                                                                                                 
-        if not records:                                                                                                                                    
-            #print(f"    not WRITING {domain_id}.csv (null) ")
+        if not records:
             continue
         with open(f"../output/{out_filename}__{domain_id}.csv", 'w', newline='') as f:                                                                                                         
             print(f"    WRITING {out_filename}_{domain_id}.csv len:{len(records)}")
@@ -1176,7 +1153,6 @@ def main() :
                             file_data_dict[domain_id].extend(rows)
                             print(f"WTF rows {domain_id} {len(rows)} ")
                             print(f"WTF dict[domain]  {domain_id} {file_data_dict.keys()}")
-                            #print(f"WTF dict[domain]  {domain_id} {len(file_data_dict[domain_id])}")
 
                             print(f"INFO: key:{key} domain_id:{domain_id} rows:{len(omop_dict[key])}")
 

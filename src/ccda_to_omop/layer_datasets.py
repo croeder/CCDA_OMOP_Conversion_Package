@@ -150,10 +150,6 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                             msg=f"layered_datasets.create_omop_domain_dataframes() NaN/NaT {config_name} {field} {prepared_value} <--"
                             raise Exception(msg)
 
-                        # if prepared_value is None and field == 'condition_start_date':
-                        #    # for debuggin in Spark, raise exception
-                        #    msg=f"layered_datasets.create_omop_domain_dataframes() None start-date {config_name} {field} {prepared_value} <--"
-                        #    raise Exception(msg)
                     else:
                         # field is not in dict, so would be null, but odd for other reasons, want to know about this
                         if prepared_value is None:
@@ -165,7 +161,6 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
             # Use domain_dataframe_colunn_types to cast dataframe columns as directed
             # Create a Pandas dataframe from the data_dict
             try:
-                ##show_column_dict(config_name, column_dict)
                 domain_df = pd.DataFrame(column_dict)
                 domain_name = config_to_domain_name_dict[config_name]
                 table_name = domain_name_to_table_name[domain_name]
@@ -190,9 +185,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                                         # leave as None/NaN for other types
                                         domain_df[column_name] = domain_df[column_name]
                                 else:
-                                    domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)  # generates downcasting wwarnings and doesn't throw, 
-                                    # domain_df[column_name] = domain_df[column_name].fillna(cast(column_type, 0)).astype(column_type)  # throwss
-                                    # domain_df[column_name] = domain_df[column_name].astype(column_type).fillna(0) # cast errors on the None
+                                    domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)
                             except (TypeError, ValueError) as e:
                                 logger.error(f"CAST ERROR in layer_datasets.py create_omop_domain_dataframes() table:{table_name} column:{column_name} type:{column_type}  ")
                                 if column_name in domain_df:
@@ -489,4 +482,3 @@ def main() -> None:
             
 if __name__ == '__main__':
     main()
-# local_file = Dataset.get("my_alias").files().get("file.pdf").download()
