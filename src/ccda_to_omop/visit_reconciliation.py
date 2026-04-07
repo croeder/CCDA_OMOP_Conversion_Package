@@ -1,6 +1,6 @@
 
 """
-    Visit_reconcilliation.py
+    Visit_reconciliation.py
 
     This module contains functions for linking domain rows to visits
     as well as functions to differentiate visit_occurrence from visit_detail.
@@ -517,16 +517,16 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
         visit_dict: List of visit_occurrence record dicts to match against.
     """
     if visit_dict is None:
-        logger.warning(f"no visits for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
+        logger.warning(f"no visits for {domain} in reconcile_visit_FK_with_specific_domain, reconciliation")
         return
 
     if domain_dict is None:
-        logger.warning(f"no data for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
+        logger.warning(f"no data for {domain} in reconcile_visit_FK_with_specific_domain, reconciliation")
         return
 
     # Only Measurement, Observation, Condition, Procedure, Drug, and Device participate in Visit FK reconciliation
     if domain not in domain_dates:
-        logger.warning(f"no metadata for domain {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
+        logger.warning(f"no metadata for domain {domain} in reconcile_visit_FK_with_specific_domain, reconciliation")
         return
 
     if 'date' in domain_dates[domain].keys():
@@ -569,7 +569,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                             matches.append(visit['visit_occurrence_id'])
 
                     except KeyError as ke:
-                        logger.warning(f"missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")
+                        logger.warning(f"missing field  \"{ke}\", in visit reconciliation, got error {type(ke)} ")
                     except Exception as e:
                         pass
 
@@ -586,7 +586,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
 
             else:
                 # S.O.L.
-                logger.warning(f"no date available for visit reconcilliation in domain {domain} for {thing}")
+                logger.warning(f"no date available for visit reconciliation in domain {domain} for {thing}")
 
     # Logic for domains with start and end date/dateime
     elif 'start' in domain_dates[domain].keys() and 'end' in domain_dates[domain].keys():
@@ -652,7 +652,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                             matches.append(visit['visit_occurrence_id'])
 
                     except KeyError as ke:
-                        print(f"WARNING missing field  \"{ke}\", in visit reconcilliation, got error {type(ke)} ")
+                        print(f"WARNING missing field  \"{ke}\", in visit reconciliation, got error {type(ke)} ")
                     except Exception as e:
                         print(f"WARNING something wrong in visit reconciliation: {e}")
 
@@ -669,11 +669,11 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
 
             else:
                 # S.O.L.
-                print(f"ERROR no date available for visit reconcilliation in domain {domain} (detail in logs)")
-                logger.warning(f" no date available for visit reconcilliation in domain {domain} for {thing}")
+                print(f"ERROR no date available for visit reconciliation in domain {domain} (detail in logs)")
+                logger.warning(f" no date available for visit reconciliation in domain {domain} for {thing}")
 
     else:
-        logger.info("??? bust in domain_dates for reconcilliation")
+        logger.info("??? bust in domain_dates for reconciliation")
 
 
 @typechecked

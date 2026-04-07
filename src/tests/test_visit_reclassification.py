@@ -1,13 +1,13 @@
 """
 Unit tests for reclassify_nested_visit_occurrences_as_detail() and its
-helper functions in visit_reconcilliation.py.
+helper functions in visit_reconciliation.py.
 """
 
 import datetime
 import unittest
 from numpy import int64
 
-import ccda_to_omop.visit_reconcilliation as VR
+import ccda_to_omop.visit_reconciliation as VR
 
 
 def make_visit(visit_occurrence_id, person_id, concept_id,

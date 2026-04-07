@@ -1,7 +1,7 @@
 import unittest
 import datetime
 import numpy as np
-import ccda_to_omop.visit_reconcilliation  as VR
+import ccda_to_omop.visit_reconciliation  as VR
 
 class TestVisitReconciliation(unittest.TestCase):
 
