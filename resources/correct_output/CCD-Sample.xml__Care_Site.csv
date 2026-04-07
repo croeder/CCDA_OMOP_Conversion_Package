@@ -1,0 +1,2 @@
+care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
+640358989126857,Good Health Hospital,,3264669127043930,1.2.840.114350.1.13.6289.1.7.2.686980|10101148|Good Health Hospital|1052-0|2.16.840.1.113883.6.259|None|None|None|None,1052-0|2.16.840.1.113883.6.259,,CCD-Sample.xml,Care_Site_pr

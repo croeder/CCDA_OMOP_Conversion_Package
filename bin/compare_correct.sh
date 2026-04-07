@@ -19,7 +19,6 @@ do
 	    echo "" >> $compare_file
         diff $CORRECT_PATH/$base_file $OUTPUT_PATH/$base_file  > $MY_TEMP
         errval=$?
-        echo "found: $OUTPUT_PATH/$base_file $errval"
         if [[ $errval > 0 ]] ; then
             err_count=$(( $err_count + 1 ))
             echo "CORRECT <--> NEW " >> $compare_file
@@ -32,8 +31,10 @@ do
 	        cat $MY_TEMP >> $compare_file
 	        echo ""  >> $compare_file
         else
-            echo -n  "$file is  OK " 
-            wc -l $file
+            if [[ $VERBOSE ]] ; then 
+                echo -n  "OK $file is  OK "
+                wc -l $file
+            fi
         fi
 	    rm $MY_TEMP
     else

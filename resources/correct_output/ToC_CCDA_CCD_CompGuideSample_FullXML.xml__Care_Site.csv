@@ -1,0 +1,2 @@
+care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
+1890960443643439,Primo Adult Health,,539915745759579,1.1.1.1.1.1.1.1.2|None|Primo Adult Health|261QP2300X|2.16.840.1.113883.6.101|1400 Main Street Ste G|Springfield|VA|22150,261QP2300X|2.16.840.1.113883.6.101,,ToC_CCDA_CCD_CompGuideSample_FullXML.xml,Care_Site_ee

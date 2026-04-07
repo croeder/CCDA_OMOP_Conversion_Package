@@ -1,7 +1,7 @@
-visit_occurrence_id,person_id,visit_concept_id,visit_start_date,visit_start_datetime,visit_end_date,visit_end_datetime,visit_type_concept_id,provider_id,care_site_id,visit_source_value,visit_source_concept_id,admitting_source_concept_id,admitting_source_value,discharge_to_concept_id,discharge_to_source_value,preceding_visit_occurrence_id,filename,cfg_name
-2027097280640103,0,9202,2025-03-19,2025-03-19,2025-03-19,2025-03-19,32827,637152871743362,3720983147285715,2.16.840.1.113883.6.12|99213,,,,,,,test_372.xml,Visit
-3000296477936249,0,9201,2025-04-10,2025-04-10,2025-04-10,2025-04-10,32827,637152871743362,3720983147285715,1.2.3.4.5.6|BAD_CODE_3,,,,,,,test_372.xml,Visit
-2694912980735847,0,9203,2025-04-25,2025-04-25,2025-04-25,2025-04-25,32827,637152871743362,3720983147285715,1.2.3.4.5.6|BAD_CODE_4,,,,,,,test_372.xml,Visit
-2630076912309009,0,9201,2025-05-15,2025-05-15,2025-05-15,2025-05-15,32827,637152871743362,3720983147285715,1.2.3.4.5.6|BAD_CODE_5,,,,,,,test_372.xml,Visit
-2440211610621363,0,0,2025-06-01,2025-06-01,2025-06-01,2025-06-01,32827,637152871743362,3720983147285715,NO-MAP-SYSTEM|NO-MAP-CODE,,,,,,,test_372.xml,Visit
-334053660907871,0,9202,2025-01-01,2025-01-01,2025-01-01,2025-01-01,32827,637152871743362,3720983147285715,BAD-CODESYSTEM|BAD-CODE,,,,,,,test_372.xml,Visit_encompassingEncounter
+visit_occurrence_id,person_id,visit_concept_id,visit_start_date,visit_start_datetime,visit_end_date,visit_end_datetime,visit_type_concept_id,provider_id,care_site_id,visit_source_value,visit_source_concept_id,admitting_source_concept_id,admitting_source_value,discharge_to_concept_id,discharge_to_source_value,preceding_visit_occurrence_id,data_partner_id,filename,cfg_name
+1006363218925332,,0,2025-03-19,2025-03-19 00:00:00,2025-03-19,2025-03-19 23:59:59,32827,3155045172750832,1014281825791676,2.16.840.1.113883.6.12|99213,,,,,,,,test_372.xml,Visit
+353573196792175,,0,2025-04-10,2025-04-10 00:00:00,2025-04-10,2025-04-10 23:59:59,32827,3155045172750832,1014281825791676,1.2.3.4.5.6|BAD_CODE_3,,,,,,,,test_372.xml,Visit
+2774089749491476,,0,2025-04-25,2025-04-25 00:00:00,2025-04-25,2025-04-25 23:59:59,32827,3155045172750832,1014281825791676,1.2.3.4.5.6|BAD_CODE_4,,,,,,,,test_372.xml,Visit
+1159707206823655,,0,2025-05-15,2025-05-15 00:00:00,2025-05-15,2025-05-15 23:59:59,32827,3155045172750832,1014281825791676,1.2.3.4.5.6|BAD_CODE_5,,,,,,,,test_372.xml,Visit
+4415904836134602,,0,2025-06-01,2025-06-01 00:00:00,2025-06-01,2025-06-01 23:59:59,32827,3155045172750832,1014281825791676,NO-MAP-SYSTEM|NO-MAP-CODE,,,,,,,,test_372.xml,Visit
+4304236490142736,,0,2025-01-01,2025-01-01 00:00:00,2025-01-01,2025-01-01 23:59:59,32827,3155045172750832,1014281825791676,BAD-CODESYSTEM|BAD-CODE,,,,,,,,test_372.xml,Visit_encompassingEncounter

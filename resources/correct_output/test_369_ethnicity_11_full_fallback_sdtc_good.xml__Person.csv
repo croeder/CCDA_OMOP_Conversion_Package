@@ -1,2 +1,2 @@
-person_id,gender_concept_id,year_of_birth,month_of_birth,day_of_birth,birth_datetime,race_concept_id,ethnicity_concept_id,location_id,provider_id,care_site_id,person_source_value,gender_source_value,gender_source_concept_id,race_source_value,race_source_concept_id,ethnicity_source_value,ethnicity_source_concept_id,filename,cfg_name
-779399238636308,0,1980,1,11,1980-01-11,0,38003563,2956139368317343,,0,,,,,,2135-2,,test_369_ethnicity_11_full_fallback_sdtc_good.xml,Person
+person_id,gender_concept_id,year_of_birth,month_of_birth,day_of_birth,birth_datetime,race_concept_id,ethnicity_concept_id,location_id,provider_id,care_site_id,person_source_value,gender_source_value,gender_source_concept_id,race_source_value,race_source_concept_id,ethnicity_source_value,ethnicity_source_concept_id,data_partner_id,filename,cfg_name
+,,1980,1,11,1980-01-11 00:00:00,,,3264669127043930,,0,,,,,,2135-2,,,test_369_ethnicity_11_full_fallback_sdtc_good.xml,Person

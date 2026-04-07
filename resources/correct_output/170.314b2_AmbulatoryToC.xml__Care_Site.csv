@@ -1,0 +1,3 @@
+care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
+2747727116433373,,,3184517141420874,None|None|None|None|None|Get Well Clinic|Protland|OR|97005,,,170.314b2_AmbulatoryToC.xml,Care_Site_ee
+2659989929881670,Get Well Clinic,,365281176634385,None|None|Get Well Clinic|1160-1|2.16.840.1.113883.6.259|1004 Healthcare Dr.|Portland|OR|97005,1160-1|2.16.840.1.113883.6.259,,170.314b2_AmbulatoryToC.xml,Care_Site_pr

@@ -1,2 +1,4 @@
-location_id,address_1,address_2,city,state,zip,county,location_source_value,filename
-186773245330823,1436 Jennyhill Ln.,0,Hollywood,CA,90068,0,0,170.314b2_AmbulatoryToC.xml
+location_id,address_1,address_2,city,state,zip,county,location_source_value,data_partner_id,filename,cfg_name
+197843998031817,1436 Jennyhill Ln.,,Hollywood,CA,90068,,,,170.314b2_AmbulatoryToC.xml,Location
+3184517141420874,Get Well Clinic,,Protland,OR,97005,,,,170.314b2_AmbulatoryToC.xml,Location_ee
+365281176634385,1004 Healthcare Dr.,,Portland,OR,97005,,,,170.314b2_AmbulatoryToC.xml,Location_pr

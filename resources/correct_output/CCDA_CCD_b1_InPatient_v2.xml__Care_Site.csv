@@ -1,0 +1,3 @@
+care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
+2334105306417885,,,3264669127043930,2.16.840.1.113883.4.6|None|None|None|None|None|None|None|None,,,CCDA_CCD_b1_InPatient_v2.xml,Care_Site_ee
+3742901093201757,Get Well Clinic,,1820708774233422,None|None|Get Well Clinic|1117-1|2.16.840.1.113883.6.259|1002 Healthcare Dr|Portland|OR|97266,1117-1|2.16.840.1.113883.6.259,,CCDA_CCD_b1_InPatient_v2.xml,Care_Site_pr

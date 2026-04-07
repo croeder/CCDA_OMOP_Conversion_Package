@@ -1,3 +1,4 @@
-location_id,address_1,address_2,city,state,zip,county,location_source_value,filename
-2498867758686726,3 Melby Pass,0,Menlo Park,CA,89461,0,0,bennis_shauna_ccda.xml
-2498867758686726,3 Melby Pass,0,MENLO PARK,CA,89461,0,0,bennis_shauna_ccda.xml
+location_id,address_1,address_2,city,state,zip,county,location_source_value,data_partner_id,filename,cfg_name
+1154540671519160,3 Melby Pass,,Menlo Park,CA,89461,,,,bennis_shauna_ccda.xml,Location
+232287170880827,3 Melby Pass,,MENLO PARK,CA,89461,,,,bennis_shauna_ccda.xml,Location
+3264669127043930,,,,,,,,,bennis_shauna_ccda.xml,Location_pr

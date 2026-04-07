@@ -1,2 +1,3 @@
-location_id,address_1,address_2,city,state,zip,county,location_source_value,filename
-3926758190086982,2222 Home Street,0,Beaverton,MD,21014,0,0,CCD-Sample.xml
+location_id,address_1,address_2,city,state,zip,county,location_source_value,data_partner_id,filename,cfg_name
+3210946069229540,2222 Home Street,,Beaverton,MD,21014,,,,CCD-Sample.xml,Location
+3264669127043930,,,,,,,,,CCD-Sample.xml,Location_pr

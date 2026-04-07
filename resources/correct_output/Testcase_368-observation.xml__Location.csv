@@ -1,2 +1,2 @@
-location_id,address_1,address_2,city,state,zip,county,location_source_value,filename,cfg_name
-4461101336416324,2222 Home Street,,Beaverton,OR,97867,,,Testcase_368-observation.xml,Location
+location_id,address_1,address_2,city,state,zip,county,location_source_value,data_partner_id,filename,cfg_name
+4104571567668891,2222 Home Street,,Beaverton,OR,97867,,,,Testcase_368-observation.xml,Location
