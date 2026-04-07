@@ -1,10 +1,11 @@
 
 from collections import defaultdict
-import logging 
+import logging
 from typeguard import typechecked
 from dateutil.parser import parse
 import csv
 import datetime
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 """
@@ -29,32 +30,31 @@ logger = logging.getLogger(__name__)
     }
 """
 
-def create_codemap_dict_from_csv(map_csv_filepath):
+def create_codemap_dict_from_csv(map_csv_filepath: str) -> dict:
     """ creates a dictionary (code_system, code) --> {source_concept_id: n, target_domain_id: m, target_concept_id: o}
         from a CSV file:
            OID, code, codeSystem, target_id, target_domain
     """
     concept_map = {}
-    with open(map_csv_filepath) as f:                                                                                                                              
+    with open(map_csv_filepath) as f:
         reader = csv.reader(f)
-        next(reader)  # skip header                                                                                                                        
+        next(reader)  # skip header
         for row in reader:
-            if len(row) < 5 or not row[0].strip():                                                                                                         
-                continue                                                                                                                                   
+            if len(row) < 5 or not row[0].strip():
+                continue
             oid, code, _, concept_id, domain = [r.strip() for r in row[:5]]
-            concept_map[(oid, code)] = {                                                                                                                   
+            concept_map[(oid, code)] = {
                 'source_concept_id': int(concept_id),
-                'target_concept_id': int(concept_id),                                                                                                      
+                'target_concept_id': int(concept_id),
                 'target_domain_id': domain,
-            }                                                                                                                                              
+            }
     return concept_map
 
 
-def create_codemap_dict(codemap_df):
+def create_codemap_dict(codemap_df: pd.DataFrame) -> dict:
     """ creates a dictionary (code_system, code) --> {source_concept_id: n, target_domain_id: m, target_concept_id: o}
         from a spark dataframe
     """
-
     logger.info(f"w xwalk create_codemap_dict {type(codemap_df)} {len(codemap_df)}")
     codemap_dict = defaultdict(list)
     for _, row in codemap_df.iterrows():
@@ -73,7 +73,7 @@ def create_codemap_dict(codemap_df):
     return codemap_dict
     
 
-def create_valueset_dict(codemap_df):
+def create_valueset_dict(codemap_df: pd.DataFrame) -> dict:
     logger.info(f"w xwalk create_valueset_dict {type(codemap_df)}  {len(codemap_df)}")
     codemap_dict = {}
     for _, row in codemap_df.iterrows():
@@ -87,7 +87,7 @@ def create_valueset_dict(codemap_df):
     return codemap_dict
 
 
-def create_visit_dict(codemap_df):
+def create_visit_dict(codemap_df: pd.DataFrame) -> dict:
     logger.info(f"w xwalk create_visit_dict {type(codemap_df)} {len(codemap_df)}")
     codemap_dict = {}
     for _, row in codemap_df.iterrows():
@@ -102,7 +102,7 @@ def create_visit_dict(codemap_df):
 
 
 @typechecked
-def cast_to_date(string_value) ->  datetime.date | None:
+def cast_to_date(string_value: str) -> datetime.date | None:
     # TODO does CCDA always do dates as YYYYMMDD ?
     # https://build.fhir.org/ig/HL7/CDA-ccda/StructureDefinition-USRealmDateTimeInterval-definitions.html
     # doc says YYYMMDD... examples show ISO-8601. Should use a regex and detect parse failure.
@@ -121,7 +121,8 @@ def cast_to_date(string_value) ->  datetime.date | None:
         #return  datetime.date.fromisoformat("1970-01-01")
 
 
-def cast_to_datetime(string_value) -> datetime.datetime | None:
+@typechecked
+def cast_to_datetime(string_value: str) -> datetime.datetime | None:
     try:
         datetime_val = parse(string_value, ignoretz=True)
         return datetime_val
