@@ -12,9 +12,6 @@
       compared to OMOP. Can you leave out unused nullable fields?
 """
 
-OMOP_CDM_DIR = "resources/" #  "../CommonDataModel/inst/ddl/5.3/duckdb/"
-OMOP_CSV_DATA_DIR = "output/"
-
 import io
 import os
 import re
