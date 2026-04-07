@@ -1,5 +1,5 @@
-name: ccda_to_omop Unit Tests
-run-name: ${{ github.actor }} is testing ccda_to_omop unit tests
+name: ccda_to_omop file comparisons
+run-name: ${{ github.actor }} is comparing output files
 on: [push, workflow_dispatch]
 jobs:
     Run-file-comparisons:
