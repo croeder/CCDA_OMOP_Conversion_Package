@@ -99,7 +99,7 @@ def cast_as_concept_id(args_dict):
     string_value = args_dict['input']
     type_value = args_dict['type']
     if type_value == 'CD' or type_value == 'CE':
-        return string_value
+        return int32(string_value)
     else:
         return None
 
