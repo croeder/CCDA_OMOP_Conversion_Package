@@ -60,4 +60,4 @@ then
    echo "$non_reconciled_visit_id_count rows with bogus or non-reconciled visit_ids in the following files"
    grep RECONCILE $OUTPUT_PATH/* | grep -v domain_ | awk -F: '{print $1}' | sort -u
 fi
-exit $err_count
+exit $(( $err_count + $missing_count ))
