@@ -7,12 +7,6 @@ from ccda_to_omop.util import cast_to_datetime
 from ccda_to_omop import package_constant_access
 import logging
 
-logging.basicConfig(
-        filename="layer_datasets.log",
-        filemode="w",
-        level=logging.INFO ,
-        format='%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d %(message)s')
-        
 """
     Functions for use in DERVIED fields.
     The configuration for this type of field is:
@@ -32,7 +26,6 @@ logging.basicConfig(
 """    
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 # --- Start of Moved Code from __init__.py ---
 # These dictionaries are now defined and handled here.
