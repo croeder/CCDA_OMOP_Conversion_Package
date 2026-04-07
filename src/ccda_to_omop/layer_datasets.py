@@ -20,7 +20,7 @@ import warnings
 import datetime as DT
 
 import ccda_to_omop.data_driven_parse as DDP
-import ccda_to_omop.visit_reconcilliation as VR
+import ccda_to_omop.visit_reconciliation as VR
 import ccda_to_omop.value_transformations as VT
 import ccda_to_omop.util as U
 from ccda_to_omop.ddl import sql_import_dict

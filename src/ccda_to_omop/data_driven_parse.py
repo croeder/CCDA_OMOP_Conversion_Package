@@ -88,13 +88,13 @@ from ccda_to_omop.util import create_codemap_dict_from_csv
 from ccda_to_omop.util import cast_to_date
 from ccda_to_omop.util import cast_to_datetime
 
-from ccda_to_omop import visit_reconcilliation as VR
+from ccda_to_omop import visit_reconciliation as VR
 import re
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-# Type alias for OMOP output record dictionaries (matches visit_reconcilliation.OMOPRecord + int32)
+# Type alias for OMOP output record dictionaries (matches visit_reconciliation.OMOPRecord + int32)
 OMOPRecord = dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date]
 
 DO_VISIT_DETAIL = False
@@ -403,7 +403,7 @@ def do_foreign_key_fields(output_dict :OMOPRecord,
         For example, the measurement_results.py file has a configuration for parsing OMOP 
         measurement rows out of an XML file. The visit.py would have been previosly processed
         and it's rows stashed away elsewhere in the parse_doc() function whose scope is large
-        enough to consider all the configurations. So the visit choice/reconcilliation
+        enough to consider all the configurations. So the visit choice/reconciliation
         must happen from there.
         
         TL;DR not all foreign keys are resolved here. In particular, domain FK references,
