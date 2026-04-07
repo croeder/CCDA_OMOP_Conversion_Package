@@ -483,16 +483,39 @@ domain_dates = {
 
 
 @typechecked
-def strip_tz(dt): # Strip timezone
+def strip_tz(dt):
+    """Remove timezone info from a datetime, leaving date objects unchanged.
+
+    Args:
+        dt: A datetime.datetime, datetime.date, or None value.
+
+    Returns:
+        The same value with tzinfo removed if it was a timezone-aware datetime;
+        otherwise the original value unchanged.
+    """
     if isinstance(dt, datetime.datetime) and dt.tzinfo is not None:
         return dt.replace(tzinfo=None)
     return dt
 
 
 @typechecked
-def reconcile_visit_FK_with_specific_domain(domain: str, 
-                                            domain_dict: list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None , 
+def reconcile_visit_FK_with_specific_domain(domain: str,
+                                            domain_dict: list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None ,
                                             visit_dict:  list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None):
+    """Assign visit_occurrence_id to each event record in a clinical domain.
+
+    Matches each event in domain_dict to a visit in visit_dict by checking whether
+    the event's date falls within the visit's start/end window. If exactly one visit
+    matches, its visit_occurrence_id is written into the event record. If zero or
+    multiple visits match, a warning is logged and the field is left unset (or a
+    ``__visit_candidates`` key is added for ambiguous cases).
+
+    Args:
+        domain: OMOP domain name (e.g. ``'Measurement'``, ``'Condition'``). Must be
+            a key in the module-level ``domain_dates`` config dict.
+        domain_dict: List of clinical event record dicts to be matched.
+        visit_dict: List of visit_occurrence record dicts to match against.
+    """
     if visit_dict is None:
         logger.warning(f"no visits for {domain} in reconcile_visit_FK_with_specific_domain, reconcilliation")
         return
@@ -656,6 +679,21 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
 @typechecked
 def assign_visit_occurrence_ids_to_events(data_dict: dict[str,
                                                              list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] | None] | None]):
+    """Assign visit_occurrence_id FKs to all clinical event records in data_dict.
+
+    Iterates over all configs in data_dict whose domain is one of Measurement,
+    Observation, Condition, Procedure, Drug, or Device, and calls
+    reconcile_visit_FK_with_specific_domain() to match each event to a visit.
+
+    Expects visit records to be under the ``'Visit'`` config key (after visit
+    hierarchy processing has merged Visit and Visit_encompassingEncounter).
+    Removes the temporary ``__visit_candidates`` key from all records after
+    reconciliation is complete.
+
+    Args:
+        data_dict: Dict mapping config names to lists of record dicts, as returned
+            by parse_doc().
+    """
     # data_dict is a dictionary of config_names to a list of record-dicts
     # Only Measurement, Observation, Condition, Procedure, Drug, and Device participate in Visit FK reconciliation
     # Visit hierarchy processing (reclassify_nested_visit_occurrences_as_detail) merges both
