@@ -1,5 +1,5 @@
 name: ccda_to_omop file comparisons
-run-name: ${{ github.actor }} is comparing output files
+run-name: ${{ github.actor }} is comparing output files on master
 on: [push, workflow_dispatch]
 jobs:
     Run-file-comparisons:
@@ -8,7 +8,7 @@ jobs:
           - name: Check out repository code
             uses: actions/checkout@v4
             with:
-              ref: dev
+              ref: master
           - name: Install packages
             run: |
                 pip install -r requirements.txt
