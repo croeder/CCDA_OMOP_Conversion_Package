@@ -77,10 +77,10 @@ def find_max_columns(config_name :str, domain_list: list[ dict[str, tuple[ None 
     domain = None
     try:
         domain = config_to_domain_name_dict[config_name]
-    except Exception as e:
+    except KeyError as e:
         logger.error(f"ERROR no domain for {config_name} in {config_to_domain_name_dict.keys()}"
                      "The config_to_domain_name_dict in ddl.py probably needs this to be added to it.")
-        raise e
+        raise
 
     chosen_row =-1
     num_columns = 0
@@ -140,9 +140,9 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                             try:
                                 prepared_value = domain_data_dict[field].replace(tzinfo=None)
                                 logger.info(f"DATETIME conversion  {type(domain_data_dict[field])} {domain_data_dict[field]} {field} ")
-                            except Exception as e:
+                            except AttributeError as e:
                                 prepared_value = None
-                                logger.error(f"ERROR  TZ {type(domain_data_dict[field])} {domain_data_dict[field]} {field} {e} TB:{traceback.format_exc(e)}")
+                                logger.error(f"ERROR  TZ {type(domain_data_dict[field])} {domain_data_dict[field]} {field} {e} TB:{traceback.format_exc()}")
                         else:
                             prepared_value = domain_data_dict[field]
 
@@ -193,7 +193,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                                     domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)  # generates downcasting wwarnings and doesn't throw, 
                                     # domain_df[column_name] = domain_df[column_name].fillna(cast(column_type, 0)).astype(column_type)  # throwss
                                     # domain_df[column_name] = domain_df[column_name].astype(column_type).fillna(0) # cast errors on the None
-                            except Exception as e:
+                            except (TypeError, ValueError) as e:
                                 logger.error(f"CAST ERROR in layer_datasets.py create_omop_domain_dataframes() table:{table_name} column:{column_name} type:{column_type}  ")
                                 if column_name in domain_df:
                                     logger.error(f"    (cont.)   value:{domain_df[column_name]}  type:{type(domain_df[column_name])}")
@@ -495,7 +495,7 @@ def main() -> None:
 
     except Exception as e:
         logger.error(f"Failed to load mapping datasets from Foundry: {e}")
-        logger.error(traceback.format_exc(e))
+        logger.error(traceback.format_exc())
         return # Exit if mappings cannot be loaded
 
     # Single File, put the datasets into the omop_dataset_dict
