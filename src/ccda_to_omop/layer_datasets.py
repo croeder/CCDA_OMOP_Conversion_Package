@@ -56,14 +56,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning) #*
 #*                                                              * 
 #****************************************************************a
 
-logging.basicConfig(
-        filename="layer_datasets.log",
-        filemode="w",
-        level=logging.INFO ,
-        format='%(levelname)s:%(filename)s:%(funcName)s:%(lineno)d %(message)s' )
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 @typechecked
 def show_column_dict(config_name, column_dict):
