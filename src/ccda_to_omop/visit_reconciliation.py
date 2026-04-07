@@ -26,6 +26,7 @@ import logging
 from numpy import int64
 from typeguard import typechecked
 from ccda_to_omop import ddl as DDL
+from ccda_to_omop.constants import INPATIENT_CONCEPT_IDS, MAX_PARENT_DURATION_DAYS, SECONDS_PER_DAY
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -35,14 +36,6 @@ logger.setLevel(logging.ERROR)
 
 # Type alias for OMOP record dictionaries
 OMOPRecord = dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date]
-
-# OMOP standard concept IDs for inpatient visits
-INPATIENT_CONCEPT_IDS = {
-    9201   # Inpatient Visit
-}
-
-# Maximum duration for a valid inpatient parent (in days)
-MAX_PARENT_DURATION_DAYS = 367
 
 
 @typechecked
@@ -76,7 +69,7 @@ def get_visit_duration_days(visit_dict: OMOPRecord) -> float | None:
 
     # Handle both datetime and date objects
     if isinstance(start, datetime.datetime) and isinstance(end, datetime.datetime):
-        return (end - start).total_seconds() / 86400
+        return (end - start).total_seconds() / SECONDS_PER_DAY
     elif isinstance(start, datetime.date) and isinstance(end, datetime.date):
         return float((end - start).days)
     else:
@@ -943,7 +936,7 @@ def get_visit_detail_duration(visit_detail_dict: dict) -> float:
         start_datetime = strip_tz(start_datetime)
         end_datetime = strip_tz(end_datetime)
         delta = end_datetime - start_datetime
-        return delta.total_seconds() / 86400  # Convert to days
+        return delta.total_seconds() / SECONDS_PER_DAY  # Convert to days
     elif start_date and end_date:
         delta = end_date - start_date
         return float(delta.days)
