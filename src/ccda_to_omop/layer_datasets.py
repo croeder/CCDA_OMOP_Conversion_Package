@@ -224,14 +224,10 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                                        f"rows with missing required fields (table={table_name})")
 
                 df_dict[config_name] = domain_df
-            except ValueError as ve:
-                logger.info(f"when creating dataframe for {config_name} in {filepath} HAVE DATA {df_dict}")
+            except (ValueError, KeyError) as e:
+                logger.error(f"failed to create dataframe for {config_name} in {filepath}: {e}")
                 show_column_dict(config_name, column_dict)
                 df_dict[config_name] = None
-            # except Exception as x:
-                # logger.error(f"exception {config_name} in {filepath} NO DATA RETURNED {x}")
-                # show_column_dict(config_name, column_dict)
-                # df_dict[config_name] = None
             logger.error(f"(create_omop_domain_dataframes) No data to create dataframe for {config_name} from {filepath} {domain_list}")
     return df_dict
 

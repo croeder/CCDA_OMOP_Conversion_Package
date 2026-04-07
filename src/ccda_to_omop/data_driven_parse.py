@@ -220,32 +220,37 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             elif field_details_dict['data_type'] == 'LONG':
                 try:
                     attribute_value = int64(attribute_value)
-                except Exception as e:
-                    logger.warning(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                except (ValueError, TypeError, OverflowError) as e:
+                    logger.warning(f"cast to int64 failed for config:{config_name} field:{field_tag} val:{attribute_value} exception:{e}")
+                    attribute_value = None
 
             elif field_details_dict['data_type'] == 'INTEGER':
                 try:
                     attribute_value = int32(attribute_value)
-                except Exception as e:
-                    logger.warning(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                except (ValueError, TypeError, OverflowError) as e:
+                    logger.warning(f"cast to int32 failed for config:{config_name} field:{field_tag} val:{attribute_value} exception:{e}")
+                    attribute_value = None
 
             elif field_details_dict['data_type'] == 'BIGINTHASH':
                 try:
                     attribute_value = create_hash(attribute_value)
-                except Exception as e:
-                    logger.warning(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                except (TypeError, ValueError) as e:
+                    logger.warning(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value} exception:{e}")
+                    attribute_value = None
 
             elif field_details_dict['data_type'] == 'TEXT':
                 try:
                     attribute_value = str(attribute_value)
-                except Exception as e:
-                    logger.warning(f"cast to hash failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                except (TypeError, ValueError) as e:
+                    logger.warning(f"cast to str failed for config:{config_name} field:{field_tag} val:{attribute_value} exception:{e}")
+                    attribute_value = None
 
             elif field_details_dict['data_type'] == 'FLOAT':
                 try:
                     attribute_value = float(attribute_value)
-                except Exception as e:
-                    logger.warning(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                except (ValueError, TypeError, OverflowError) as e:
+                    logger.warning(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value} exception:{e}")
+                    attribute_value = None
                     
             else:
                 logger.warning(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
