@@ -18,13 +18,17 @@
       compared to OMOP. Can you leave out unused nullable fields?
 ''' 
 
-OMOP_CDM_DIR = "resources/" #  "../CommonDataModel/inst/ddl/5.3/duckdb/"
-OMOP_CSV_DATA_DIR = "output/"
-
 import io
 import os
+from pathlib import Path
 import re
 import logging
+
+# Paths are relative to the package root (three levels up from this file:
+#   src/ccda_to_omop/load_duck_db.py -> src/ccda_to_omop/ -> src/ -> package root)
+_PACKAGE_ROOT = Path(__file__).parent.parent.parent
+OMOP_CDM_DIR = _PACKAGE_ROOT / "resources"
+OMOP_CSV_DATA_DIR = _PACKAGE_ROOT / "output"
 #import duckdb
 import importlib.util
 from typing import Dict, Any
@@ -71,7 +75,7 @@ processing_status = True
 
 def _apply_ddl(ddl_file):
     print(f"Applying DDL file {ddl_file}")
-    with io.open(OMOP_CDM_DIR +  ddl_file, "r") as ddl_file:
+    with io.open(OMOP_CDM_DIR / ddl_file, "r") as ddl_file:
         ddl_statements = ddl_file.read()
         for statement in ddl_statements.split(";"):
             statement = statement.replace("@cdmDatabaseSchema.", "") + ";"
@@ -94,8 +98,8 @@ def _import_CSVs(domain):
 #            sql_string = sql_string.replace('FILENAME', OMOP_CSV_DATA_DIR + csv_filename)
 #            sql_string = sql_string.replace('TABLENAME', table_name)
             # How to check for empty file?
-            if os.stat("output/" + csv_filename).st_size > 2:
-                output_path = f"output/{csv_filename}"
+            if (OMOP_CSV_DATA_DIR / csv_filename).stat().st_size > 2:
+                output_path = str(OMOP_CSV_DATA_DIR / csv_filename)
                 # print(f"loading file {csv_filename}  {output_path}  size:{os.stat(output_path).st_size}")
                 try:
 #                    x=conn.execute(sql_string)
