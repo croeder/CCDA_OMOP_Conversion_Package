@@ -1,6 +1,5 @@
 import re
-#import ccda_to_omop.metadata
-from ccda_to_omop.metadata.test import metadata
+from ccda_to_omop.metadata import get_meta_dict
 
 """
 This script aims to link the various field types from XML source
@@ -320,10 +319,8 @@ def merge_second_level_dict(dest_dict: dict, additional_dict: dict) -> None:
     
 
 def main() -> None:
-    # just use the imported metadata from test. Don't need this:
-    #metadata = ccda_to_omop.metadata.get_meta_dict()
-      # config_key --> field_key --> dict (described in data_driven_parse.py)
-
+    metadata = get_meta_dict()
+    # config_key --> field_key --> dict (described in data_driven_parse.py)
 
     # FIELD, PK
     base_field_dict = get_base_elements(metadata)
@@ -333,7 +330,7 @@ def main() -> None:
     #print_data_hash(base_field_dict)
    
     # DERIVED 
-    derived_field_dict = get_derived_fields(metadata) 
+    derived_field_dict = get_derived_fields(metadata)
       # config_key --> field_key --> {'function': function name,
       #                               'args' : [ field names ],
       #                               'order' : int }
