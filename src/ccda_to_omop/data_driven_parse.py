@@ -477,18 +477,11 @@ def do_derived_fields(output_dict: OMOPRecord,
                             error_fields_set.add(field_tag)
                             logger.warning((f"DERIVED config:{config_name} field:{field_tag} could not "
                                       f"find {field_name} in {output_dict}"))
-                        try:
-                            args_dict[arg_name] = output_dict[field_name]
-                        except Exception as e:
-                            #print(f"-------error field_name:{field_name}  arg_name:{arg_name}  {e}")
-                            #print(traceback.format_exc(e))
-                            error_fields_set.add(field_tag)
-                            logger.warning((f"DERIVED {field_tag} arg_name: {arg_name} field_name:{field_name}"
-                                        f" args_dict:{args_dict} output_dict:{output_dict}"))
-                            logger.warning(f"DERIVED exception {e}")
-                    except TypeError as te:
-                        logger.warning(f"-------error field_name:{field_name}  arg_name:{arg_name}  {te}")
-                        print(traceback.format_exc(te))
+                        args_dict[arg_name] = output_dict[field_name]
+                    except (TypeError, KeyError) as e:
+                        error_fields_set.add(field_tag)
+                        logger.warning(f"-------error field_name:{field_name}  arg_name:{arg_name}  {e}")
+                        logger.warning(traceback.format_exc())
             allowed_length = field_details_dict.get('length', MAX_FIELD_LENGTH)
             try:
                 function_value = field_details_dict['FUNCTION'](args_dict)
