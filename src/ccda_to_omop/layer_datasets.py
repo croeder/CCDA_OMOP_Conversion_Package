@@ -59,7 +59,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning) #*
 logger = logging.getLogger(__name__)
 
 @typechecked
-def show_column_dict(config_name, column_dict):
+def show_column_dict(config_name: str, column_dict: dict[str, list]) -> None:
     for key,val in column_dict.items():
         print(f"   config: {config_name}  key:{key} length(val):{len(val)}")
 
@@ -220,7 +220,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
 
 
 @typechecked
-def write_csvs_from_dataframe_dict(df_dict :dict[str, pd.DataFrame], file_name, folder):
+def write_csvs_from_dataframe_dict(df_dict: dict[str, pd.DataFrame], file_name: str, folder: str) -> None:
     """ writes a CSV file for each dataframe
         uses the key of the dict as filename
     """
@@ -232,7 +232,7 @@ def write_csvs_from_dataframe_dict(df_dict :dict[str, pd.DataFrame], file_name, 
             logger.error(f"ERROR: NOT WRITING domain {config_name} to file {filepath}, no dataframe")
 
 @typechecked
-def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame]:
+def process_string(contents: str, filepath: str, write_csv_flag: bool) -> dict[str, pd.DataFrame]:
     """
         * E X P E R I M E N T A L *
 
@@ -267,7 +267,7 @@ def process_string(contents, filepath, write_csv_flag) -> dict[str, pd.DataFrame
 
 
 @typechecked
-def process_string_to_dict(contents, filepath, write_csv_flag, codemap_dict, visit_map_dict, valueset_map_dict, mspi_map_dict, partner_map_dict ) -> dict[str, list[dict]]:
+def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, codemap_dict: dict, visit_map_dict: dict, valueset_map_dict: dict, mspi_map_dict: dict | None, partner_map_dict: dict | None) -> dict[str, list[dict]]:
     """
         Processes an XML CCDA string, returns data as Python structures.
 
@@ -321,7 +321,7 @@ def process_string_to_dict(contents, filepath, write_csv_flag, codemap_dict, vis
 
 
 @typechecked
-def process_file(filepath, write_csv_flag, parse_config :str) -> dict[str, pd.DataFrame]:
+def process_file(filepath: str, write_csv_flag: bool, parse_config: str) -> dict[str, pd.DataFrame]:
     """ processes file, processes visits, creates dataset, writes csv
         returns dataset
     """
@@ -351,7 +351,7 @@ def process_file(filepath, write_csv_flag, parse_config :str) -> dict[str, pd.Da
 
 
 @typechecked
-def dict_summary(my_dict):
+def dict_summary(my_dict: dict) -> None:
     for key in my_dict:
         logger.info(f"Summary {key} {len(my_dict[key])}")
 
@@ -378,7 +378,7 @@ def build_file_to_domain_dict(meta_config_dict :dict[str, dict[str, dict[str, st
 
 
         
-def combine_datasets(omop_dataset_dict):    
+def combine_datasets(omop_dataset_dict: dict[str, pd.DataFrame | None]) -> dict[str, pd.DataFrame]:
 
     # COMBINE like datasets, datasets from different parse configurations in the metadata
     # that produce rows for the same domain. 
@@ -408,7 +408,7 @@ def combine_datasets(omop_dataset_dict):
 
 
         
-def do_write_csv_files(domain_dataset_dict):
+def do_write_csv_files(domain_dataset_dict: dict[str, pd.DataFrame | None]) -> None:
     for domain_id in domain_dataset_dict:
         if domain_id in domain_dataset_dict and domain_dataset_dict[domain_id] is not None:
             logger.info(f"Writing CSV for domain:{domain_id} dim:{domain_dataset_dict[domain_id].shape}")
@@ -420,7 +420,7 @@ def do_write_csv_files(domain_dataset_dict):
         
     
 # ENTRY POINT for directory of files
-def process_directory(directory_path, export_datasets, write_csv_flag, parse_config):
+def process_directory(directory_path: str, export_datasets: bool, write_csv_flag: bool, parse_config: str) -> None:
     omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
     
     only_files = [f for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]
@@ -447,7 +447,7 @@ def process_directory(directory_path, export_datasets, write_csv_flag, parse_con
          
 
 # JUPYTER ENTRY POINT
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         prog='CCDA - OMOP parser with datasets layer layer_datasets.py',
         description="reads CCDA XML, translate to and writes OMOP CSV files",

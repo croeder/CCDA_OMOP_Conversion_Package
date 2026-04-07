@@ -94,6 +94,9 @@ import re
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
+# Type alias for OMOP output record dictionaries (matches visit_reconcilliation.OMOPRecord + int32)
+OMOPRecord = dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date]
+
 DO_VISIT_DETAIL = False
 MAX_FIELD_LENGTH=50
 
@@ -129,7 +132,7 @@ def create_hash_too_long(input_string):
     return long_hash_value
 
 @typechecked
-def parse_field_from_dict(field_details_dict :dict[str, str], root_element, 
+def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
         config_name, field_tag, root_path) ->  None | str | float | int | int32 | int64 | datetime.datetime | datetime.date | list:
     """ Retrieves a value for the field descrbied in field_details_dict that lies below
         the root_element.
@@ -282,7 +285,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
 
 
 @typechecked
-def do_none_fields(output_dict :dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date ],
+def do_none_fields(output_dict :OMOPRecord,
                    root_element, root_path, config_name,  
                    config_dict :dict[str, dict[str, str | None]], 
                    error_fields_set :set[str]):
@@ -295,7 +298,7 @@ def do_none_fields(output_dict :dict[str, None | str | float | int | int32 | int
 
             
 @typechecked
-def do_constant_fields(output_dict :dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date], 
+def do_constant_fields(output_dict :OMOPRecord,
                        root_element, root_path, config_name,  
                        config_dict :dict[str, dict[str, str | None]], 
                        error_fields_set :set[str]):
@@ -314,7 +317,7 @@ def do_constant_fields(output_dict :dict[str, None | str | float | int | int32 |
 
             
 @typechecked
-def do_filename_fields(output_dict :dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date], 
+def do_filename_fields(output_dict :OMOPRecord,
                        root_element, root_path, config_name,  
                        config_dict :dict[str, dict[str, str | None]], 
                        error_fields_set :set[str],
@@ -328,7 +331,7 @@ def do_filename_fields(output_dict :dict[str, None | str | float | int | int32 |
 
             
 @typechecked
-def do_basic_fields(output_dict :dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date], 
+def do_basic_fields(output_dict :OMOPRecord,
                     root_element, root_path, config_name,  
                     config_dict :dict[str, dict[str, str | None] ], 
                     error_fields_set :set[str], 
@@ -370,7 +373,7 @@ def do_basic_fields(output_dict :dict[str, None | str | float | int | int32 | in
             
 
 @typechecked 
-def do_foreign_key_fields(output_dict :dict[str, None | str | float | int | int32 | int64 |datetime.datetime | datetime.date], 
+def do_foreign_key_fields(output_dict :OMOPRecord,
                     root_element, root_path, config_name,  
                     config_dict :dict[str, dict[str, str | None] ], 
                     error_fields_set :set[str], 
@@ -436,7 +439,7 @@ def do_foreign_key_fields(output_dict :dict[str, None | str | float | int | int3
                 error_fields_set.add(field_tag)
 
 @typechecked
-def do_derived_fields(output_dict: dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date],
+def do_derived_fields(output_dict: OMOPRecord,
                       root_element, root_path, config_name,
                       config_dict: dict[str, dict[str, str | None]],
                       error_fields_set: set[str],
@@ -542,7 +545,7 @@ def do_derived2_fields(output_dict :dict[str, list | None | str | float | int | 
 
                 
 @typechecked
-def do_hash_fields(output_dict: dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date],
+def do_hash_fields(output_dict: OMOPRecord,
                    root_element, root_path, config_name,
                    config_dict: dict[str, dict[str, str | None]],
                    error_fields_set: set[str],
@@ -575,7 +578,7 @@ def do_hash_fields(output_dict: dict[str, None | str | float | int | int32 | int
 
             
 @typechecked
-def do_priority_fields(output_dict: dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date],
+def do_priority_fields(output_dict: OMOPRecord,
                        root_element, root_path, config_name,
                        config_dict: dict[str, dict[str, str | None]],
                        error_fields_set: set[str],
