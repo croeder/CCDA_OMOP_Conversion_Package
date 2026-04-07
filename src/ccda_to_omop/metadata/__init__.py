@@ -19,6 +19,10 @@ from typing import Dict, Any
     REMEMBER to update the ddl.py file as well.
 """
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+
 # ***
 #  NB: *** Order is important here. ***
 # ***
@@ -124,12 +128,12 @@ def get_meta_dict():
         try:
             from user_mappings import overlay_mappings
             metadata = discover_and_sort_metadata() | overlay_mappings
-            print("iNFO: got user mappings  and overlaid them.")
+            logger.info("got user mappings  and overlaid them.")
         except Exception as e:
-            print("iNFO: no user mappings available, nothing overlaid, using package mappings as-is.")
+            logger.info("no user mappings available, nothing overlaid, using package mappings as-is.")
             print(f"    {e}")
 
         return metadata
     else:
-        print("iNFO: it appears this might be running in a main or master branch, so any user mappings will not be applied, using package mappings as-is.")
+        logger.warning("It appears this might be running in a main or master branch, so any user mappings will not be applied, using package mappings as-is.")
         return metadata

@@ -1,0 +1,4 @@
+visit_occurrence_id,person_id,visit_concept_id,visit_start_date,visit_start_datetime,visit_end_date,visit_end_datetime,visit_type_concept_id,provider_id,care_site_id,visit_source_value,visit_source_concept_id,admitting_source_concept_id,admitting_source_value,discharge_to_concept_id,discharge_to_source_value,preceding_visit_occurrence_id,filename,cfg_name
+4409266959554731,1501606930159724,9202,2015-11-02,2015-11-02 00:00:00,2015-11-04,2015-11-04 00:00:00,32827,2466439641612211,3720983147285715,2.16.840.1.113883.6.12|99214,,,,,,,test_517.xml,Visit
+4418654243736440,1501606930159724,9202,2015-11-02,2015-11-02 10:24:38,2015-11-04,2015-11-04 10:24:38,32827,2466439641612211,3720983147285715,2.16.840.1.113883.6.12|99214,,,,,,,test_517.xml,Visit
+4409266959554731,1501606930159724,9202,2015-11-02,2015-11-02 00:00:00,2015-11-04,2015-11-04 00:00:00,32827,2466439641612211,1086312335244399,2.16.840.1.113883.6.12|99214,,,,,,,test_517.xml,Visit_encompassingEncounter

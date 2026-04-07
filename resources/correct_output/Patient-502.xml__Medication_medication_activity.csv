@@ -1,0 +1,4 @@
+drug_exposure_id,person_id,drug_concept_id,drug_exposure_start_date,drug_exposure_start_datetime,drug_exposure_end_date,drug_exposure_end_datetime,verbatim_end_date,drug_type_concept_id,stop_reason,refills,quantity,days_supply,sig,route_concept_id,lot_number,provider_id,visit_occurrence_id,visit_detail_id,drug_source_value,drug_source_concept_id,route_source_value,dose_unit_source_value,filename
+240773282429705,727979791772240,0,2009-05-16,2009-05-16 10:00:00,,,,32818,,0,0.0,0,0,0,0,-1,2891623856154548,0,858828|2.16.840.1.113883.6.88,0,,0,Patient-502.xml
+240773282429705,727979791772240,0,2010-04-14,2010-04-14 10:00:00,,,,32818,,0,0.0,0,0,0,0,-1,2891623856154548,0,858828|2.16.840.1.113883.6.88,0,,0,Patient-502.xml
+3797664735428271,727979791772240,0,2010-09-15,2010-09-15 10:00:00,,,,32818,,0,0.0,0,0,0,0,-1,2891623856154548,0,1046847|2.16.840.1.113883.6.88,0,,0,Patient-502.xml

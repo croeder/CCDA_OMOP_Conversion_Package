@@ -1,0 +1,2 @@
+condition_occurrence_id,person_id,condition_concept_id,condition_start_date,condition_start_datetime,condition_end_date,condition_end_datetime,condition_type_concept_id,condition_status_concept_id,stop_reason,provider_id,visit_occurrence_id,visit_detail_id,condition_source_value,condition_source_concept_id,condition_status_source_value,filename,cfg_name
+2324205694015431,200867100417322,316866,2024-01-25,2024-01-25,2024-01-27,2024-01-27,32840,,,-1,3015343111146074,,38341003|2.16.840.1.113883.6.96,,,test_585.xml,Condition

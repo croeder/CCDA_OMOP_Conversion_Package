@@ -61,6 +61,7 @@
 
 
 import argparse
+import csv
 import datetime
 from dateutil.parser import parse
 import hashlib
@@ -1036,6 +1037,30 @@ def process_file(filepath :str, print_output: bool, parse_config :str):
     print(f"done PROCESSING {filepath} ")
     return omop_data
 
+def write_all_csv_files(data: dict[str, list[dict]]):                                                                                                          
+    for domain_id, records in data.items():                                                                                                                 
+        if not records:                                                                                                                                    
+            #print(f"not WRITING {domain_id}.csv {len(records)} ")
+            continue
+        with open(f"{domain_id}.csv", 'w', newline='') as f:                                                                                                         
+            print(f"WRITING {domain_id}.csv   {len(records)}")
+            writer = csv.DictWriter(f, fieldnames=records[0].keys())
+            writer.writeheader()                                                                                                                           
+            writer.writerows(records)   
+
+def write_individual_csv_files(out_filename, data: dict[str, list[dict]]):                                                                                                          
+    """ writes csv files to a folder "output", one folder up
+    """
+    for domain_id, records in data.items():                                                                                                                 
+        if not records:                                                                                                                                    
+            #print(f"    not WRITING {domain_id}.csv (null) ")
+            continue
+        with open(f"../output/{out_filename}__{domain_id}.csv", 'w', newline='') as f:                                                                                                         
+            print(f"    WRITING {out_filename}_{domain_id}.csv len:{len(records)}")
+            writer = csv.DictWriter(f, fieldnames=records[0].keys())
+            writer.writeheader()                                                                                                                           
+            writer.writerows(records)   
+    print(f"    done WRITING {out_filename}")
 
 # for argparse
 def str2bool(v):
@@ -1060,11 +1085,19 @@ def main() :
     parser.add_argument('-p', '--print_output', 
             type=str2bool, const=True, default=True,  nargs="?",
             help="print out the output values, -p False to have it not print")
+    parser.add_argument('-c', '--write_individual_csvs', type=str2bool, 
+            const=True, default=True, nargs="?",
+            help="write inidividual csv files")
+    parser.add_argument('-o', '--generate_all_output', type=str2bool, 
+            const=True, default=True, nargs="?",
+            help="write csv files")
     args = parser.parse_args()
 
     home="/Users/croeder/git/CCDA/tislab-clad/CCDA_OMOP_Conversion_Package"
     codemap_dict = create_codemap_dict_from_csv(f"{home}/resources/map.csv")
     VT.set_codemap_dict(codemap_dict)
+
+    all_data_dict = defaultdict(list)
 
     if args.filename is not None:
         process_file(args.filename, args.print_output)
@@ -1076,11 +1109,49 @@ def main() :
                 	print("n/a")
                 else:
                     meta_dict = get_meta_dict()
+                    file_data_dict = {}
                     for key in meta_dict.keys():
                         omop_dict = process_file(os.path.join(args.directory, file), args.print_output, key)
-                        print(f"{key} : {omop_dict}")
+                        domain_id = meta_dict[key]['root']['expected_domain_id']
+                        rows = omop_dict[key]
+                        if rows is not None and len(rows) > 0:
+                            # all data
+                            if domain_id in all_data_dict:
+                                if all_data_dict[domain_id] is None:
+                                    all_data_dict[domain_id] = []
+                                all_data_dict[domain_id] = all_data_dict[domain_id].extend(rows)
+
+                            else: # I thought this is why we have defaultdict(list) above
+                                all_data_dict[domain_id] = rows
+
+                            # just single file's data
+                            if domain_id not in file_data_dict or file_data_dict[domain_id] is None:
+                                file_data_dict[domain_id] = []
+                            file_data_dict[domain_id].extend(rows)
+                            print(f"WTF rows {domain_id} {len(rows)} ")
+                            print(f"WTF dict[domain]  {domain_id} {file_data_dict.keys()}")
+                            #print(f"WTF dict[domain]  {domain_id} {len(file_data_dict[domain_id])}")
+
+                            print(f"INFO: key:{key} domain_id:{domain_id} rows:{len(omop_dict[key])}")
+
+                            if args.write_individual_csvs:
+                                print(f"WRITING INDIVIDUAL len:{len(rows)}  {file}   {key}  {file_data_dict.keys()} {domain_id} ")
+                                for domain_key in file_data_dict.keys():
+                                    if domain_key in file_data_dict and file_data_dict[domain_key] is not None:
+                                        print(f"     {domain_key} {len(file_data_dict[domain_key])} WRITING")
+                                    else:
+                                        print(f"     BUST {domain_key}  WRITING")
+                                write_individual_csv_files(file, file_data_dict)
+                            else:
+                                print(f"no data for WRITING INDIVIDUAL {file}   {key} {len(rows)} {file_data_dict.keys()} {domain_id} ")
+                        else:
+                            print(f"WARNING: {key} has no data")
     else:
         logger.error("Did args parse let us  down? Have neither a file, nor a directory.")
+
+    if args.generate_all_output:
+        print("WRITE all ")
+        write_all_csv_files(all_data_dict)
 
 
 if __name__ == '__main__':

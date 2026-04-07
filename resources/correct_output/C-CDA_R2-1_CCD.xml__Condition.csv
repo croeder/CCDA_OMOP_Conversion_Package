@@ -1,0 +1,5 @@
+condition_occurrence_id,person_id,condition_concept_id,condition_start_date,condition_start_datetime,condition_end_date,condition_end_datetime,condition_type_concept_id,condition_status_concept_id,stop_reason,provider_id,visit_occurrence_id,visit_detail_id,condition_source_value,condition_source_concept_id,condition_status_source_value,filename
+608444944082072,1501606930159724,0,2013-07-03,2013-07-03,2008-08-14,2008-08-14,32840,0,,-1,1549190636141175,0,233604007|2.16.840.1.113883.6.96,0,,C-CDA_R2-1_CCD.xml
+1451916743985442,1501606930159724,0,2007-04-14,2007-04-14,,,32840,0,,-1,1549190636141175,0,29857009|2.16.840.1.113883.6.96,0,,C-CDA_R2-1_CCD.xml
+3974876597997550,1501606930159724,0,2007-04-17,2007-04-17,,,32840,0,,-1,1549190636141175,0,194828000|2.16.840.1.113883.6.96,0,,C-CDA_R2-1_CCD.xml
+47153469070625,1501606930159724,0,1998-03-10,1998-03-10,1998-03-16,1998-03-16,32840,0,,-1,1549190636141175,0,233604007|2.16.840.1.113883.6.96,0,,C-CDA_R2-1_CCD.xml

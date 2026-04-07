@@ -1,0 +1,4 @@
+provider_id,provider_name,npi,dea,specialty_concept_id,care_site_id,year_of_birth,gender_concept_id,provider_source_value,specialty_source_value,specialty_source_concept_id,gender_source_value,gender_source_concept_id,filename,cfg_name
+572741487201498,John|Smith,,,0,463240307571943,,,,,,,,test_566_2.xml,Provider
+581587677649784,Sarah|Williams,,,0,540789674546829,,,,,,,,test_566_2.xml,Provider
+3894809078686684,Michael|Brown,,,0,2604034374307668,,,,,,,,test_566_2.xml,Provider

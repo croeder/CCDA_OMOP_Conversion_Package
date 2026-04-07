@@ -1,0 +1,2 @@
+observation_id,person_id,observation_concept_id,observation_date,observation_datetime,observation_type_concept_id,value_as_number,value_as_string,value_as_concept_id,qualifier_concept_id,unit_concept_id,provider_id,visit_occurrence_id,visit_detail_id,observation_source_value,observation_source_concept_id,unit_source_value,qualifier_source_value,filename,cfg_name
+2135406543911882,1501606930159724,3021806,2011-02-03,,32827,,,,,,,,,8677-7|2.16.840.1.113883.6.1,,,,Testcase_368-observation.xml,Procedure_activity_act_observation

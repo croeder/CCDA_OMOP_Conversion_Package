@@ -1,0 +1,2 @@
+person_id,gender_concept_id,year_of_birth,month_of_birth,day_of_birth,birth_datetime,race_concept_id,ethnicity_concept_id,location_id,provider_id,care_site_id,person_source_value,gender_source_value,gender_source_concept_id,race_source_value,race_source_concept_id,ethnicity_source_value,ethnicity_source_concept_id,filename,cfg_name
+3480161720501515,0,1980,1,12,1980-01-12,0,0,2956139368317343,,0,,,,another-bad-code,,,,test_369_race_12_full_fallback_sdtc_bad.xml,Person

@@ -13,7 +13,7 @@ rm -f output/*
 # run the main conversion and compare
 cd src
 #python3 -m ccda_to_omop.layer_datasets -d resources -c
-python3 -m ccda_to_omop.data_driven_parse -d ../resources 
+python3 -m ccda_to_omop.data_driven_parse -d ../resources -c
 
 # load into DuckDB for constraint errors
 ## python3 -m omop.setup_omop

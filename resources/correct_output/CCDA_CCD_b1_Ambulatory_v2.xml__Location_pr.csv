@@ -1,0 +1,2 @@
+location_id,address_1,address_2,city,state,zip,county,location_source_value,filename
+3688046635632096,1002 Healthcare Dr,0,Portland,OR,97266,0,0,CCDA_CCD_b1_Ambulatory_v2.xml

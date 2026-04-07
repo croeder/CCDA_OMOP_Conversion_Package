@@ -1,0 +1,2 @@
+location_id,address_1,address_2,city,state,zip,county,location_source_value,filename
+860801534975864,1357 Amber Drive,0,Beaverton,OR,97006,0,0,CCDA_CCD_b1_InPatient_v2.xml
