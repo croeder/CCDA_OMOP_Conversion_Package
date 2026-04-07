@@ -158,8 +158,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | s
                         else:
                             prepared_value = domain_data_dict[field]
 
-                        if prepared_value != prepared_value:
-                            # for debuggin in Spark, raise exception
+                        if prepared_value is not None and pd.isna(prepared_value):  # NaN/NaT check, not None
                             msg=f"layered_datasets.create_omop_domain_dataframes() NaN/NaT {config_name} {field} {prepared_value} <--"
                             raise Exception(msg)
 

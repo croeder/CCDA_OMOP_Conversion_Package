@@ -182,7 +182,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             if field_details_dict['data_type'] == 'DATE':
                 try:
                     attribute_value = cast_to_date(attribute_value)
-                    if attribute_value != attribute_value:
+                    if attribute_value is not None and pd.isna(attribute_value):
                         attribute_value = None
                         #attribute_value = datetime.date.fromisoformat("1970-01-01")
                 except Exception as e:
@@ -193,7 +193,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             elif field_details_dict['data_type'] == 'DATETIME':
                 try:
                     attribute_value = cast_to_datetime(attribute_value)
-                    if attribute_value != attribute_value:
+                    if attribute_value is not None and pd.isna(attribute_value):
                         attribute_value = None
                         #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
                 except Exception as e:
@@ -250,18 +250,15 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
             else:
                 logger.warning(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
 
-            #if attribute_value is None or attribute_value != attribute_value:
-            if attribute_value != attribute_value: # checking for NaN or NaT, but not None
-                #raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(2)! {config_name} {field_tag}")
-                wth = f"No  NaNs or NaTs allowed(2)! {config_name} {field_tag}" 
+            if attribute_value is not None and pd.isna(attribute_value):  # NaN/NaT check, not None
+                wth = f"No  NaNs or NaTs allowed(2)! {config_name} {field_tag}"
                 raise Exception(wth)
             return attribute_value
 
         else:
             logger.warning(f" no value: {field_details_dict['data_type']} {config_name} {field_tag}")
 
-        #if attribute_value is None or attribute_value != attribute_value:
-        if attribute_value != attribute_value: # checking for NaN or NaT, but not None
+        if attribute_value is not None and pd.isna(attribute_value):  # NaN/NaT check, not None
             if field_details_dict['data_type'] == 'DATETIME' or field_details_dict['data_type'] == 'DATE':
                 attribute_value=datetime.date.fromisoformat("1970-01-01")
                 return attribute_value
@@ -271,10 +268,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 raise Exception(wth)
                 return None
     else:
-        #if attribute_value is None or attribute_value != attribute_value:
-        if attribute_value != attribute_value:
-            #raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(3)! {config_name} {field_tag}")
-            wth = f"No  NaNs or NaTs allowed(3)! {config_name} {field_tag}" 
+        if attribute_value is not None and pd.isna(attribute_value):  # NaN/NaT check, not None
+            wth = f"No  NaNs or NaTs allowed(3)! {config_name} {field_tag}"
             raise Exception(wth)
         return attribute_value
 
