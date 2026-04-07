@@ -43,8 +43,6 @@ class VocabContext:
 
     def __init__(self):
         self.codemap_dict = None
-        self.valueset_dict = None
-        self.visitmap_dict = None
         self.partner_map = None
         self.mspi_lookup_map = None
 
@@ -67,27 +65,6 @@ def set_codemap_dict(map: dict | None) -> None:
 def get_codemap_dict() -> dict | None:
     return _context.codemap_dict
 
-
-def set_valueset_dict(map: dict | None) -> None:
-    if map is not None:
-        logger.info(f"set_valueset_dict {len(map)}")
-    else:
-        logger.info("set_valueset_dict None map")
-    _context.valueset_dict = map
-
-def get_valueset_dict() -> dict | None:
-    return _context.valueset_dict
-
-
-def set_visitmap_dict(map: dict | None) -> None:
-    if map is not None:
-        logger.info(f"set_visitmap_dict {len(map)}")
-    else:
-        logger.info("set_visitmap_dict None map")
-    _context.visitmap_dict = map
-
-def get_visitmap_dict() -> dict | None:
-    return _context.visitmap_dict
 
 
 def cast_as_string(args_dict: dict[str, any]) -> str | None:

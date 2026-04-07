@@ -267,7 +267,7 @@ def process_string(contents: str, filepath: str, write_csv_flag: bool) -> dict[s
 
 
 @typechecked
-def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, codemap_dict: dict, visit_map_dict: dict, valueset_map_dict: dict, mspi_map_dict: dict | None, partner_map_dict: dict | None) -> dict[str, list[dict]]:
+def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, codemap_dict: dict, mspi_map_dict: dict | None, partner_map_dict: dict | None) -> dict[str, list[dict]]:
     """
         Processes an XML CCDA string, returns data as Python structures.
 
@@ -277,8 +277,6 @@ def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, c
         Returns  dict of column lists
     """
     VT.set_codemap_dict(codemap_dict)
-    VT.set_valueset_dict(valueset_map_dict)
-    VT.set_visitmap_dict(visit_map_dict)
 
     if mspi_map_dict:
         VT.set_mspi_map(mspi_map_dict)
@@ -287,25 +285,11 @@ def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, c
 
     if len(VT.get_codemap_dict()) < 1:
         raise Exception(f"codemap length {len(VT.get_codemap_dict())}")
-    if len(VT.get_valueset_dict() ) < 1:    
-        raise Exception(f"valueset map length {len(VT.get_valueset_dict())}" )
-    if len(VT.get_visitmap_dict() ) < 1:
-        raise Exception(f"visit map length {len(VT.get_visitmap_dict())}" )
 
     test_value = codemap_dict[('2.16.840.1.113883.6.96', '608837004')]
     if test_value[0]['target_concept_id'] != 1340204:
         msg=f"codemap_xwalk test failed to deliver correct code, got: {test_value}"
         raise Exception(msg)
-
-    test_value = valueset_map_dict[('2.16.840.1.113883.6.238','2106-3')]
-    if test_value[0]['target_concept_id'] != '8527':
-                msg=f"valueset map test failed to deliver correct code, got: {test_value}"
-                raise Exception(msg)
-
-    test_value = visit_map_dict[('2.16.840.1.113883.6.259','1026-4')]
-    if test_value[0]['target_concept_id'] != '9201':
-                msg=f"visit map test failed to deliver correct code, got: {test_value}"
-                raise Exception(msg)
 
     omop_data = DDP.parse_string(contents, filepath, get_meta_dict())
 
@@ -473,16 +457,6 @@ def main() -> None:
         codemap_dict = U.create_codemap_dict(codemap_df)
         logger.error(f"CODEMAP  {len(codemap_dict)}")
         VT.set_codemap_dict(codemap_dict)
-
-        visit_map_df = Dataset.get("visit_concept_xwalk_mapping_dataset").read_table(format="pandas")
-        visitmap_dict = U.create_visit_dict(visit_map_df)
-        logger.error(f"VISITMAP  {len(visitmap_dict)}")
-        VT.set_visitmap_dict(visitmap_dict)
-
-        valueset_map_df = Dataset.get("ccda_value_set_mapping_table_dataset").read_table(format="pandas")
-        valueset_dict = U.create_valueset_dict(valueset_map_df)
-        logger.error(f"VALUESET  {len(valueset_dict)}")
-        VT.set_valueset_dict(valueset_dict)
 
         metadata_df = Dataset.get("ccda_response_metadata").read_table(format="pandas")
         # Create a dictionary: { 'filename.xml': mspi_value }
