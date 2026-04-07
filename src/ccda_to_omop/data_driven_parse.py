@@ -190,10 +190,10 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                     if attribute_value is not None and pd.isna(attribute_value):
                         attribute_value = None
                         #attribute_value = datetime.date.fromisoformat("1970-01-01")
-                except Exception as e:
+                except (ValueError, TypeError) as e:
                     attribute_value = None
                     #attribute_value = datetime.date.fromisoformat("1970-01-01")
-                    logger.warning(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to date failed for config:{config_name} field:{field_tag} val:{attribute_value}: {e}")
 
             elif field_details_dict['data_type'] == 'DATETIME':
                 try:
@@ -201,16 +201,16 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                     if attribute_value is not None and pd.isna(attribute_value):
                         attribute_value = None
                         #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
-                except Exception as e:
+                except (ValueError, TypeError) as e:
                     attribute_value = None
                     #attribute_value = datetime.datetime.fromisoformat("1970-01-01T00:00:00")
-                    logger.warning(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}") 
+                    logger.warning(f"cast to datetime failed for config:{config_name} field:{field_tag} val:{attribute_value}: {e}")
 
             elif field_details_dict['data_type'] == 'DATETIME_LOW':
                 try:
                     args = {'input_value': attribute_value, 'default': None}
                     attribute_value = VT.transform_datetime_low(args)
-                except Exception as e:
+                except (ValueError, TypeError) as e:
                     attribute_value = None
                     logger.warning(f"DATETIME_LOW conversion failed for {config_name}/{field_tag}: {e}")
 
@@ -218,7 +218,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 try:
                     args = {'input_value': attribute_value, 'default': None}
                     attribute_value = VT.transform_datetime_high(args)
-                except Exception as e:
+                except (ValueError, TypeError) as e:
                     attribute_value = None
                     logger.warning(f"DATETIME_HIGH conversion failed for {config_name}/{field_tag}: {e}")
 
