@@ -970,20 +970,8 @@ def parse_doc(file_path,
         #else:
         #    print(f"\nSKIPPING config \"{config_name}\" ")
 
-    # Try:
     if DO_VISIT_DETAIL:
-        try:
-            omop_dict = VR.reclassify_nested_visit_occurrences_as_detail(omop_dict)
-    # No. Crash loudly and publicly if this threw an exception that is so mysterious
-    # we catch with something as broad as Exception.
-    # We are not operating on such a tight schedule that glossing over an unknown
-    # here, and hoping the error is noticed in the logs.  There is no automated
-    # process for scanning them. It's a human effort that never happens in
-    # production.
-        except Exception as e:
-            logger.error(f"Error processing visit hierarchy in file: {e}")
-            logger.error(traceback.format_exc())
-    #    # Continue with original data if hierarchy processing fails
+        omop_dict = VR.reclassify_nested_visit_occurrences_as_detail(omop_dict)
 
     return omop_dict
 
