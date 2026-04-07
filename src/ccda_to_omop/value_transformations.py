@@ -27,11 +27,34 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# --- Start of Moved Code from __init__.py ---
-# These dictionaries are now defined and handled here.
-codemap_dict = None
-valueset_dict = None
-visitmap_dict = None
+class VocabContext:
+    """Holds the vocabulary lookup maps used by transformation functions.
+
+    A single module-level instance (_context) is used at runtime.  Tests can
+    call reset() between cases to guarantee isolation without relying on
+    import order or global keyword side-effects.
+
+    Full dependency injection is not yet possible because transformation
+    functions are referenced by name in metadata configs and are called with
+    only args_dict.  This class is the first step: all mutable state lives
+    here rather than as bare module globals, which eliminates the 'global'
+    keyword and makes the state easy to inspect and reset.
+    """
+
+    def __init__(self):
+        self.codemap_dict = None
+        self.valueset_dict = None
+        self.visitmap_dict = None
+        self.partner_map = None
+        self.mspi_lookup_map = None
+
+
+_context = VocabContext()
+
+
+def reset_context():
+    """Reset all vocab maps to None.  Call between test cases for isolation."""
+    _context.__init__()
 
 
 def set_codemap_dict(map):
@@ -39,11 +62,10 @@ def set_codemap_dict(map):
         logger.info(f"set_codemap_dict {len(map)}")
     else:
         logger.info("set_codemap_dict None map")
-    global codemap_dict
-    codemap_dict = map
+    _context.codemap_dict = map
 
 def get_codemap_dict():
-    return codemap_dict
+    return _context.codemap_dict
 
 
 def set_valueset_dict(map):
@@ -51,11 +73,10 @@ def set_valueset_dict(map):
         logger.info(f"set_valueset_dict {len(map)}")
     else:
         logger.info("set_valueset_dict None map")
-    global valueset_dict
-    valueset_dict = map 
+    _context.valueset_dict = map
 
 def get_valueset_dict():
-    return valueset_dict
+    return _context.valueset_dict
 
 
 def set_visitmap_dict(map):
@@ -63,11 +84,10 @@ def set_visitmap_dict(map):
         logger.info(f"set_visitmap_dict {len(map)}")
     else:
         logger.info("set_visitmap_dict None map")
-    global visitmap_dict
-    visitmap_dict = map
+    _context.visitmap_dict = map
 
 def get_visitmap_dict():
-    return visitmap_dict
+    return _context.visitmap_dict
 
 
 def cast_as_string(args_dict):
@@ -326,16 +346,12 @@ def concat_fields(args_dict):
     
 ####################################################################################################
 
-partner_map = None
-mspi_lookup_map = None 
-
 def set_partner_map(m):
     """Initializes the partner map on the executor."""
-    global partner_map
-    partner_map = m
+    _context.partner_map = m
 
 def get_partner_map():
-    return partner_map
+    return _context.partner_map
 
 def get_data_partner_id(args_dict):
     """
@@ -353,11 +369,10 @@ def get_data_partner_id(args_dict):
 
 def set_mspi_map(m):
     """Initializes the MSPI (person_id) map on the executor."""
-    global mspi_lookup_map
-    mspi_lookup_map = m
+    _context.mspi_lookup_map = m
 
 def get_mspi_map():
-    return mspi_lookup_map
+    return _context.mspi_lookup_map
 
 def map_filename_to_mspi(args_dict):
     """
