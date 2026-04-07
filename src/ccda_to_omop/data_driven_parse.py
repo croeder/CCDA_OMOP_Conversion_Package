@@ -944,20 +944,70 @@ def parse_string(ccda_string, file_path,
 
 
 @typechecked
-def parse_doc(file_path, 
+def validate_ccda_document(file_path, tree) -> list[str]:
+    """Validate that a parsed lxml tree looks like a conformant CCDA document.
+
+    Checks performed:
+    - Root element is ClinicalDocument in the HL7 v3 namespace
+    - Document contains at least one structuredBody/component section
+
+    Args:
+        file_path: Path to the source file (used in error messages only).
+        tree: lxml ElementTree returned by ET.parse().
+
+    Returns:
+        List of human-readable error strings. Empty list means the document
+        passed all checks.
+    """
+    errors = []
+    ns = {'hl7': 'urn:hl7-org:v3'}
+    root = tree.getroot()
+
+    # Check root element namespace and local name
+    expected_tag = '{urn:hl7-org:v3}ClinicalDocument'
+    if root.tag != expected_tag:
+        errors.append(
+            f"{file_path}: root element is <{root.tag}>, "
+            f"expected <{expected_tag}> — not a valid CCDA document"
+        )
+        return errors  # further checks won't be meaningful
+
+    # Check that at least one structuredBody section is present
+    sections = tree.xpath(
+        '//hl7:structuredBody/hl7:component/hl7:section',
+        namespaces=ns
+    )
+    if not sections:
+        errors.append(
+            f"{file_path}: no structuredBody/component/section elements found — "
+            "document may be empty or use an unsupported CCDA structure"
+        )
+
+    return errors
+
+
+def parse_doc(file_path,
               metadata :dict[str, dict[str, dict[str, str]]],
-              parse_config : str) -> dict[str, 
+              parse_config : str) -> dict[str,
                       list[ dict[str,  None | str | float | int | int64] | None  ] | None]:
     """ Parses many meta configs from a single file, collects them in omop_dict.
         - file_path
         - metadata
         - parse_config the name of a single config to run, all if None.
-        Returns omop_dict, a  dict keyed by configuration names, 
+        Returns omop_dict, a  dict keyed by configuration names,
           each a list of record/row dictionaries.
     """
     omop_dict = {}
-    pk_dict = defaultdict(list) 
-    tree = ET.parse(file_path)
+    pk_dict = defaultdict(list)
+    try:
+        tree = ET.parse(file_path)
+    except ET.XMLSyntaxError as e:
+        logger.error(f"parse_doc: XML parse failure in {file_path}: {e}")
+        raise
+
+    validation_errors = validate_ccda_document(file_path, tree)
+    for err in validation_errors:
+        logger.warning(err)
     base_name = os.path.basename(file_path)
     for config_name, config_dict in metadata.items():
         if parse_config is None or parse_config == '' or parse_config == config_name:

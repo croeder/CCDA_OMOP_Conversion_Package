@@ -82,7 +82,7 @@ metadata = {
         'device_exposure_start_date_low': {
     	    'config_type': 'FIELD',
             'data_type':'DATE',
-    	    'element': "../../..hl7:effectiveTime/hl7:low",
+    	    'element': "../../../hl7:effectiveTime/hl7:low",
     	    'attribute': "value",
             'priority': ('device_exposure_start_date', 1)
     	},
