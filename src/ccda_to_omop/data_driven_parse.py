@@ -77,7 +77,7 @@ from numpy import int32
 from numpy import int64
 from collections import defaultdict
 from lxml import etree as ET
-from lxml.etree import XPathEvalError
+from lxml.etree import XPathEvalError, XPathError
 from typeguard import typechecked
 
 from ccda_to_omop import value_transformations as VT
@@ -873,11 +873,11 @@ def parse_config_from_xml_file(tree, config_name,
     logger.info((f"CONFIG >>  config:{config_name} root:{config_dict['root']['element']}"
                  f"   ROOT path:{root_path}"))
     #root_element_list = tree.findall(config_dict['root']['element'], ns)
-    root_element_list = None
+    root_element_list = []
     try:
         root_element_list = tree.xpath(config_dict['root']['element'], namespaces=ns)
-    except Exception as e:
-        logger.error(f" {config_dict['root']['element']} config:{config_name}   {e}")
+    except XPathError as e:
+        logger.error(f"XPath query failed for config:{config_name} path:{config_dict['root']['element']}  {e}")
         
     if root_element_list is None or len(root_element_list) == 0:
         logger.info((f"CONFIG couldn't find root element for {config_name}"
