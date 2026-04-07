@@ -73,32 +73,6 @@ def create_codemap_dict(codemap_df: pd.DataFrame) -> dict:
     return codemap_dict
     
 
-def create_valueset_dict(codemap_df: pd.DataFrame) -> dict:
-    logger.info(f"w xwalk create_valueset_dict {type(codemap_df)}  {len(codemap_df)}")
-    codemap_dict = {}
-    for _, row in codemap_df.iterrows():
-        if (row['codeSystem'], row['src_cd']) not in codemap_dict:
-            codemap_dict[(row['codeSystem'], row['src_cd'])] = []
-        codemap_dict[(row['codeSystem'], row['src_cd'])].append({
-            'source_concept_id': None,
-            'target_domain_id': row['target_domain_id'],
-            'target_concept_id': row['target_concept_id'] })
-
-    return codemap_dict
-
-
-def create_visit_dict(codemap_df: pd.DataFrame) -> dict:
-    logger.info(f"w xwalk create_visit_dict {type(codemap_df)} {len(codemap_df)}")
-    codemap_dict = {}
-    for _, row in codemap_df.iterrows():
-        if (row['codeSystem'], row['src_cd']) not in codemap_dict:
-            codemap_dict[(row['codeSystem'], row['src_cd'])] = []
-        codemap_dict[(row['codeSystem'], row['src_cd'])].append({
-            'source_concept_id': None,
-            'target_domain_id': row['target_domain_id'],
-            'target_concept_id': row['target_concept_id'] })
-
-    return codemap_dict
 
 
 @typechecked
