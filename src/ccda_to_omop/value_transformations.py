@@ -362,7 +362,7 @@ def map_filename_to_mspi(args_dict: dict[str, any]) -> int:
 
 
 @typechecked
-def transform_datetime_low(args) -> datetime.datetime :
+def transform_datetime_low(args) -> datetime.datetime | None:
     """
     Transforms a date-only string into a full ISO 8601 datetime defaulting to 00:00:00.
     
@@ -385,7 +385,7 @@ def transform_datetime_low(args) -> datetime.datetime :
     return cast_to_datetime(val_str)
 
 @typechecked
-def transform_datetime_high(args) -> datetime.datetime:
+def transform_datetime_high(args) -> datetime.datetime | None:
     """
     Transforms a date-only string into a full ISO 8601 datetime defaulting to 23:59:59.
     
