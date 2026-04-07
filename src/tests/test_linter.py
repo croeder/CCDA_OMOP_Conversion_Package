@@ -1,6 +1,14 @@
 
 import unittest
+from lxml import etree as ET
 import ccda_to_omop.metadata as MD
+
+# Namespace map used in all CCDA XPath expressions
+NS = {
+    'hl7': 'urn:hl7-org:v3',
+    'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+    'sdtc': 'urn:hl7-org:sdtc',
+}
 
 
 
@@ -219,6 +227,63 @@ class Linter(unittest.TestCase):
             #self.assertTrue(field_config['constant_value'] not in bad_news)
 
 
+    def check_xpath_syntax(self, config, config_name):
+        """Validate XPath syntax on all element fields using lxml.etree.XPath()."""
+        for field_name, field_config in config.items():
+            config_type = field_config.get('config_type')
+            if config_type in ('FIELD', 'PK', 'ROOT') and 'element' in field_config:
+                xpath_expr = field_config['element']
+                try:
+                    ET.XPath(xpath_expr, namespaces=NS)
+                except ET.XPathSyntaxError as e:
+                    print(f"ERROR: invalid XPath in {config_name}/{field_name}: {xpath_expr!r} — {e}")
+                    self.fail(f"XPath syntax error in {config_name}/{field_name}: {e}")
+
+
+    def check_circular_dependencies(self, config, config_name):
+        """Detect circular dependencies in DERIVED and FK field references."""
+        # Build adjacency: field -> set of fields it depends on
+        deps = {}
+        for field_name, field_config in config.items():
+            config_type = field_config.get('config_type')
+            if config_type == 'DERIVED':
+                deps[field_name] = set(
+                    v for k, v in field_config.get('argument_names', {}).items()
+                    if k != 'default' and v in config
+                )
+            elif config_type == 'FK':
+                # FK targets reference the pk_dict (populated by another config),
+                # not a field in this config — skip to avoid false self-loop positives.
+                deps[field_name] = set()
+            elif config_type == 'HASH':
+                deps[field_name] = set(
+                    f for f in field_config.get('fields', []) if f in config
+                )
+            else:
+                deps[field_name] = set()
+
+        # DFS cycle detection
+        WHITE, GRAY, BLACK = 0, 1, 2
+        color = {f: WHITE for f in deps}
+
+        def dfs(node, path):
+            color[node] = GRAY
+            for neighbor in deps.get(node, set()):
+                if neighbor not in color:
+                    continue
+                if color[neighbor] == GRAY:
+                    cycle = ' -> '.join(path + [neighbor])
+                    print(f"ERROR: circular dependency in {config_name}: {cycle}")
+                    self.fail(f"Circular dependency in {config_name}: {cycle}")
+                elif color[neighbor] == WHITE:
+                    dfs(neighbor, path + [neighbor])
+            color[node] = BLACK
+
+        for field_name in list(deps.keys()):
+            if color[field_name] == WHITE:
+                dfs(field_name, [field_name])
+
+
     def check_parameters_by_field_type(self, config, config_name):
         for field_name in config.keys():
             if 'config_type' not in config[field_name]:
@@ -382,9 +447,11 @@ for config_name in  meta_dict.keys():
             config_dict = meta_dict[config_name]
             #print(f"testing {config_name} {config_dict.keys()}")
             print(f"\ntesting {config_name}")
-            #self._check_for_domain_id(config_name) 
+            #self._check_for_domain_id(config_name)
             self.check_priority_chains(config_dict, config_name)
             self.check_parameters_by_field_type(config_dict, config_name)
+            self.check_xpath_syntax(config_dict, config_name)
+            self.check_circular_dependencies(config_dict, config_name)
         # changes the name of the _test_method just created, effectively creating a new function.
         setattr(Linter, f"test_{config_name}", _test_method)
     
