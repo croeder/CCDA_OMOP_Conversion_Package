@@ -311,7 +311,10 @@ def do_constant_fields(output_dict :OMOPRecord,
         if config_type_tag == 'CONSTANT':
             constant_value = field_details_dict['constant_value']
             if isinstance(constant_value, str):
-                output_dict[field_tag] = constant_value.strip()[:allowed_length]
+                stripped = constant_value.strip()
+                if len(stripped) > allowed_length:
+                    logger.warning(f"TRUNCATING CONSTANT {config_name}/{field_tag}: length {len(stripped)} -> {allowed_length}")
+                output_dict[field_tag] = stripped[:allowed_length]
             else:
                 output_dict[field_tag] = constant_value
 
@@ -347,6 +350,8 @@ def do_basic_fields(output_dict :OMOPRecord,
                                                     config_name, field_tag, root_path)
                 if isinstance(attribute_value, str):
                     attribute_value = re.sub(r'\n+', ' ', attribute_value)
+                    if len(attribute_value) > allowed_length:
+                        logger.warning(f"TRUNCATING FIELD {config_name}/{field_tag}: length {len(attribute_value)} -> {allowed_length}")
                     output_dict[field_tag] = attribute_value[:allowed_length]
                 else:
                     output_dict[field_tag] = attribute_value
@@ -364,7 +369,9 @@ def do_basic_fields(output_dict :OMOPRecord,
             attribute_value = parse_field_from_dict(field_details_dict, root_element,
                                                     config_name, field_tag, root_path)
             if isinstance(attribute_value, str):
-                attribute_value = re.sub(r'\n+', ' ', attribute_value) 
+                attribute_value = re.sub(r'\n+', ' ', attribute_value)
+                if len(attribute_value) > allowed_length:
+                    logger.warning(f"TRUNCATING PK {config_name}/{field_tag}: length {len(attribute_value)} -> {allowed_length}")
                 output_dict[field_tag] = attribute_value[:allowed_length]
             else:
                 output_dict[field_tag] = attribute_value
@@ -486,7 +493,10 @@ def do_derived_fields(output_dict: OMOPRecord,
                 function_value = field_details_dict['FUNCTION'](args_dict)
                 
                 if isinstance(function_value, str):
-                    final_value = function_value.strip()[:allowed_length]
+                    stripped = function_value.strip()
+                    if len(stripped) > allowed_length:
+                        logger.warning(f"TRUNCATING DERIVED {config_name}/{field_tag}: length {len(stripped)} -> {allowed_length}")
+                    final_value = stripped[:allowed_length]
                 else:
                     final_value = function_value
                 output_dict[field_tag] = final_value
