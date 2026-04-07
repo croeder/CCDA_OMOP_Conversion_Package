@@ -54,19 +54,21 @@ def generate_cfg_name_to_domain_map() -> Dict[str, str]:
                 spec.loader.exec_module(module)
 
                 # Check if the module has the required 'metadata' dictionary
-                if hasattr(module, 'metadata'):
-                    # --- CORE LOGIC: Extract the mapping ---
-                    # Iterate through the top-level keys in the metadata dict
+                if not hasattr(module, 'metadata'):
+                    logging.warning(f"Module '{module_name}' does not contain a 'metadata' attribute.")
+                elif not isinstance(module.metadata, dict):
+                    logging.warning(f"Module '{module_name}' has a 'metadata' attribute that is not a dict (got {type(module.metadata).__name__}).")
+                else:
                     for config_name, domain_details in module.metadata.items():
-                        # Safely get the nested 'expected_domain_id'
+                        if not isinstance(domain_details, dict):
+                            logging.warning(f"'{config_name}' in '{filename}' has a non-dict value; skipping.")
+                            continue
                         root_info = domain_details.get('root', {})
                         expected_domain = root_info.get('expected_domain_id')
                         if expected_domain:
                             domain_map[config_name] = expected_domain
                         else:
                             logging.warning(f"'{config_name}' in '{filename}' is missing 'expected_domain_id'.")
-                else:
-                    logging.warning(f"Module '{module_name}' does not contain a 'metadata' dictionary.")
             except Exception as e:
                 logging.error(f"Failed to process metadata from '{filename}': {e}")
 
