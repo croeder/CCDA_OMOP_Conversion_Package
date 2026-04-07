@@ -5,6 +5,7 @@ import pandas as pd
 from ccda_to_omop.util import cast_to_date
 from ccda_to_omop.util import cast_to_datetime
 from ccda_to_omop import package_constant_access
+from ccda_to_omop.constants import HL7_DATE_LENGTH, ISO_DATE_LENGTH, DATETIME_LOW_SUFFIX, DATETIME_HIGH_SUFFIX
 import logging
 
 """
@@ -376,11 +377,11 @@ def transform_datetime_low(args) -> datetime.datetime | None:
     
     val_str = str(val).strip()
     # HL7 format (YYYYMMDD)
-    if len(val_str) == 8 and val_str.isdigit():
-        return cast_to_datetime(f"{val_str[:4]}-{val_str[4:6]}-{val_str[6:]}T00:00:00.000Z")
+    if len(val_str) == HL7_DATE_LENGTH and val_str.isdigit():
+        return cast_to_datetime(f"{val_str[:4]}-{val_str[4:6]}-{val_str[6:]}{DATETIME_LOW_SUFFIX}")
     # ISO 8601 format (YYYY-MM-DD)
-    if len(val_str) == 10 and '-' in val_str:
-        return cast_to_datetime(f"{val_str}T00:00:00.000Z")
+    if len(val_str) == ISO_DATE_LENGTH and '-' in val_str:
+        return cast_to_datetime(f"{val_str}{DATETIME_LOW_SUFFIX}")
     
     return cast_to_datetime(val_str)
 
@@ -399,10 +400,10 @@ def transform_datetime_high(args) -> datetime.datetime | None:
     
     val_str = str(val).strip()
     # HL7 format (YYYYMMDD)
-    if len(val_str) == 8 and val_str.isdigit():
-        return cast_to_datetime(f"{val_str[:4]}-{val_str[4:6]}-{val_str[6:]}T23:59:59.000Z")
+    if len(val_str) == HL7_DATE_LENGTH and val_str.isdigit():
+        return cast_to_datetime(f"{val_str[:4]}-{val_str[4:6]}-{val_str[6:]}{DATETIME_HIGH_SUFFIX}")
     # ISO 8601 format (YYYY-MM-DD)
-    if len(val_str) == 10 and '-' in val_str:
-        return cast_to_datetime(f"{val_str}T23:59:59.000Z")
+    if len(val_str) == ISO_DATE_LENGTH and '-' in val_str:
+        return cast_to_datetime(f"{val_str}{DATETIME_HIGH_SUFFIX}")
 
     return cast_to_datetime(val_str)

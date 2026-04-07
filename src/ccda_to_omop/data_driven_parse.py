@@ -89,6 +89,7 @@ from ccda_to_omop.util import cast_to_date
 from ccda_to_omop.util import cast_to_datetime
 
 from ccda_to_omop import visit_reconciliation as VR
+from ccda_to_omop.constants import MAX_FIELD_LENGTH
 import re
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,6 @@ logger.setLevel(logging.ERROR)
 OMOPRecord = dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date]
 
 DO_VISIT_DETAIL = False
-MAX_FIELD_LENGTH=50
 
 ns = {
    # '': 'urn:hl7-org:v3',  # default namespace
@@ -271,8 +271,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
 
         if attribute_value is not None and pd.isna(attribute_value):  # NaN/NaT check, not None
             if field_details_dict['data_type'] == 'DATETIME' or field_details_dict['data_type'] == 'DATE':
-                attribute_value=datetime.date.fromisoformat("1970-01-01")
-                return attribute_value
+                return None
             else:
                 #raise Exception(f"No Nones, N/As, NaNs or NaTs allowed(1)! {config_name} {field_tag}")
                 wth = f"No NaNs or NaTs allowed(1)! {config_name} {field_tag}" 
