@@ -16,7 +16,7 @@ jobs:
           - name: get the concept map file
             run: |
               wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
-                   --header="Accept: application/vnd.github.v3.raw" \
+                   --header="Accept: */*" \
                    -O resources/map.csv \
                    "https://github.com"
           - name: Run tests with coverage
