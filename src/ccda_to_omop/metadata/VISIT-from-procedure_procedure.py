@@ -191,7 +191,6 @@ not_running_this_one = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_encounter',
                 'vocabulary_oid': 'visit_concept_codeSystem_encounter',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 1]
         },
@@ -240,7 +239,6 @@ not_running_this_one = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans1',
                 'vocabulary_oid': 'visit_concept_system_trans1',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 2]
         },
@@ -289,7 +287,6 @@ not_running_this_one = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans2',
                 'vocabulary_oid': 'visit_concept_system_trans2',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 3]
         },
@@ -338,7 +335,6 @@ not_running_this_one = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans3',
                 'vocabulary_oid': 'visit_concept_system_trans3',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 4]
         },
@@ -387,7 +383,6 @@ not_running_this_one = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans4',
                 'vocabulary_oid': 'visit_concept_system_trans4',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 5]
         },

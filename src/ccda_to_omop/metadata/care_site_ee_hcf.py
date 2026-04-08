@@ -67,7 +67,6 @@ metadata = {
             'argument_names': {
                     'concept_code': 'place_of_service_concept_code',
                     'vocabulary_oid': 'place_of_service_concept_codeSystem',
-                    'default': 0
             },
             'order': 3
         },
@@ -103,7 +102,6 @@ metadata = {
             'argument_names':{
                 'first_field': 'place_of_service_concept_code',
                 'second_field': 'place_of_service_concept_codeSystem',
-                'default' : 'error'
             },
             'order': 6
         },

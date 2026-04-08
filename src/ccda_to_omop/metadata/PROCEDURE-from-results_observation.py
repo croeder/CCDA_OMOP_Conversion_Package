@@ -54,7 +54,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'procedure_concept_code',
                 'vocabulary_oid': 'procedure_concept_codeSystem',
-                'default': 0
             },
             'order': 3
         },
@@ -66,7 +65,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'procedure_concept_code',
                 'vocabulary_oid': 'procedure_concept_codeSystem',
-                'default': 0
             }
         },
 

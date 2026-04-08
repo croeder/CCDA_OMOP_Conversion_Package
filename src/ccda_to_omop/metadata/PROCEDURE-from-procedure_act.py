@@ -55,7 +55,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'procedure_concept_id_code',
                 'vocabulary_oid': 'procedure_concept_id_codeSystem',
-                'default': 0
             },
             'order': 3
         },
@@ -66,7 +65,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'procedure_concept_id_code',
                 'vocabulary_oid': 'procedure_concept_id_codeSystem',
-                'default': 0
             }
         },
 
@@ -151,7 +149,6 @@ metadata = {
             'argument_names': {
                 'first_field': 'procedure_concept_id_code',
                 'second_field': 'procedure_concept_id_codeSystem',
-                'default': 'error'
             },
             'order': 12
         },
@@ -162,7 +159,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'procedure_concept_id_code',
                 'vocabulary_oid': 'procedure_concept_id_codeSystem',
-                'default': 0
             },
             'order': 13
         },

@@ -64,7 +64,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'measurement_concept_code',
                 'vocabulary_oid': 'measurement_concept_codeSystem',
-                'default': 0
             },
             'order': 3
         },
@@ -75,7 +74,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'measurement_concept_code',
                 'vocabulary_oid': 'measurement_concept_codeSystem',
-                'default': 0
             }
         },
 
@@ -181,7 +179,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'value_as_code_CD',
                 'vocabulary_oid': 'value_as_codeSystem_CD',
-                'default': None
             },
             'priority': ['value_as_concept_id', 2]
         },
@@ -201,7 +198,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'value_as_code_CE',
                 'vocabulary_oid': 'value_as_codeSystem_CE',
-                'default': None
             },
             'priority': ['value_as_concept_id', 1]
         },
@@ -221,7 +217,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'value_as_code_XX',
                 'vocabulary_oid': 'value_as_codeSystem_XX',
-                'default': None
             },
             'priority': ['value_as_concept_id', 3]
         },
@@ -246,7 +241,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'unit_source_value',
                 'vocabulary_oid': 'unit_codeSystem',
-                'default': None
             },
             'order': 11
         },

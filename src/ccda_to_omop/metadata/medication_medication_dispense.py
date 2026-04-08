@@ -69,7 +69,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code',
                 'vocabulary_oid': 'drug_concept_codeSystem',
-                'default': 0
             },
             'order': 3
         },
@@ -80,7 +79,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code',
                 'vocabulary_oid': 'drug_concept_codeSystem',
-                'default': 0
             }
         },
 
@@ -245,7 +243,6 @@ metadata = {
             'argument_names': {
                 'first_field': 'drug_concept_code',
                 'second_field': 'drug_concept_codeSystem',
-                'default': 'error'
             },
             'order': 20
         },
@@ -256,7 +253,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code',
                 'vocabulary_oid': 'drug_concept_codeSystem',
-                'default': 0
             },
             'order': 21 },
 

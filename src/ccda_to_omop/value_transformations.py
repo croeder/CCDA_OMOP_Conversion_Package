@@ -114,7 +114,7 @@ def codemap_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
     """
 
     id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'],
-                'target_concept_id', args_dict.get('default'))
+                'target_concept_id')
 
     if id_value is not None and (id_value != 0 or package_constant_access.get_allow_no_matching_concept()):
         logger.debug(f"codemap_xwalk_concept_id concept_id is {id_value}  for {args_dict}")
@@ -130,7 +130,7 @@ def codemap_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
         throws/raises when codemap_xwalk is None
     """
     id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'],
-                'target_domain_id', args_dict.get('default'))
+                'target_domain_id')
 
     if id_value is not None:
         return str(id_value)
@@ -143,8 +143,8 @@ def codemap_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
         returns: unmapped concept_id AS INTEGER (because that's what's in the table), not necessarily standard
         throws/raises when codemap_xwalk is None
     """
-    id_value =  _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'],
-                'source_concept_id', args_dict.get('default'))
+    id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'],
+                'source_concept_id')
 
     if id_value is not None and (id_value != 0 or package_constant_access.get_allow_no_matching_concept()):
         return int32(id_value)
@@ -152,12 +152,12 @@ def codemap_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
         return None
 
 
-def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
+def _codemap_xwalk(vocabulary_oid, concept_code, column_name):
     """Look up a single column value from the codemap crosswalk dict.
 
-    Raises if the codemap is not initialized. Returns default if the
+    Raises if the codemap is not initialized. Returns None if the
     (vocabulary_oid, concept_code) key is absent or has no matching rows.
-    If NMC (no-matching-concept, value 0) is disallowed, also returns default.
+    If NMC (no-matching-concept, value 0) is disallowed, also returns None.
     """
     if get_codemap_dict() is None:
         logger.error("codemap_dict is not initialized in ccda_to_omop/value_transformations.py for value_transformations.py")
@@ -168,15 +168,15 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
         mapping_rows = codemap_xwalk_mapping_dict[(vocabulary_oid, concept_code)]
     else:
         logger.warning(f"value_transformations.py _codemap_xwalk vocabulary_id:\"{vocabulary_oid}\" ,{type(vocabulary_oid)}, code:\"{concept_code}\", {type(concept_code)}  not present or not found")
-        return default
+        return None
 
     if mapping_rows is None:
-        logger.warning(f"codemap_dict mapping_rows is None  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
-        return default
+        logger.warning(f"codemap_dict mapping_rows is None  for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name}")
+        return None
 
     if len(mapping_rows) < 1:
-        logger.warning(f"codemap_dict mapping_rows is <1 for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name} default:{default}")
-        return default
+        logger.warning(f"codemap_dict mapping_rows is <1 for vocab:{vocabulary_oid} code:{concept_code} column_name:{column_name}")
+        return None
 
     if len(mapping_rows) > 1:
         logger.warning(f"_codemap_xwalk(): more than one  concept for  \"{column_name}\" from  \"{vocabulary_oid}\" \"{concept_code}\", chose the first")
@@ -188,9 +188,8 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
         logger.error(f"value_transformations.py _codemap_xwalk doens't have the column{column_name}....{mapping_rows[0]}")
         logger.error("f (cont) {mapping_rows}")
 
-    # if NMC is disallowed, and there is a default specified, return the default
     if column_value is not None and column_value == 0 and not package_constant_access.get_allow_no_matching_concept():
-        return default
+        return None
 
     return column_value
 
