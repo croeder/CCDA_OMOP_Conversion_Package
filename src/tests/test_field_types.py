@@ -87,8 +87,8 @@ class FieldTypeTest_DERIVED(unittest.TestCase):
             # of the map file.
             # 2.16.840.1.113883.6.1,742-7,3033575,Measurement
         #    def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default)
-        self.assertEqual(VT._codemap_xwalk('2.16.840.1.113883.6.1', '742-7', 'target_concept_id', 0), 3033575)
-        self.assertEqual(VT.codemap_xwalk_concept_id({'vocabulary_oid': '2.16.840.1.113883.6.1', 'concept_code': '742-7', 'default':0}), 3033575)
+        self.assertEqual(VT._codemap_xwalk('2.16.840.1.113883.6.1', '742-7', 'target_concept_id'), 3033575)
+        self.assertEqual(VT.codemap_xwalk_concept_id({'vocabulary_oid': '2.16.840.1.113883.6.1', 'concept_code': '742-7'}), 3033575)
 
         with io.StringIO(self.xml_text) as file_obj:
             tree = ET.parse(file_obj)

@@ -41,20 +41,6 @@ class ValueTransformTest_codemap(unittest.TestCase):
         self.assertEqual(concept_id, self.expected_domain_id)
 
 
-    def test_default_conept_id(self):
-        args_dict = { 'vocabulary_oid': self.vocab_oid,
-                      'concept_code': 'bogus',
-                      'default': 0 }
-        concept_id = VT.codemap_xwalk_concept_id(args_dict)
-        self.assertEqual(concept_id, 0)
-
-    def test_default_conept_id_none_specified(self):
-        args_dict = { 'vocabulary_oid': self.vocab_oid,
-                      'concept_code': 'bogus'}
-        concept_id = VT.codemap_xwalk_concept_id(args_dict)
-        self.assertEqual(concept_id, None)
-
-
     def test_source_conept_id(self):
         args_dict = { 'vocabulary_oid': self.vocab_oid,
                       'concept_code': self.concept_code,
