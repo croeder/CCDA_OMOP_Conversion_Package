@@ -1,6 +1,6 @@
 
 
-# CCDA_OMOP_Conversion_Package ccda_to_omop
+# CCDA_OMOP_Conversion_Package:  ccda_to_omop
 
 This is a project to convert CCDA documents to OMOP CDM format in Python.
 
