@@ -60,7 +60,7 @@ metadata = {
                         'provider_id_given', 'provider_id_family',
                         'provider_id_root', 'provider_id_extension','npi','dea','specialty_concept_id',
                         'care_site_id_root', 'care_site_id_extension'
-                        #'care_site_id' # don't use a hash field in a hash field. It may not have been calculated yet
+                        # 'care_site_id' # don't use a hash field in a hash field. It may not have been calculated yet
                         ],
             'order': 1
         },
@@ -84,11 +84,11 @@ metadata = {
         },
         'dea': {
             'config_type': 'FIELD',
-            'element': 'hl7:id[@root="2.16.840.1.113883.D.E.A"]', # TODO get the correct OID
+            'element': 'hl7:id[@root="2.16.840.1.113883.D.E.A"]',  # TODO get the correct OID
             'attribute': "extension",
             'order': 4
         },
-        #<code code="207QA0505X" displayName="Adult Medicine Physician" codeSystem="2.16.840.1.113883.6.101" codeSystemName="NUCC" />
+        # <code code="207QA0505X" displayName="Adult Medicine Physician" codeSystem="2.16.840.1.113883.6.101" codeSystemName="NUCC" />
         'specialty_concept_id_code': {
             'config_type': 'FIELD',
             'element': 'hl7:code',

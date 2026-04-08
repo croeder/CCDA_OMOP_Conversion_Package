@@ -9,8 +9,8 @@ metadata = {
             'expected_domain_id': 'Drug',
             # Medication Dispense
             # Medications section, entry, substanceAdministration, entryRelationship, supply
-            #substanceAdministration/@moodCode="INT" represents intention of patient to take the  medications ?
-            #supply/@moodCode="EVN" represents medications are dispensed to the patient.
+            # substanceAdministration/@moodCode="INT" represents intention of patient to take the  medications ?
+            # supply/@moodCode="EVN" represents medications are dispensed to the patient.
             'element':
               ('./hl7:component/hl7:structuredBody/hl7:component/hl7:section'
                '/hl7:templateId[@root="2.16.840.1.113883.10.20.22.2.1" or @root="2.16.840.1.113883.10.20.22.2.1.1"]/..'
@@ -36,7 +36,7 @@ metadata = {
         'drug_exposure_id': {
             'config_type': 'HASH',
             'fields' : ['person_id',  'provider_id',
-                        #'visit_occurrence_id',
+                        # 'visit_occurrence_id',
                         'drug_concept_code', 'drug_concept_codeSystem',
                         'drug_exposure_start_date', 'drug_exposure_start_datetime',
                         'drug_exposure_end_date', 'drug_exposure_end_datetime',
@@ -195,7 +195,7 @@ metadata = {
 
         'drug_type_concept_id': {
             'config_type': 'CONSTANT',
-            'constant_value' : int32(32825), # OMOP concept ID for 'EHR dispensing record'
+            'constant_value' : int32(32825),  # OMOP concept ID for 'EHR dispensing record'
             'order': 9
         },
        'stop_reason': {
@@ -264,7 +264,7 @@ metadata = {
 
         'dose_unit_source_value': {
             'config_type': 'FIELD',
-            #'element': "hl7:doseQuantity",
+            # 'element': "hl7:doseQuantity",
             'element': "../../../hl7:doseQuantity",
             'attribute': "unit",
             'order': 23

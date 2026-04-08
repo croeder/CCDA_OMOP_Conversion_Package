@@ -664,7 +664,7 @@ def sort_output_and_omit_dict(output_dict :OMOPRecord,
     """
     ordered_output_dict = {}
 
-    sort_function = get_extract_order_fn(config_dict) # curry in the config_dict arg.
+    sort_function = get_extract_order_fn(config_dict)  # curry in the config_dict arg.
     ordered_keys = sorted(config_dict.keys(), key=sort_function)
 
     filter_function = get_filter_fn(config_dict)
@@ -694,7 +694,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
 
          Returns output_dict, a record, a single row for the domain involved.
     """
-    output_dict = {} #  :dict[str, any]  a record, a single row for a given domain.
+    output_dict = {}  # :dict[str, any]  a record, a single row for a given domain.
     domain_id = None
     logger.info((f"DDP.parse_config_for_single_root()  ROOT for config:{config_name}, we have tag:{root_element.tag}"
                  f" attributes:{root_element.attrib}"))
@@ -726,7 +726,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
         logger.error("'domain_id' mising from output dict when testing expected_domain_id. Check your "
             f"parse configuration \"{config_name}\" for a field called 'domain_id'. If you don't have one, add it."
             "If you do, check the spelling. Your row will be REJECTED or DENY/DENIED.")
-    domain_id = output_dict.get('domain_id', None) # fetch this before it gets omitted
+    domain_id = output_dict.get('domain_id', None)  # fetch this before it gets omitted
     output_dict = sort_output_and_omit_dict(output_dict, config_dict, config_name)
 
     # Strict: null domain_id is not good, but don't expect a domain id from non-domain tables
@@ -1134,7 +1134,7 @@ def main() :
                                     all_data_dict[domain_id] = []
                                 all_data_dict[domain_id] = all_data_dict[domain_id].extend(rows)
 
-                            else: # I thought this is why we have defaultdict(list) above
+                            else:  # I thought this is why we have defaultdict(list) above
                                 all_data_dict[domain_id] = rows
 
                             # just single file's data

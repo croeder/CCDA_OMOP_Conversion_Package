@@ -29,7 +29,7 @@ metadata = {
         'drug_exposure_id': {
             'config_type': 'HASH',
             'fields' : ['person_id',  'provider_id',
-                        #'visit_occurrence_id',
+                        # 'visit_occurrence_id',
                         'drug_concept_code_code', 'drug_concept_codeSystem_code',
                         'drug_concept_code_translation', 'drug_concept_codeSystem_translation',
                         'drug_exposure_start_date', 'drug_exposure_start_datetime',
@@ -239,7 +239,7 @@ metadata = {
         'verbatim_end_date_value': {
             'config_type': 'FIELD',
             'data_type': 'DATE',
-            #'element': "hl7:effectiveTime[not(@nullFlavor='UNK')]",
+            # 'element': "hl7:effectiveTime[not(@nullFlavor='UNK')]",
             'element': "../../../hl7:effectiveTime[not(@nullFlavor='UNK')]",
             'attribute': "value",
             'priority': ('verbatim_end_date', 2)
@@ -247,7 +247,7 @@ metadata = {
 
         'drug_type_concept_id': {
             'config_type': 'CONSTANT',
-            'constant_value' : int32(32818), # OMOP concept ID for 'EHR administration record', substanceAdministration/@moodCode="EVN" represents medications that have been administered and are currently being taken.
+            'constant_value' : int32(32818),  # OMOP concept ID for 'EHR administration record', substanceAdministration/@moodCode="EVN" represents medications that have been administered and are currently being taken.
             'order': 9
         },
 

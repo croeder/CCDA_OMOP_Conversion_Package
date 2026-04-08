@@ -33,7 +33,7 @@ metadata = {
         'drug_exposure_id': {
             'config_type': 'HASH',
             'fields' : ['person_id',  'provider_id',
-                        #'visit_occurrence_id',
+                        # 'visit_occurrence_id',
                         'drug_concept_code_code', 'drug_concept_codeSystem_code',
                         'drug_concept_code_translation', 'drug_concept_codeSystem_translation',
                         'drug_exposure_start_date', 'drug_exposure_start_datetime',
@@ -237,7 +237,7 @@ metadata = {
 
         'drug_type_concept_id': {
             'config_type': 'CONSTANT',
-            'constant_value' : int32(32818), # OMOP concept ID for 'EHR administration record'
+            'constant_value' : int32(32818),  # OMOP concept ID for 'EHR administration record'
             'order': 9
         },
         'stop_reason': {
@@ -354,7 +354,7 @@ metadata = {
             'order': 21
         },
 
-        'route_source_value': { # CHRIS very nice
+        'route_source_value': {  # CHRIS very nice
             'config_type': 'DERIVED',
             'FUNCTION': VT.concat_fields,
             'argument_names': {

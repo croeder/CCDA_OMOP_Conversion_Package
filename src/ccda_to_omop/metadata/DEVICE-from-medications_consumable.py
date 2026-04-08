@@ -9,7 +9,7 @@ metadata = {
             'expected_domain_id': 'Device',
             # Medical equipment section, entry, organizer, component, procedure
             'element':
-            #component/structuredBody/component/section/entry/substanceAdministration/consumable/manufacturedProduct/manufacturedMaterial
+            # component/structuredBody/component/section/entry/substanceAdministration/consumable/manufacturedProduct/manufacturedMaterial
               ("./hl7:component/hl7:structuredBody/hl7:component/hl7:section"
                "/hl7:templateId[@root='2.16.840.1.113883.10.20.22.2.1' or @root='2.16.840.1.113883.10.20.22.2']"
                "/../hl7:entry/hl7:substanceAdministration/hl7:consumable/hl7:manufacturedProduct/hl7:manufacturedMaterial")
@@ -28,7 +28,7 @@ metadata = {
         'device_exposure_id': {
             'config_type': 'HASH',
             'fields' : ['person_id', 'provider_id',
-                        #'visit_occurrence_id',
+                        # 'visit_occurrence_id',
                         'device_concept_id_code', 'device_concept_id_codeSystem',
                         'device_exposure_start_date', 'device_exposure_start_datetime',
                         'device_exposure_end_date', 'device_exposure_end_datetime',
@@ -176,7 +176,7 @@ metadata = {
 
         'device_type_concept_id': {
             'config_type': 'CONSTANT',
-            'constant_value' : int32(32817), # OMOP concept ID for 'EHR'
+            'constant_value' : int32(32817),  # OMOP concept ID for 'EHR'
             'order': 8
         },
 

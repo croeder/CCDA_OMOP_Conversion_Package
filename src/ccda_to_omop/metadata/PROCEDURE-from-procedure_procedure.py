@@ -26,7 +26,7 @@ metadata = {
         'procedure_occurrence_id': {
             'config_type': 'HASH',
             'fields' : ['person_id', 'provider_id',
-                        #'visit_occurrence_id',  'procedure_concept_id',
+                        # 'visit_occurrence_id',  'procedure_concept_id',
                         'procedure_concept_id_code', 'procedure_concept_id_codeSystem',
                         'procedure_date', 'procedure_datetime',
                         'procedure_occurrence_id_root', 'procedure_occurrence_id_extension' ],
@@ -125,7 +125,7 @@ metadata = {
 
         'procedure_type_concept_id': {
             'config_type': 'CONSTANT',
-            'constant_value' : int32(32817), # OMOP concept ID for 'EHR'
+            'constant_value' : int32(32817),  # OMOP concept ID for 'EHR'
             'order': 6
         },
 
