@@ -7,7 +7,7 @@
    figure out how to use them once there.
 
   - Deterministic hashing in Python3 https://stackoverflow.com/questions/27954892/deterministic-hashing-in-python-3
-  - https://stackoverflow.com/questions/16008670/how-to-hash-a-string-into-8-digits 
+  - https://stackoverflow.com/questions/16008670/how-to-hash-a-string-into-8-digits
 
  Chris Roeder
 
@@ -29,15 +29,15 @@
     metadata = {
         config_dict = {
             field_details_dict = {
-               attribute: value 
+               attribute: value
             }
         }
     }
     So there are many config_dicts, each roughly for a domain. You may
     have more than one per domain when there are more than a single
     location for a domain.
-    Each config_dict is made up of many fields for the OMOP table it 
-    creates. There are non-output fields used as input to derived 
+    Each config_dict is made up of many fields for the OMOP table it
+    creates. There are non-output fields used as input to derived
     fields, like the vocabulary and code used to find the concept_id.
     Each field_spec. has multiple attributes driving that field's
     retrieval or derivation.
@@ -113,7 +113,7 @@ def create_hash(input_string) -> int64 | None:
     """
     if input_string == '':
         return None
-    
+
     hash_value = hashlib.md5(input_string.encode('utf-8'))
     truncated_hash = hash_value.hexdigest()[0:13]
     int_trunc_hash_value = int(truncated_hash, 16)
@@ -145,9 +145,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
     field_element = None
     try:
         field_element = root_element.xpath(field_details_dict['element'], namespaces=ns)
-    except XPathEvalError as p:
-        pass
-        logger.warning(f"ERROR (often inconsequential) {field_details_dict['element']} {p}")
+    except XPathEvalError as e:
+        logger.warning(f"ERROR (often inconsequential) {field_details_dict['element']} {e}")
     if field_element is None:
         logger.warning((f"FIELD could not find field element {field_details_dict['element']}"
                       f" for {config_name}/{field_tag} root:{root_path} {field_details_dict} "))
@@ -250,7 +249,7 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
                 except (ValueError, TypeError, OverflowError) as e:
                     logger.warning(f"cast to float failed for config:{config_name} field:{field_tag} val:{attribute_value} exception:{e}")
                     attribute_value = None
-                    
+
             else:
                 logger.warning(f" UNKNOWN DATA TYPE: {field_details_dict['data_type']} {config_name} {field_tag}")
 
@@ -278,8 +277,8 @@ def parse_field_from_dict(field_details_dict :dict[str, str], root_element,
 
 @typechecked
 def do_none_fields(output_dict :OMOPRecord,
-                   root_element, root_path, config_name,  
-                   config_dict :dict[str, dict[str, str | None]], 
+                   root_element, root_path, config_name,
+                   config_dict :dict[str, dict[str, str | None]],
                    error_fields_set :set[str]):
     for (field_tag, field_details_dict) in config_dict.items():
         logger.info((f"     NONE FIELD config:'{config_name}' field_tag:'{field_tag}'"
@@ -288,11 +287,11 @@ def do_none_fields(output_dict :OMOPRecord,
         if config_type_tag is None:
             output_dict[field_tag] = None
 
-            
+
 @typechecked
 def do_constant_fields(output_dict :OMOPRecord,
-                       root_element, root_path, config_name,  
-                       config_dict :dict[str, dict[str, str | None]], 
+                       root_element, root_path, config_name,
+                       config_dict :dict[str, dict[str, str | None]],
                        error_fields_set :set[str]):
 
     for (field_tag, field_details_dict) in config_dict.items():
@@ -310,11 +309,11 @@ def do_constant_fields(output_dict :OMOPRecord,
             else:
                 output_dict[field_tag] = constant_value
 
-            
+
 @typechecked
 def do_filename_fields(output_dict :OMOPRecord,
-                       root_element, root_path, config_name,  
-                       config_dict :dict[str, dict[str, str | None]], 
+                       root_element, root_path, config_name,
+                       config_dict :dict[str, dict[str, str | None]],
                        error_fields_set :set[str],
                        filename :str):
     for (field_tag, field_details_dict) in config_dict.items():
@@ -324,12 +323,12 @@ def do_filename_fields(output_dict :OMOPRecord,
         if config_type_tag == 'FILENAME':
             output_dict[field_tag] = filename
 
-            
+
 @typechecked
 def do_basic_fields(output_dict :OMOPRecord,
-                    root_element, root_path, config_name,  
-                    config_dict :dict[str, dict[str, str | None] ], 
-                    error_fields_set :set[str], 
+                    root_element, root_path, config_name,
+                    config_dict :dict[str, dict[str, str | None] ],
+                    error_fields_set :set[str],
                     pk_dict :dict[str, list[any]] ):
     for (field_tag, field_details_dict) in config_dict.items():
         logger.info((f"     FIELD config:'{config_name}' field_tag:'{field_tag}'"
@@ -369,45 +368,45 @@ def do_basic_fields(output_dict :OMOPRecord,
                 output_dict[field_tag] = attribute_value
             pk_dict[field_tag].append(attribute_value)
             logger.info("PK {config_name}/{field_tag} {type(attribute_value)} {attribute_value}")
-            
 
-@typechecked 
+
+@typechecked
 def do_foreign_key_fields(output_dict :OMOPRecord,
-                    root_element, root_path, config_name,  
-                    config_dict :dict[str, dict[str, str | None] ], 
-                    error_fields_set :set[str], 
+                    root_element, root_path, config_name,
+                    config_dict :dict[str, dict[str, str | None] ],
+                    error_fields_set :set[str],
                     pk_dict :dict[str, list[any]] ):
     """
         When a configuration has an FK field, it uses the tag in that configuration
         to find corresponding values from PK fields.  This mechanism is intended for
         PKs uniquely identified in a CCDA document header for any places in the sections
-        it would be used as an FK. This is typically true for person_id and visit_occurrence_id, 
+        it would be used as an FK. This is typically true for person_id and visit_occurrence_id,
         but there are exceptions. In particular, some documents have multiple encounters, so
         you can't just naively choose the only visit_id because there are many.
-        
+
         Choosing the visit is more complicated, because it requires a join (on date ranges)
         between the domain table and the encounters table, or portion of the header that
         has encompassingEncounters in it. This code, the do_foreign_key_fields() function
         operates in too narrow a context for that join. These functions are scoped down
-        to processing a single config entry for a particular OMOP domain. The output_dict, 
+        to processing a single config entry for a particular OMOP domain. The output_dict,
         parameter is just for that one domain. It wouldn't include the encounters.
-        For example, the measurement_results.py file has a configuration for parsing OMOP 
+        For example, the measurement_results.py file has a configuration for parsing OMOP
         measurement rows out of an XML file. The visit.py would have been previosly processed
         and it's rows stashed away elsewhere in the parse_doc() function whose scope is large
         enough to consider all the configurations. So the visit choice/reconciliation
         must happen from there.
-        
+
         TL;DR not all foreign keys are resolved here. In particular, domain FK references,
         visit_occurrence_id, in cases where more than a single encounter has previously been
         parsed, are not, can not, be resolved here. See the parse_doc() function for how
         it is handled there.
-        
+
     """
     for (field_tag, field_details_dict) in config_dict.items():
         logger.info((f"     FK config:'{config_name}' field_tag:'{field_tag}'"
                      f" {field_details_dict}"))
         type_tag = field_details_dict['config_type']
-        
+
         if type_tag == 'FK':
             logger.info(f"     FK for {config_name}/{field_tag}")
             if field_tag in pk_dict:
@@ -476,7 +475,7 @@ def do_derived_fields(output_dict: OMOPRecord,
             allowed_length = field_details_dict.get('length', MAX_FIELD_LENGTH)
             try:
                 function_value = field_details_dict['FUNCTION'](args_dict)
-                
+
                 if isinstance(function_value, str):
                     stripped = function_value.strip()
                     if len(stripped) > allowed_length:
@@ -501,7 +500,7 @@ def do_derived_fields(output_dict: OMOPRecord,
                 error_fields_set.add(field_tag)
                 logger.warning(f"DERIVED type error exception: {e}")
                 logger.warning((f"DERIVED TypeError {field_tag} possibly calling something that isn't a function"
-                              " or that function was passed a null value." 
+                              " or that function was passed a null value."
                               f" {field_details_dict['FUNCTION']}. You may have quotes "
                               "around it in  a python mapping structure if this is a "
                               f"string: {type(field_details_dict['FUNCTION'])}"))
@@ -537,7 +536,7 @@ def do_derived2_fields(output_dict :OMOPRecord,
 
 
 
-                
+
 @typechecked
 def do_hash_fields(output_dict: OMOPRecord,
                    root_element, root_path, config_name,
@@ -570,7 +569,7 @@ def do_hash_fields(output_dict: OMOPRecord,
             logger.info((f"     HASH (PK) {hash_value} for "
                          f"{field_tag}, {field_details_dict} {output_dict[field_tag]}"))
 
-            
+
 @typechecked
 def do_priority_fields(output_dict: OMOPRecord,
                        root_element, root_path, config_name,
@@ -578,11 +577,11 @@ def do_priority_fields(output_dict: OMOPRecord,
                        error_fields_set: set[str],
                        pk_dict: dict[str, list[any]]) -> dict[str, list]:
     """
-        ARGS expected in config: 
-       	    'config_type': 'PRIORITY',
+        ARGS expected in config:
+            'config_type': 'PRIORITY',
             'defult': 0, in case there is no non-null value in the priority change and we don't want a null value in the end.
             'order': 17
-        Returns the list of  priority_names so the chosen one (first non-null) can be 
+        Returns the list of  priority_names so the chosen one (first non-null) can be
         added to output fields Also, adds this field to the PK list?
         This is basically what SQL calls a coalesce.
 
@@ -619,7 +618,7 @@ def do_priority_fields(output_dict: OMOPRecord,
         # Ex. [('person_id_ssn', 1), ('person_id_other, 2)]
 
         found=False
-        for value_field_pair in sorted_contents: 
+        for value_field_pair in sorted_contents:
             if value_field_pair[0] in output_dict and \
                output_dict[value_field_pair[0]] is not None and \
                output_dict[value_field_pair[0]] !='':
@@ -638,8 +637,8 @@ def do_priority_fields(output_dict: OMOPRecord,
             pk_dict[priority_name].append(default_value)
             logger.warning(f"  PRIORITY config:\"{config_name}\" defaulting {priority_name} to {default_value}")
     return priority_fields
-    
-    
+
+
 @typechecked
 def get_extract_order_fn(dict):
     def get_order_from_dict(field_key):
@@ -664,7 +663,7 @@ def get_filter_fn(dict):
 def sort_output_and_omit_dict(output_dict :OMOPRecord,
                      config_dict :dict[str, dict[str, str | None]], config_name):
     """ Sorts the ouput_dict by the value of the 'order' fields in the associated
-        config_dict. Fields without a value, or without an entry used to 
+        config_dict. Fields without a value, or without an entry used to
         come last, now are omitted.
     """
     ordered_output_dict = {}
@@ -683,9 +682,9 @@ def sort_output_and_omit_dict(output_dict :OMOPRecord,
 
 
 @typechecked
-def parse_config_for_single_root(root_element, root_path, config_name, 
-                                 config_dict :dict[str, dict[str, str | None]], 
-                                 error_fields_set : set[str], 
+def parse_config_for_single_root(root_element, root_path, config_name,
+                                 config_dict :dict[str, dict[str, str | None]],
+                                 error_fields_set : set[str],
                                  pk_dict :dict[str, list[any]],
                                  filename :str) -> OMOPRecord | None:
 
@@ -694,7 +693,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
 
         If the configuration includes a field of config_type DOMAIN, the value it generates
         will be compared to the domain specified in the config in expected_domain_id. If they are different, null is returned.
-        This is how  OMOP "domain routing" is implemented here. 
+        This is how  OMOP "domain routing" is implemented here.
 
 
          Returns output_dict, a record, a single row for the domain involved.
@@ -730,7 +729,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
     if 'domain_id' not in output_dict and expected_domain_id not in ('Care_Site', 'Location', 'Provider','Person'):
         logger.error("'domain_id' mising from output dict when testing expected_domain_id. Check your "
             f"parse configuration \"{config_name}\" for a field called 'domain_id'. If you don't have one, add it."
-            "If you do, check the spelling. Your row will be REJECTED or DENY/DENIED.")        
+            "If you do, check the spelling. Your row will be REJECTED or DENY/DENIED.")
     domain_id = output_dict.get('domain_id', None) # fetch this before it gets omitted
     output_dict = sort_output_and_omit_dict(output_dict, config_dict, config_name)
 
@@ -819,11 +818,11 @@ def make_distinct(rows):
 
 
 @typechecked
-def parse_config_from_xml_file(tree, config_name, 
-                           config_dict :dict[str, dict[str, str | None]], filename, 
+def parse_config_from_xml_file(tree, config_name,
+                           config_dict :dict[str, dict[str, str | None]], filename,
                            pk_dict :dict[str, list[any]]) -> list[OMOPRecord | None] | None:
-                                                                   
-    """ 
+
+    """
     Basically returns a list of rows for one domain that a parse configuration, config_name, creates.
 
         The main logic is here.
@@ -837,13 +836,13 @@ def parse_config_from_xml_file(tree, config_name,
               { field_1: (value, path)}, {field_2: (value, path)} ]
         It's a list of because you might have more than one instance of the root path, like when you
         get many observations.
-        
+
         arg: tree, this is the lxml.etree parse of the XML file
         arg: config_name, this is a key into the first level of the metadata, an often a OMOP domain name
         arg: config_dict, this is the value of that key in the dict
         arg: filename, the name of the XML file, for logging
-        arg: pk_dict, a dictionary for Primary Keys, the keys here are field names and 
-             their values are their values. It's a sort of global space for carrying PKs 
+        arg: pk_dict, a dictionary for Primary Keys, the keys here are field names and
+             their values are their values. It's a sort of global space for carrying PKs
              to other parts of processing where they will be used as FKs. This is useful
              for things like the main person_id that is part of the context the document creates.
     """
@@ -865,7 +864,7 @@ def parse_config_from_xml_file(tree, config_name,
         root_element_list = tree.xpath(config_dict['root']['element'], namespaces=ns)
     except XPathError as e:
         logger.error(f"XPath query failed for config:{config_name} path:{config_dict['root']['element']}  {e}")
-        
+
     if root_element_list is None or len(root_element_list) == 0:
         logger.info((f"CONFIG couldn't find root element for {config_name}"
                       f" with {config_dict['root']['element']}"))
@@ -875,7 +874,7 @@ def parse_config_from_xml_file(tree, config_name,
     error_fields_set = set()
     logger.info(f"NUM ROOTS {config_name} {len(root_element_list)}")
     for root_element in root_element_list:
-        output_dict = parse_config_for_single_root(root_element, root_path, 
+        output_dict = parse_config_for_single_root(root_element, root_path,
                 config_name, config_dict, error_fields_set, pk_dict, filename)
         if output_dict is not None:
             output_list.append(output_dict)
@@ -893,11 +892,11 @@ def parse_config_from_xml_file(tree, config_name,
 @typechecked
 def parse_string(ccda_string, file_path,
               metadata :dict[str, dict[str, dict[str, str]]]) -> dict[str, list[OMOPRecord | None] | None]:
-    """ 
-        Parses many meta configs from a string instead of a single file, 
+    """
+        Parses many meta configs from a string instead of a single file,
         collects them in omop_dict.
 
-        Returns omop_dict, a  dict keyed by configuration names, 
+        Returns omop_dict, a  dict keyed by configuration names,
         each a list of record/row dictionaries.
     """
     omop_dict = {}
@@ -995,7 +994,7 @@ def parse_doc(file_path,
     for config_name, config_dict in metadata.items():
         if parse_config is None or parse_config == '' or parse_config == config_name:
             data_dict_list = parse_config_from_xml_file(tree, config_name, config_dict, base_name, pk_dict)
-            if config_name in omop_dict: 
+            if config_name in omop_dict:
                 omop_dict[config_name] = omop_dict[config_name].extend(data_dict_list)
             else:
                 omop_dict[config_name] = data_dict_list
@@ -1010,7 +1009,7 @@ def parse_doc(file_path,
 @typechecked
 def print_omop_structure(omop :dict[str, list[OMOPRecord]],
                          metadata :dict[str, dict[str, dict[str, str ] ] ] ):
-    
+
     """ prints a dict of parsed domains as returned from parse_doc()
         or parse_domain_from_dict()
     """
@@ -1032,7 +1031,7 @@ def print_omop_structure(omop :dict[str, list[OMOPRecord]],
                         n = n+1
                     print(f"\n\nDOMAIN: {domain} {n}\n\n")
 
-                    
+
 @typechecked
 def process_file(filepath :str, print_output: bool, parse_config :str):
     """ Process each configuration in the metadata for one file.
@@ -1057,27 +1056,27 @@ def process_file(filepath :str, print_output: bool, parse_config :str):
     print(f"done PROCESSING {filepath} ")
     return omop_data
 
-def write_all_csv_files(data: dict[str, list[dict]]):                                                                                                          
-    for domain_id, records in data.items():                                                                                                                 
+def write_all_csv_files(data: dict[str, list[dict]]):
+    for domain_id, records in data.items():
         if not records:
             continue
-        with open(f"{domain_id}.csv", 'w', newline='') as f:                                                                                                         
+        with open(f"{domain_id}.csv", 'w', newline='') as f:
             print(f"WRITING {domain_id}.csv   {len(records)}")
             writer = csv.DictWriter(f, fieldnames=records[0].keys())
-            writer.writeheader()                                                                                                                           
-            writer.writerows(records)   
+            writer.writeheader()
+            writer.writerows(records)
 
-def write_individual_csv_files(out_filename, data: dict[str, list[dict]]):                                                                                                          
+def write_individual_csv_files(out_filename, data: dict[str, list[dict]]):
     """ writes csv files to a folder "output", one folder up
     """
-    for domain_id, records in data.items():                                                                                                                 
+    for domain_id, records in data.items():
         if not records:
             continue
-        with open(f"../output/{out_filename}__{domain_id}.csv", 'w', newline='') as f:                                                                                                         
+        with open(f"../output/{out_filename}__{domain_id}.csv", 'w', newline='') as f:
             print(f"    WRITING {out_filename}_{domain_id}.csv len:{len(records)}")
             writer = csv.DictWriter(f, fieldnames=records[0].keys())
-            writer.writeheader()                                                                                                                           
-            writer.writerows(records)   
+            writer.writeheader()
+            writer.writerows(records)
     print(f"    done WRITING {out_filename}")
 
 # for argparse
@@ -1100,13 +1099,13 @@ def main() :
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-d', '--directory', help="directory of files to parse")
     group.add_argument('-f', '--filename', help="filename to parse")
-    parser.add_argument('-p', '--print_output', 
+    parser.add_argument('-p', '--print_output',
             type=str2bool, const=True, default=True,  nargs="?",
             help="print out the output values, -p False to have it not print")
-    parser.add_argument('-c', '--write_individual_csvs', type=str2bool, 
+    parser.add_argument('-c', '--write_individual_csvs', type=str2bool,
             const=True, default=True, nargs="?",
             help="write inidividual csv files")
-    parser.add_argument('-o', '--generate_all_output', type=str2bool, 
+    parser.add_argument('-o', '--generate_all_output', type=str2bool,
             const=True, default=True, nargs="?",
             help="write csv files")
     args = parser.parse_args()
@@ -1124,7 +1123,7 @@ def main() :
         for file in (only_files):
             if file.endswith(".xml"):
                 if False:  # placeholder for doing just one config or not
-                	print("n/a")
+                    print("n/a")
                 else:
                     meta_dict = get_meta_dict()
                     file_data_dict = {}
