@@ -19,6 +19,9 @@ jobs:
                    --header="Accept: */*" \
                    -O resources/map.csv \
                    "https://github.com"
+              ls -lht resources/map.csv
+              grep 9202 resources/map.csv
+              grep comprehensive_migration resources/map.csv
           - name: Run tests with coverage
             run: |
                 cd src
