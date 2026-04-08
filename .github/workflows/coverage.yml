@@ -12,7 +12,7 @@ jobs:
             with:
               python-version: '3.x'
           - name: Install packages
-            run: pip install -r requirements.txt pytest pytest-cov
+            run: pip install -r requirements.txt coverage
           - name: get the concept map file
             run: |
               wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
@@ -20,13 +20,11 @@ jobs:
                    -O resources/map.csv \
                    "https://github.com"
           - name: Run tests with coverage
-            run: cd src && python -m pytest tests/ --cov=ccda_to_omop --cov-report=xml
-#          - name: Upload coverage to Codecov
-#            uses: codecov/codecov-action@v4
-#            with:
-#              files: src/coverage.xml
-#              fail_ci_if_error: false
-          - name: Upload coverage reports to Codecov 5
+            run: |
+                cd src
+                coverage run -m unittest discover -s tests -p "test*.py"
+                coverage xml
+          - name: Upload coverage to Codecov
             uses: codecov/codecov-action@v5
             with:
               files: src/coverage.xml
