@@ -8,10 +8,9 @@ jobs:
           - name: Check out repository code
             uses: actions/checkout@v4
             with:
-              ref: dev
+              ref: master
           - name: Install packages
-            run: |
-                pip install -r requirements.txt
+            run: pip install -r requirements.txt
           - name: get the concept map file
             run: |
               wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
@@ -19,5 +18,4 @@ jobs:
                    -O resources/map.csv \
                    "https://github.com"
           - name: run unit tests
-            run: |
-                bin/run_unittests.sh
+            run: bin/run_unittests.sh
