@@ -84,9 +84,9 @@ from ccda_to_omop import value_transformations as VT
 from ccda_to_omop.metadata import get_meta_dict
 from ccda_to_omop import ddl as DDL
 from ccda_to_omop.util import create_codemap_dict_from_csv
-
 from ccda_to_omop.util import cast_to_date
 from ccda_to_omop.util import cast_to_datetime
+from ccda_to_omop.util import OMOPRecord
 
 from ccda_to_omop import visit_reconciliation as VR
 from ccda_to_omop.constants import MAX_FIELD_LENGTH
@@ -94,9 +94,6 @@ import re
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
-
-# Type alias for OMOP output record dictionaries (matches visit_reconciliation.OMOPRecord + int32)
-OMOPRecord = dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date]
 
 DO_VISIT_DETAIL = False
 
@@ -517,7 +514,7 @@ def do_derived_fields(output_dict: OMOPRecord,
 
 
 @typechecked
-def do_derived2_fields(output_dict :dict[str, list | None | str | float | int | int32 | int64 | datetime.datetime | datetime.date], 
+def do_derived2_fields(output_dict :OMOPRecord,
                       root_element, root_path, config_name,
                       config_dict :dict[str, dict[str, str | None | list]],
                       error_fields_set :set[str]):
@@ -664,7 +661,7 @@ def get_filter_fn(dict):
 
 
 @typechecked
-def sort_output_and_omit_dict(output_dict :dict[str, None | str | float | int | int64], 
+def sort_output_and_omit_dict(output_dict :OMOPRecord,
                      config_dict :dict[str, dict[str, str | None]], config_name):
     """ Sorts the ouput_dict by the value of the 'order' fields in the associated
         config_dict. Fields without a value, or without an entry used to 
@@ -690,7 +687,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
                                  config_dict :dict[str, dict[str, str | None]], 
                                  error_fields_set : set[str], 
                                  pk_dict :dict[str, list[any]],
-                                 filename :str) -> dict[str,  None | str | float | int | int64 |  datetime.datetime | datetime.date] | None:
+                                 filename :str) -> OMOPRecord | None:
 
     """  Parses for each field in the metadata for a config out of the root_element passed in.
          You may have more than one such root element, each making for a row in the output.
@@ -824,7 +821,7 @@ def make_distinct(rows):
 @typechecked
 def parse_config_from_xml_file(tree, config_name, 
                            config_dict :dict[str, dict[str, str | None]], filename, 
-                           pk_dict :dict[str, list[any]]) -> list[ dict[str,  None | str | float | int | int64 | datetime.datetime | datetime.date] | None  ] | None:
+                           pk_dict :dict[str, list[any]]) -> list[OMOPRecord | None] | None:
                                                                    
     """ 
     Basically returns a list of rows for one domain that a parse configuration, config_name, creates.
@@ -895,8 +892,7 @@ def parse_config_from_xml_file(tree, config_name,
 
 @typechecked
 def parse_string(ccda_string, file_path,
-              metadata :dict[str, dict[str, dict[str, str]]]) -> dict[str, 
-                      list[ dict[str,  None | str | float | int | int64 ] | None  ] | None]:
+              metadata :dict[str, dict[str, dict[str, str]]]) -> dict[str, list[OMOPRecord | None] | None]:
     """ 
         Parses many meta configs from a string instead of a single file, 
         collects them in omop_dict.
@@ -976,8 +972,7 @@ def validate_ccda_document(file_path, tree) -> list[str]:
 
 def parse_doc(file_path,
               metadata :dict[str, dict[str, dict[str, str]]],
-              parse_config : str) -> dict[str,
-                      list[ dict[str,  None | str | float | int | int64] | None  ] | None]:
+              parse_config : str) -> dict[str, list[OMOPRecord | None] | None]:
     """ Parses many meta configs from a single file, collects them in omop_dict.
         - file_path
         - metadata
@@ -1013,7 +1008,7 @@ def parse_doc(file_path,
 
 
 @typechecked
-def print_omop_structure(omop :dict[str, list[ dict[str, None | str | float | int | int64 ] ] ], 
+def print_omop_structure(omop :dict[str, list[OMOPRecord]],
                          metadata :dict[str, dict[str, dict[str, str ] ] ] ):
     
     """ prints a dict of parsed domains as returned from parse_doc()

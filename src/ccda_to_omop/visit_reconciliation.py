@@ -27,15 +27,10 @@ from numpy import int64
 from typeguard import typechecked
 from ccda_to_omop import ddl as DDL
 from ccda_to_omop.constants import INPATIENT_CONCEPT_IDS, MAX_PARENT_DURATION_DAYS, SECONDS_PER_DAY
+from ccda_to_omop.util import OMOPRecord
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
-
-
-
-
-# Type alias for OMOP record dictionaries
-OMOPRecord = dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date]
 
 
 @typechecked
@@ -493,8 +488,8 @@ def strip_tz(dt):
 
 @typechecked
 def reconcile_visit_FK_with_specific_domain(domain: str,
-                                            domain_dict: list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None ,
-                                            visit_dict:  list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] ] | None):
+                                            domain_dict: list[OMOPRecord] | None,
+                                            visit_dict: list[OMOPRecord] | None):
     """Assign visit_occurrence_id to each event record in a clinical domain.
 
     Matches each event in domain_dict to a visit in visit_dict by checking whether
@@ -670,8 +665,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
 
 
 @typechecked
-def assign_visit_occurrence_ids_to_events(data_dict: dict[str,
-                                                             list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] | None] | None]):
+def assign_visit_occurrence_ids_to_events(data_dict: dict[str, list[OMOPRecord | None] | None]):
     """Assign visit_occurrence_id FKs to all clinical event records in data_dict.
 
     Iterates over all configs in data_dict whose domain is one of Measurement,
@@ -714,8 +708,7 @@ def assign_visit_occurrence_ids_to_events(data_dict: dict[str,
 
 
 @typechecked
-def assign_visit_detail_ids_to_events(data_dict: dict[str,
-                                                         list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date] | None] | None]):
+def assign_visit_detail_ids_to_events(data_dict: dict[str, list[OMOPRecord | None] | None]):
     """
     visit_detail FK reconciliation: Match clinical domain events to visit_detail records.
 
@@ -749,8 +742,8 @@ def assign_visit_detail_ids_to_events(data_dict: dict[str,
 
 @typechecked
 def reconcile_visit_detail_FK_with_specific_domain(domain: str,
-                                                    domain_dict: list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date]] | None,
-                                                    visit_detail_dict: list[dict[str, None | str | float | int | int64 | datetime.datetime | datetime.date]] | None):
+                                                    domain_dict: list[OMOPRecord] | None,
+                                                    visit_detail_dict: list[OMOPRecord] | None):
     """
     Match events to visit_detail records by temporal containment.
     Choose the most specific (smallest duration) matching visit_detail.
