@@ -116,7 +116,7 @@ def create_hash(input_string) -> int64 | None:
     return int64(int_trunc_hash_value)
 
 def create_hash_too_long(input_string):
-    # 64 bit is 16 hex characters, output is way longer...
+    """64 bit is 16 hex characters, output is way longer..."""
     if input_string == '':
         return None
     hash_value = hashlib.md5(input_string.encode('utf-8'))

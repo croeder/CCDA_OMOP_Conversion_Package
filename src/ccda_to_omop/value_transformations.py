@@ -219,7 +219,7 @@ def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default=None):
 
 @typechecked
 def extract_day_of_birth(args_dict : dict[str, any]) -> int32:
-    # assumes input is a datetime
+    """Extract day of birth from args_dict['date_object'] (assumes a date/datetime)."""
     date_object = args_dict['date_object']
     if date_object is not None:
         return int32(date_object.day)
@@ -228,7 +228,7 @@ def extract_day_of_birth(args_dict : dict[str, any]) -> int32:
 
 @typechecked
 def extract_month_of_birth(args_dict : dict[str, any]) -> int32:
-    # assumes input is a datetime
+    """Extract month of birth from args_dict['date_object'] (assumes a date/datetime)."""
     date_object = args_dict['date_object']
     if date_object is not None:
         return int32(date_object.month)
@@ -237,7 +237,7 @@ def extract_month_of_birth(args_dict : dict[str, any]) -> int32:
 
 @typechecked
 def extract_year_of_birth(args_dict : dict[str, any]) -> int32:
-    # assumes input is a datetime
+    """Extract year of birth from args_dict['date_object'] (assumes a date/datetime)."""
     date_object = args_dict['date_object']
     if date_object is not None:
         return int32(date_object.year)
