@@ -41,4 +41,4 @@ class Test_disallow_no_matching_concept(unittest.TestCase):
         concept_id = VT.codemap_xwalk_source_concept_id(self.args_dict)
         #self.assertEqual(concept_id, self.expected_default_value)
         # 0000-0 is in the map now with a 0. FIX 
-        self.assertEqual(concept_id, 0)
+        self.assertIsNone(concept_id)

@@ -97,7 +97,7 @@ class Test_basic_concept_mapping(unittest.TestCase):
         args_dict = { 'vocabulary_oid': '2.16.840.1.113883.6.1',
                       'concept_code': '0000-0'}
         concept_id = VT.codemap_xwalk_source_concept_id(args_dict)
-        self.assertEqual(concept_id, 0)
+        self.assertIsNone(concept_id)
 
 
     def test_source_concept_bogus(self):
