@@ -15,7 +15,11 @@ jobs:
             run: pip install -r requirements.txt pytest pytest-cov
           - name: get the concept map file
             run: |
-              wget https://media.githubusercontent.com/media/croeder/CCDA_OMOP_Private/refs/heads/main/map.csv?token=AAA5CJJL5FBY6JPRDPD6TBTJ22HSQ
+              wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
+                   --header="Accept: application/vnd.github.v3.raw" \
+                   -O resources/map.csv \
+                   "https://github.com"
+
               mv map.csv resources
           - name: Run tests with coverage
             run: cd src && python -m pytest tests/ --cov=ccda_to_omop --cov-report=xml
