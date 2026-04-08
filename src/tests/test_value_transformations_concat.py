@@ -11,7 +11,6 @@ import ccda_to_omop.value_transformations as VT
 mock_map = {
     ('2.16.840.1.113883.5.1', 'M'): [{'target_concept_id': np.int32(8532)}]
 }
-VT.set_valueset_dict(mock_map)
 VT.set_codemap_dict(mock_map)
         
 

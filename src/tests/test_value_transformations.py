@@ -18,7 +18,6 @@ class ValueTransformTest_map_to_standard_1(unittest.TestCase):
             ('2.16.840.1.113883.5.1', 'F'): [{'target_concept_id': np.int32(8532), 'target_domain_id': 'Gender'}],
             ('2.16.840.1.113883.6.1', '11579-0'): [{'target_concept_id': np.int32(3019762), 'target_domain_id': 'Measurement'}]
         }
-        VT.set_valueset_dict(mock_map)
         VT.set_codemap_dict(mock_map)
 
     def test_map_hl7_to_omop_concept_id(self):
@@ -60,7 +59,6 @@ class ValueTransformTest_map_to_standard_2(unittest.TestCase):
             ('2.16.840.1.113883.5.1', 'F'): [{'target_concept_id': np.int32(8532), 'target_domain_id': 'Gender'}],
             ('2.16.840.1.113883.6.1', '11579-0'): [{'target_concept_id': np.int32(3019762), 'target_domain_id': 'Measurement'}]
         }
-        VT.set_valueset_dict(mock_map)
         VT.set_codemap_dict(mock_map)
 
     def test_map_to_concept_id(self):

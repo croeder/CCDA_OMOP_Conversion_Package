@@ -9,7 +9,6 @@ mock_map = {
         'source_concept_id': np.int32(8532), 
         'target_domain_id': 'Gender'}]
 }
-VT.set_valueset_dict(mock_map)
 VT.set_codemap_dict(mock_map)
 
 class ValueTransformTest_valueset(unittest.TestCase):
