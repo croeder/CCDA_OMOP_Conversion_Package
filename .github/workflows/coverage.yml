@@ -15,11 +15,11 @@ jobs:
             run: pip install -r requirements.txt pytest pytest-cov
           - name: Run tests with coverage
             run: cd src && python -m pytest tests/ --cov=ccda_to_omop --cov-report=xml
-          - name: Upload coverage to Codecov
-            uses: codecov/codecov-action@v4
-            with:
-              files: src/coverage.xml
-              fail_ci_if_error: false
+#          - name: Upload coverage to Codecov
+#            uses: codecov/codecov-action@v4
+#            with:
+#              files: src/coverage.xml
+#              fail_ci_if_error: false
           - name: Upload coverage reports to Codecov 5
             uses: codecov/codecov-action@v5
             with:
