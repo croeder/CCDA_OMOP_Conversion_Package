@@ -345,19 +345,17 @@ def build_file_to_domain_dict(meta_config_dict :dict[str, dict[str, dict[str, st
 
 
 def combine_datasets(omop_dataset_dict: dict[str, pd.DataFrame | None]) -> dict[str, pd.DataFrame]:
+    """Combine like datasets from different parse configurations that produce rows for the same domain.
 
-    # COMBINE like datasets, datasets from different parse configurations in the metadata
-    # that produce rows for the same domain.
-    #
-    # We need to collect all files/datasets that have the same expected_domain_id.
-    # For example, the Measurement domain, rows for the measurement table can
-    # come from at least two kinds of files:
-    #     <file>__Measurement_results.csv
-    #     <file>__Measurement_vital_signs.csv
-    # Two dictionaries at play here:
-    # 1 is the omop_dataset_dict which is a dictionary of datasets keyed by their domain_keys or config filenames
-    # 2 is the config data that comes from get_meta_dict
+    Collects all files/datasets that share the same expected_domain_id. For example,
+    rows for the Measurement table can come from at least two kinds of files:
+        <file>__Measurement_results.csv
+        <file>__Measurement_vital_signs.csv
 
+    Two dictionaries at play:
+    1. omop_dataset_dict: keyed by domain_keys (config filenames)
+    2. config data from get_meta_dict
+    """
     file_to_domain_dict = build_file_to_domain_dict(get_meta_dict())
     domain_dataset_dict = {}
     for filename in omop_dataset_dict:

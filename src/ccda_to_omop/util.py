@@ -82,10 +82,13 @@ def create_codemap_dict(codemap_df: pd.DataFrame) -> dict:
 
 @typechecked
 def cast_to_date(string_value: str) -> datetime.date | None:
-    # TODO does CCDA always do dates as YYYYMMDD ?
-    # https://build.fhir.org/ig/HL7/CDA-ccda/StructureDefinition-USRealmDateTimeInterval-definitions.html
-    # doc says YYYMMDD... examples show ISO-8601. Should use a regex and detect parse failure.
-    # TODO  when  is it date and when datetime
+    """Parse a date string and return a datetime.date.
+
+    TODO: does CCDA always use YYYYMMDD?
+    https://build.fhir.org/ig/HL7/CDA-ccda/StructureDefinition-USRealmDateTimeInterval-definitions.html
+    doc says YYYYMMDD... examples show ISO-8601. Should use a regex and detect parse failure.
+    TODO: when is it date and when datetime?
+    """
 
     try:
         datetime_val = parse(string_value, ignoretz=True)
