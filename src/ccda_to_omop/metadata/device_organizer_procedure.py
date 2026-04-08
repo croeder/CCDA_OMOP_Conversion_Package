@@ -30,7 +30,7 @@ metadata = {
         'device_exposure_id': {
             'config_type': 'HASH',
             'fields' : ['person_id', 'provider_id',
-                        #'visit_occurrence_id',
+                        # 'visit_occurrence_id',
                         'device_concept_id_code', 'device_concept_id_codeSystem',
                         'device_exposure_start_date', 'device_exposure_start_datetime',
                         'device_exposure_end_date', 'device_exposure_end_datetime',
@@ -146,7 +146,7 @@ metadata = {
 
         'device_type_concept_id': {
             'config_type': 'CONSTANT',
-            'constant_value' : int32(32817), # OMOP concept ID for 'EHR'
+            'constant_value' : int32(32817),  # OMOP concept ID for 'EHR'
             'order': 8
         },
 

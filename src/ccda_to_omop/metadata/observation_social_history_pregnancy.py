@@ -28,7 +28,7 @@ metadata = {
         'observation_id': {
             'config_type': 'HASH',
             'fields' : ['person_id',  'provider_id',
-                        #'visit_occurrence_id',
+                        # 'visit_occurrence_id',
                         'observation_concept_code', 'observation_concept_codeSystem',
                         'observation_date', 'observation_datetime',
                         'value_as_string', 'value_as_number', 'value_as_concept_id',
@@ -43,20 +43,20 @@ metadata = {
         },
 
         # <code code="72166-2"" codeSystem="2.16.840.1.113883.5.4">
-        #'observation_concept_code': {
+        # 'observation_concept_code': {
         #    'config_type': 'FIELD',
         #    'element': "hl7:code" ,
         #    'attribute': "code"
-        #},
+        # },
         'observation_concept_code': {
             'config_type': 'CONSTANT',
             'constant_value': '289908002' ,
         },
-        #'observation_concept_codeSystem': {
+        # 'observation_concept_codeSystem': {
         #    'config_type': 'FIELD',
         #    'element': "hl7:code",
         #    'attribute': "codeSystem"
-        #},
+        # },
         'observation_concept_codeSystem': {
             'config_type': 'CONSTANT',
             'constant_value': "2.16.840.1.113883.6.96",

@@ -44,7 +44,7 @@ metadata = {
         },
         'county': {'config_type': None, 'order': 7 },
         'location_source_value':  {'config_type': None, 'order': 8 },
-                #TODO: concatentation of fields f"{address_1}|{address_2}|{city} "
+                # TODO: concatentation of fields f"{address_1}|{address_2}|{city} "
         'data_partner_id': {
             'config_type': 'DERIVED',
             'FUNCTION': VT.get_data_partner_id,

@@ -387,7 +387,7 @@ def do_write_csv_files(domain_dataset_dict: dict[str, pd.DataFrame | None]) -> N
 
 # ENTRY POINT for directory of files
 def process_directory(directory_path: str, write_csv_flag: bool, parse_config: str) -> None:
-    omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
+    omop_dataset_dict = {}  # keyed by dataset_names (legacy domain names)
 
     only_files = [f for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]
     for file in (only_files):
@@ -428,7 +428,7 @@ def main() -> None:
     print(f" ARGS: {args}")
 
 
-    omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
+    omop_dataset_dict = {}  # keyed by dataset_names (legacy domain names)
 
     try:
         codemap_df = Dataset.get("codemap_xwalk").read_table(format="pandas")  # noqa: F821
@@ -448,7 +448,7 @@ def main() -> None:
     except Exception as e:
         logger.error(f"Failed to load mapping datasets from Foundry: {e}")
         logger.error(traceback.format_exc())
-        return # Exit if mappings cannot be loaded
+        return  # Exit if mappings cannot be loaded
 
     # Single File, put the datasets into the omop_dataset_dict
     if args.filename is not None and args.dataset is None:

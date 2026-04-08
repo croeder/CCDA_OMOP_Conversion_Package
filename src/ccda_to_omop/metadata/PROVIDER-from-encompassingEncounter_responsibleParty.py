@@ -81,11 +81,11 @@ metadata = {
         },
         'dea': {
             'config_type': 'FIELD',
-            'element': 'hl7:id[@root="2.16.840.1.113883.D.E.A"]', # TODO get the correct OID
+            'element': 'hl7:id[@root="2.16.840.1.113883.D.E.A"]',  # TODO get the correct OID
             'attribute': "extension",
             'order': 4
         },
-        #<code code="207QA0505X" displayName="Adult Medicine Physician" codeSystem="2.16.840.1.113883.6.101" codeSystemName="NUCC" />
+        # <code code="207QA0505X" displayName="Adult Medicine Physician" codeSystem="2.16.840.1.113883.6.101" codeSystemName="NUCC" />
         'specialty_concept_id_code': {
             'config_type': 'FIELD',
             'element': 'hl7:code',

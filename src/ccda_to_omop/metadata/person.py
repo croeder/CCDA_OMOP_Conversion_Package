@@ -275,7 +275,7 @@ metadata = {
             'fields' : [ 'address_1', 'city', 'state', 'zip'  ],
             'order': 9
         },
-        'provider_id': { # TODO FK to document-level provider?
+        'provider_id': {  # TODO FK to document-level provider?
             'config_type': None,
             'order': 10
         },
@@ -286,7 +286,7 @@ metadata = {
         },
         'person_source_value': {
             'config_type': 'CONSTANT',
-            'constant_value' : '', # None?
+            'constant_value' : '',  # None?
             'order':12
         },
 

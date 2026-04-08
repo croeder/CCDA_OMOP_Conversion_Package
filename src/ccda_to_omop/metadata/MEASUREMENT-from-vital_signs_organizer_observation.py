@@ -27,7 +27,7 @@ metadata = {
         'measurement_id': {
             'config_type': 'HASH',
             'fields' : ['person_id', 'provider_id',
-                        #'visit_occurrence_id',
+                        # 'visit_occurrence_id',
                         'measurement_concept_code', 'measurement_concept_codeSystem',
                         'measurement_date', 'measurement_datetime',
                         'value_as_number', 'value_as_concept_id',

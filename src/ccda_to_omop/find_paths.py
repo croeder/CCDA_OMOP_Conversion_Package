@@ -156,7 +156,7 @@ def get_derived_fields(metadata: dict) -> dict:
 
                 # values-dict only
                 try:
-                    ####fk_field_key = metadata[config_key][field_key]['config_type']['FK']
+                    # fk_field_key = metadata[config_key][field_key]['config_type']['FK']
                     fk_field_key = metadata[config_key][field_key]['FK']
                 except Exception as x:
                     print(f"ERROR: {config_key} {field_key} ")
@@ -166,7 +166,7 @@ def get_derived_fields(metadata: dict) -> dict:
                             fk_field_key:  metadata[config_key][fk_field_key]
                 }
 
-                #order
+                # order
                 if 'order' in metadata[config_key][field_key]:
                     derived_field_dict[config_key][field_key]['order'] = metadata[config_key][field_key]['order']
                 else:
@@ -191,7 +191,7 @@ def get_derived_fields(metadata: dict) -> dict:
                     else:
                         args_hash[arg_key] = arg_field_key
                         if metadata[config_key][arg_field_key]['config_type'] == 'FIELD':
-                            #values_hash[arg_key] =  metadata[config_key][arg_field_key]
+                            # values_hash[arg_key] =  metadata[config_key][arg_field_key]
                             root_path =  metadata[config_key]['root']['element']
                             values_hash[arg_key] =  (f"{root_path}/"
                                                    f"{metadata[config_key][arg_field_key]['element']}"
@@ -256,7 +256,7 @@ def get_hash_fields(metadata: dict, derived_field_dict: dict) -> dict:
                                 if False:
                                     # madness, deeper, but raw
                                     values_hash[arg_key] =  derived_field_dict[config_key][arg_key]
-                                    #arg:test_derived_field value:{'type': 'map_hl7_to_omop_concept_id()',
+                                    # arg:test_derived_field value:{'type': 'map_hl7_to_omop_concept_id()',
                                     #                              'args-dict': {'concept_code': 'field_code', 'vocabulary_oid': 'field_oid', 'default': '(constant default)'},
                                     #                              'values-dict': {'concept_code': 'fake/doc/path/id/@code', 'vocabulary_oid': 'fake/doc/path/id/@codeSystem', 'default': 0},
                                     #                              'order': 6}
@@ -295,7 +295,7 @@ def print_data_hash(data_hash: dict) -> None:
     for config_key in sorted(data_hash):
         for field_key in sorted(data_hash[config_key]):
             thing =  data_hash[config_key][field_key]
-            #if 'order' in thing and thing['order']:
+            # if 'order' in thing and thing['order']:
             if True:
                 print(f"{config_key}/{field_key} type:{thing['type']} order:{thing['order']}")
                 if 'arg' in thing:
@@ -327,21 +327,21 @@ def main() -> None:
       # (old) config_key --> field_key --> XML Path
       # (new) config_key --> field_key --> { 'path': XML Path,
       #                                      'order' : int }
-    #print_data_hash(base_field_dict)
+    # print_data_hash(base_field_dict)
 
     # DERIVED
     derived_field_dict = get_derived_fields(metadata)
       # config_key --> field_key --> {'function': function name,
       #                               'args' : [ field names ],
       #                               'order' : int }
-    #print_data_hash(derived_field_dict)
+    # print_data_hash(derived_field_dict)
 
     # HASH
     hash_field_dict = get_hash_fields(metadata, derived_field_dict)
       # config_key --> field_key --> { 'function' : 'hash()',
       #                                'args' : [ field names ],
       #                                'order' : int }
-    #print_data_hash(hash_field_dict)
+    # print_data_hash(hash_field_dict)
 
 
 

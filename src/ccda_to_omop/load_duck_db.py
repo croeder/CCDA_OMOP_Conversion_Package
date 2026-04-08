@@ -29,20 +29,20 @@ import logging
 _PACKAGE_ROOT = Path(__file__).parent.parent.parent
 OMOP_CDM_DIR = _PACKAGE_ROOT / "resources"
 OMOP_CSV_DATA_DIR = _PACKAGE_ROOT / "output"
-#import duckdb
+# import duckdb
 
 
 
 # These used to appear as vars in ddl.py and now
 # are entries in the
-#from .ddl import  sql_import_dict
-#from .ddl import  person_ddl
-#from .ddl import  visit_ddl
-#from .ddl import  measurement_ddl
-#from .ddl import  procedure_ddl
-#from .ddl import  procedure_ddl
-#from .ddl import  drug_ddl
-#from .ddl import  device_ddl
+# from .ddl import  sql_import_dict
+# from .ddl import  person_ddl
+# from .ddl import  visit_ddl
+# from .ddl import  measurement_ddl
+# from .ddl import  procedure_ddl
+# from .ddl import  procedure_ddl
+# from .ddl import  drug_ddl
+# from .ddl import  device_ddl
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ processing_status = True
 
 # conn = duckdb.connect()
 
-#def init_sql_import_dict():
+# def init_sql_import_dict():
 #    for key in sql_import_dict:
 #        sql_import_dict[key]['sql'] = f"""
 #                INSERT INTO TABLENAME SELECT
@@ -60,7 +60,7 @@ processing_status = True
 #    print(sql_import_dict)
 
 
-#def _apply_local_ddl():
+# def _apply_local_ddl():
 #    x=conn.execute(person_ddl)
 #    x=conn.execute(visit_ddl)
 #    x=conn.execute(measurement_ddl)
@@ -108,9 +108,9 @@ def _import_CSVs(domain):
                     print(e)
                     logger.error(f"Failed to load {domain} from {csv_filename}")
                     logger.error(e)
-                #print(x.df())
-            #else:
-                #print(f"skipping small size file {csv_filename}")
+                # print(x.df())
+            # else:
+                # print(f"skipping small size file {csv_filename}")
 #        except duckdb.BinderException as e:
 #            logger.error(f"Failed to read {csv_filename} {type(e)} {e}")
 
@@ -132,9 +132,9 @@ def check_PK(domain):
 
 def main():
     print("\nDDL")
-    #_apply_ddl("OMOPCDM_duckdb_5.3_ddl.sql")
-    #_apply_ddl("OMOPCDM_duckdb_5.3_ddl_with_constraints.sql")
-    #_apply_ddl("OMOPCDM_duckdb_5.3_ddl_with_constraints_and_string_PK.sql")
+    # _apply_ddl("OMOPCDM_duckdb_5.3_ddl.sql")
+    # _apply_ddl("OMOPCDM_duckdb_5.3_ddl_with_constraints.sql")
+    # _apply_ddl("OMOPCDM_duckdb_5.3_ddl_with_constraints_and_string_PK.sql")
 #    _apply_ddl("OMOPCDM_duckdb_5.3_ddl_with_constraints_and_bigint_PK.sql")
 
     domain_list = ['Person', 'Visit', 'Provider', 'Care_Site', 'Location',
@@ -148,8 +148,8 @@ def main():
 
     # not implemented in ALTER TABLE yet in v1.0
     # https://github.com/OHDSI/CommonDataModel/issues/713
-##    _apply_ddl("OMOPCDM_duckdb_5.3_primary_keys.sql")
-##    _apply_ddl("OMOPCDM_duckdb_5.3_constraints.sql")
+# _apply_ddl("OMOPCDM_duckdb_5.3_primary_keys.sql")
+# _apply_ddl("OMOPCDM_duckdb_5.3_constraints.sql")
 
     print("\nINDICES")
     _apply_ddl("OMOPCDM_duckdb_5.3_indices.sql")

@@ -103,4 +103,4 @@ def cast_to_datetime(string_value: str) -> datetime.datetime | None:
     except Exception as x:
         logger.warning(f"ERROR couldn't parse {string_value} as datetime. {x}")
         return None
-        #return  datetime.date.fromisoformat("1970-01-01T00:00:00"
+        # return  datetime.date.fromisoformat("1970-01-01T00:00:00"
