@@ -67,6 +67,7 @@ import hashlib
 import logging
 import os
 import pandas as pd
+import pathlib
 import sys
 import traceback
 
@@ -1106,7 +1107,7 @@ def main() :
             help="write csv files")
     args = parser.parse_args()
 
-    home="/Users/croeder/git/CCDA/tislab-clad/CCDA_OMOP_Conversion_Package"
+    home=pathlib.Path(__file__).parent.parent.parent.resolve()
     codemap_dict = create_codemap_dict_from_csv(f"{home}/resources/map.csv")
     VT.set_codemap_dict(codemap_dict)
 

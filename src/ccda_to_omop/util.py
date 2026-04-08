@@ -6,6 +6,7 @@ from dateutil.parser import parse
 import csv
 import datetime
 import pandas as pd
+import pathlib
 from numpy import int32, int64
 
 # Canonical type alias for a single OMOP output record dictionary.
@@ -40,7 +41,7 @@ def create_codemap_dict_from_csv(map_csv_filepath: str) -> dict:
         from a CSV file:
            OID, code, codeSystem, target_id, target_domain
     """
-    concept_map = {}
+    concept_map = defaultdict(list)
     with open(map_csv_filepath) as f:
         reader = csv.reader(f)
         next(reader)  # skip header
@@ -48,11 +49,11 @@ def create_codemap_dict_from_csv(map_csv_filepath: str) -> dict:
             if len(row) < 5 or not row[0].strip():
                 continue
             oid, code, _, concept_id, domain = [r.strip() for r in row[:5]]
-            concept_map[(oid, code)] = {
+            concept_map[(oid, code)].append({
                 'source_concept_id': int(concept_id),
                 'target_concept_id': int(concept_id),
                 'target_domain_id': domain,
-            }
+            })
     return concept_map
 
 
