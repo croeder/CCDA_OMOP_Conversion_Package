@@ -47,7 +47,7 @@ metadata = {
                 #TODO: concatentation of fields f"{address_1}|{address_2}|{city} "
         'data_partner_id': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.get_data_partner_id, 
+            'FUNCTION': VT.get_data_partner_id,
             'argument_names': { 'filename': 'filename' },
             'order': 20
         },
@@ -55,11 +55,11 @@ metadata = {
         'filename' : {
             'config_type': 'FILENAME',
             'order':100
-        }, 
-        'cfg_name' : { 
-			'config_type': 'CONSTANT', 
+        },
+        'cfg_name' : {
+            'config_type': 'CONSTANT',
             'constant_value': 'Location_ee',
-			'order':101
-		} 
+            'order':101
+        }
     }
 }

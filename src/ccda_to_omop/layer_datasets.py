@@ -1,19 +1,14 @@
 
 import argparse
 import logging
-import math
 import os
 import pandas as pd
-import re
 from typeguard import typechecked
 import traceback
 
-from collections import defaultdict
 from numpy import int32
 from numpy import int64
-from numpy import float32
 from numpy import datetime64
-import numpy as np
 import warnings
 import datetime as DT
 
@@ -436,12 +431,12 @@ def main() -> None:
     omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
 
     try:
-        codemap_df = Dataset.get("codemap_xwalk").read_table(format="pandas")
+        codemap_df = Dataset.get("codemap_xwalk").read_table(format="pandas")  # noqa: F821
         codemap_dict = U.create_codemap_dict(codemap_df)
         logger.error(f"CODEMAP  {len(codemap_dict)}")
         VT.set_codemap_dict(codemap_dict)
 
-        metadata_df = Dataset.get("ccda_response_metadata").read_table(format="pandas")
+        metadata_df = Dataset.get("ccda_response_metadata").read_table(format="pandas")  # noqa: F821
         # Create a dictionary: { 'filename.xml': mspi_value }
         # We use 'response_file_path' as the key to match the 'filename' in the OMOP output
         mspi_map = dict(zip(metadata_df['response_file_path'], metadata_df['mspi']))
@@ -463,9 +458,9 @@ def main() -> None:
         domain_dataset_dict = process_directory(args.directory, args.write_csv, args.config)
     elif args.dataset is not None:
         if args.filename is not None:
-            domain_dataset_dict = process_file_from_dataset(args.dataset, args.export, args.write_csv, args.limit, args.skip, args.config, args.filename)
+            domain_dataset_dict = process_file_from_dataset(args.dataset, args.export, args.write_csv, args.limit, args.skip, args.config, args.filename)  # noqa: F821
         else:
-            domain_dataset_dict = process_dataset_of_files(args.dataset, args.export, args.write_csv, args.limit, args.skip, args.config)
+            domain_dataset_dict = process_dataset_of_files(args.dataset, args.export, args.write_csv, args.limit, args.skip, args.config)  # noqa: F821
     else:
         logger.error("Did args parse let us  down? Have neither a file, nor a directory.")
 

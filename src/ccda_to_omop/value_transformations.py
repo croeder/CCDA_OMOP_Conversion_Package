@@ -1,8 +1,6 @@
 import datetime
 from typeguard import typechecked
 from numpy import int32
-import pandas as pd
-from ccda_to_omop.util import cast_to_date
 from ccda_to_omop.util import cast_to_datetime
 from ccda_to_omop import package_constant_access
 from ccda_to_omop.constants import HL7_DATE_LENGTH, ISO_DATE_LENGTH, DATETIME_LOW_SUFFIX, DATETIME_HIGH_SUFFIX

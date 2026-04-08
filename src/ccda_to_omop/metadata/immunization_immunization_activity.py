@@ -3,35 +3,35 @@ from numpy import int32
 #
 metadata = {
     'Immunization_immunization_activity': {
-    	'root': {
-    	    'config_type': 'ROOT',
+        'root': {
+            'config_type': 'ROOT',
             'expected_domain_id': 'Drug',
             # Immunizations section, entry, substanceAdministration
-    	    'element':
-    		  ("./hl7:component/hl7:structuredBody/hl7:component/hl7:section"
-    		   "/hl7:templateId[@root='2.16.840.1.113883.10.20.22.2.2' or @root='2.16.840.1.113883.10.20.22.2.2.1']"
-    		   "/../hl7:entry/hl7:substanceAdministration[@moodCode='EVN']"
+            'element':
+              ("./hl7:component/hl7:structuredBody/hl7:component/hl7:section"
+               "/hl7:templateId[@root='2.16.840.1.113883.10.20.22.2.2' or @root='2.16.840.1.113883.10.20.22.2.2.1']"
+               "/../hl7:entry/hl7:substanceAdministration[@moodCode='EVN']"
                "/hl7:statusCode[@code='active' or @code='completed']/.."
                "/hl7:consumable/hl7:manufacturedProduct/hl7:manufacturedMaterial")
-            
-#    		  ("./hl7:component/hl7:structuredBody/hl7:component/hl7:section/"
-#    		   "hl7:templateId[@root='2.16.840.1.113883.10.20.22.2.2' or @root='2.16.840.1.113883.10.20.22.2.2.1']"
-#    		   "/../hl7:entry/hl7:substanceAdministration[@moodCode='EVN' and "
+
+#             ("./hl7:component/hl7:structuredBody/hl7:component/hl7:section/"
+#              "hl7:templateId[@root='2.16.840.1.113883.10.20.22.2.2' or @root='2.16.840.1.113883.10.20.22.2.2.1']"
+#              "/../hl7:entry/hl7:substanceAdministration[@moodCode='EVN' and "
 #               "(hl7:statusCode[@code='active'] or hl7:statusCode[@code='completed'])]")
         },
-    	
+
         'drug_exposure_id_root': {
             'config_type': 'FIELD',
             'element': '../../../hl7:id[not(@nullFlavor="UNK")]',
             'attribute': 'root'
-    	},
-    	'drug_exposure_id_extension': {
+        },
+        'drug_exposure_id_extension': {
             'config_type': 'FIELD',
             'element': '../../../hl7:id[not(@nullFlavor="UNK")]',
             'attribute': 'extension'
-    	},
+        },
         'drug_exposure_id': {
-    	    'config_type': 'HASH',
+            'config_type': 'HASH',
             'fields' : ['person_id',  'provider_id',
                         #'visit_occurrence_id',
                         'drug_concept_code_code', 'drug_concept_codeSystem_code',
@@ -43,159 +43,159 @@ metadata = {
             'order': 1
         },
 
-    	'person_id': {
-    	    'config_type': 'FK',
-    	    'FK': 'person_id',
+        'person_id': {
+            'config_type': 'FK',
+            'FK': 'person_id',
             'order': 2
-    	},
+        },
 
         # consumable/manufacturedProduct/manufacturedMaterial/...
-    	'drug_concept_code_code': {
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:code" ,
-    	    'attribute': "code"
-    	},
-    	'drug_concept_codeSystem_code': {
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:code",
-    	    'attribute': "codeSystem"
-    	},
-    	'drug_concept_id_code': {
-    	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.codemap_xwalk_concept_id,  
-    	    'argument_names': {
-    		    'concept_code': 'drug_concept_code_code',
-    		    'vocabulary_oid': 'drug_concept_codeSystem_code',
+        'drug_concept_code_code': {
+            'config_type': 'FIELD',
+            'element': "hl7:code" ,
+            'attribute': "code"
+        },
+        'drug_concept_codeSystem_code': {
+            'config_type': 'FIELD',
+            'element': "hl7:code",
+            'attribute': "codeSystem"
+        },
+        'drug_concept_id_code': {
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.codemap_xwalk_concept_id,
+            'argument_names': {
+                'concept_code': 'drug_concept_code_code',
+                'vocabulary_oid': 'drug_concept_codeSystem_code',
                 'default': 0
             },
             'priority': ('drug_concept_id', 1)
-    	},
+        },
 
-    	'drug_concept_domain_id_code': {
-    	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.codemap_xwalk_domain_id,
-    	    'argument_names': {
-    		    'concept_code': 'drug_concept_code_code',
-    		    'vocabulary_oid': 'drug_concept_codeSystem_code',
+        'drug_concept_domain_id_code': {
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.codemap_xwalk_domain_id,
+            'argument_names': {
+                'concept_code': 'drug_concept_code_code',
+                'vocabulary_oid': 'drug_concept_codeSystem_code',
                 'default': 0
-    	    },
+            },
             'priority': ('domain_id', 1)
-    	},
+        },
 
-    	'drug_concept_code_translation': {
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:code/hl7:translation" ,
-    	    'attribute': "code"
-    	},
-    	'drug_concept_codeSystem_translation': {
-    	    'config_type': 'FIELD',
-    	    'element': "hl7:code/hl7:translation",
-    	    'attribute': "codeSystem"
-    	},
-    	'drug_concept_id_translation': {
-    	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.codemap_xwalk_concept_id,  
-    	    'argument_names': {
-    		    'concept_code': 'drug_concept_code_translation',
-    		    'vocabulary_oid': 'drug_concept_codeSystem_translation',
+        'drug_concept_code_translation': {
+            'config_type': 'FIELD',
+            'element': "hl7:code/hl7:translation" ,
+            'attribute': "code"
+        },
+        'drug_concept_codeSystem_translation': {
+            'config_type': 'FIELD',
+            'element': "hl7:code/hl7:translation",
+            'attribute': "codeSystem"
+        },
+        'drug_concept_id_translation': {
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.codemap_xwalk_concept_id,
+            'argument_names': {
+                'concept_code': 'drug_concept_code_translation',
+                'vocabulary_oid': 'drug_concept_codeSystem_translation',
                 'default': 0
-    	    },
+            },
             'priority': ('drug_concept_id', 2)
-    	},
+        },
 
-    	'drug_concept_domain_id_translation': {
-    	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.codemap_xwalk_domain_id,
-    	    'argument_names': {
-    		    'concept_code': 'drug_concept_code_translation',
-    		    'vocabulary_oid': 'drug_concept_codeSystem_translation',
+        'drug_concept_domain_id_translation': {
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.codemap_xwalk_domain_id,
+            'argument_names': {
+                'concept_code': 'drug_concept_code_translation',
+                'vocabulary_oid': 'drug_concept_codeSystem_translation',
                 'default': 0
-    	    },
+            },
             'priority': ('domain_id', 2)
-    	},
-        
+        },
+
         'drug_concept_id': {
             'config_type': 'PRIORITY',
             'order' : 3
-        },                  
-        
+        },
+
         'domain_id': {
             'config_type': 'PRIORITY'
-        },                  
-        
+        },
+
         'drug_exposure_start_date_eT': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime", 
+            'element': "../../../hl7:effectiveTime",
             'attribute': "value",
             'data_type': 'DATE',
-            'priority' : ['drug_exposure_start_date', 2 ] 
-        },        
+            'priority' : ['drug_exposure_start_date', 2 ]
+        },
         'drug_exposure_start_date_low': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:low", 
+            'element': "../../../hl7:effectiveTime/hl7:low",
             'attribute': "value",
             'data_type': 'DATE',
-            'priority' : ['drug_exposure_start_date', 1 ] 
-        },        
+            'priority' : ['drug_exposure_start_date', 1 ]
+        },
         'drug_exposure_start_date_high': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:high", 
+            'element': "../../../hl7:effectiveTime/hl7:high",
             'attribute': "value",
             'data_type': 'DATE',
-            'priority' : ['drug_exposure_start_date', 3 ] 
+            'priority' : ['drug_exposure_start_date', 3 ]
         },
         'drug_exposure_start_date': {
             'config_type': 'PRIORITY',
             'order': 4
-        },        
+        },
 
         'drug_exposure_start_datetime_eT': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime", 
+            'element': "../../../hl7:effectiveTime",
             'attribute': "value",
             'data_type': 'DATETIME_LOW',
-            'priority' : ['drug_exposure_start_datetime', 2 ] 
-        },        
+            'priority' : ['drug_exposure_start_datetime', 2 ]
+        },
         'drug_exposure_start_datetime_low': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:low", 
+            'element': "../../../hl7:effectiveTime/hl7:low",
             'attribute': "value",
             'data_type': 'DATETIME_LOW',
-            'priority' : ['drug_exposure_start_datetime', 1 ] 
-        },  
+            'priority' : ['drug_exposure_start_datetime', 1 ]
+        },
         'drug_exposure_start_datetime_high': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:high", 
+            'element': "../../../hl7:effectiveTime/hl7:high",
             'attribute': "value",
             'data_type': 'DATETIME_LOW',
-            'priority' : ['drug_exposure_start_datetime', 3 ] 
-        }, 
+            'priority' : ['drug_exposure_start_datetime', 3 ]
+        },
         'drug_exposure_start_datetime': {
             'config_type': 'PRIORITY',
             'order': 5
-        },  
+        },
 
         'drug_exposure_end_date_high': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:high", 
+            'element': "../../../hl7:effectiveTime/hl7:high",
             'attribute': "value",
             'data_type': 'DATE',
-            'priority' : ['drug_exposure_end_date', 1 ] 
-        },        
+            'priority' : ['drug_exposure_end_date', 1 ]
+        },
         'drug_exposure_end_date_eT': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime", 
+            'element': "../../../hl7:effectiveTime",
             'attribute': "value",
             'data_type': 'DATE',
-            'priority' : ['drug_exposure_end_date', 2 ] 
+            'priority' : ['drug_exposure_end_date', 2 ]
         },
         'drug_exposure_end_date_low': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:low", 
+            'element': "../../../hl7:effectiveTime/hl7:low",
             'attribute': "value",
             'data_type': 'DATE',
-            'priority' : ['drug_exposure_end_date', 3 ] 
-        },  
+            'priority' : ['drug_exposure_end_date', 3 ]
+        },
         'drug_exposure_end_date': {
             'config_type': 'PRIORITY',
             'order': 6
@@ -203,52 +203,52 @@ metadata = {
 
         'drug_exposure_end_datetime_high': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:high", 
+            'element': "../../../hl7:effectiveTime/hl7:high",
             'attribute': "value",
             'data_type': 'DATETIME_HIGH',
-            'priority' : ['drug_exposure_end_datetime', 1 ] 
-        },   
+            'priority' : ['drug_exposure_end_datetime', 1 ]
+        },
         'drug_exposure_end_datetime_eT': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime", 
+            'element': "../../../hl7:effectiveTime",
             'attribute': "value",
             'data_type': 'DATETIME_HIGH',
-            'priority' : ['drug_exposure_end_datetime', 2 ] 
+            'priority' : ['drug_exposure_end_datetime', 2 ]
         },
         'drug_exposure_end_datetime_low': {
             'config_type': 'FIELD',
-            'element': "../../../hl7:effectiveTime/hl7:low", 
+            'element': "../../../hl7:effectiveTime/hl7:low",
             'attribute': "value",
             'data_type': 'DATETIME_HIGH',
-            'priority' : ['drug_exposure_end_datetime', 3 ] 
-        },      
+            'priority' : ['drug_exposure_end_datetime', 3 ]
+        },
         'drug_exposure_end_datetime': {
             'config_type': 'PRIORITY',
             'order': 7
-        },           
-       
+        },
+
         'verbatim_end_date': {
-    	    'config_type': 'FIELD',
+            'config_type': 'FIELD',
             'element': "../../../hl7:effectiveTime",
-    	    'attribute': "value",
+            'attribute': "value",
             'data_type':'DATE',
             'order': 8
-    	},        
-        
+        },
+
         'drug_type_concept_id': {
             'config_type': 'CONSTANT',
             'constant_value' : int32(32818), # OMOP concept ID for 'EHR administration record'
             'order': 9
         },
-        'stop_reason': { 
+        'stop_reason': {
             'config_type': 'CONSTANT',
             'constant_value' : '',
             'length': 20,
             'order':10
         },
-        
+
         'refills': { 'config_type': None, 'order': 11},
-       
+
         'quantity': {
             'config_type': 'FIELD',
             'element': "../../../hl7:doseQuantity",
@@ -256,7 +256,7 @@ metadata = {
             'data_type': 'FLOAT',
             'order': 12
         },
-        
+
         'days_supply': { 'config_type': None, 'order': 13 },
         'sig': { 'config_type': None, 'order': 14 },
 
@@ -272,7 +272,7 @@ metadata = {
         },
         'route_concept_id': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.codemap_xwalk_concept_id,  
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': {
                 'concept_code': 'route_concept_code',
                 'vocabulary_oid': 'route_concept_codeSystem',
@@ -283,55 +283,55 @@ metadata = {
 
         # consumable/manufacturedProduct/manufacturedMaterial/lotNumberText
         'lot_number': {
-    	    'config_type': 'FIELD',
-    	    'element':  "hl7:lotNumberText",
+            'config_type': 'FIELD',
+            'element':  "hl7:lotNumberText",
             'data_type': 'TEXT',
             'attribute': '#text',
             'order': 16
         },
-        
-        'provider_id': { 
-    	    'config_type': 'FK',
-    	    'FK': 'provider_id',
+
+        'provider_id': {
+            'config_type': 'FK',
+            'FK': 'provider_id',
             'order': 17
-    	},
+        },
 
         'visit_occurrence_id': {
-    	    'config_type': 'FK',
-    	    'FK': 'visit_occurrence_id',
+            'config_type': 'FK',
+            'FK': 'visit_occurrence_id',
             'order':  18
-    	},
-        
+        },
+
         'visit_detail_id': { 'config_type': None, 'order': 19 },
 
         'drug_source_value_translation': {
-       	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.concat_fields,  
-    	    'argument_names': {
-    		    'first_field': 'drug_concept_code_translation',
-    		    'second_field': 'drug_concept_codeSystem_translation',
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.concat_fields,
+            'argument_names': {
+                'first_field': 'drug_concept_code_translation',
+                'second_field': 'drug_concept_codeSystem_translation',
                 'default': 'error'
-    	    },
+            },
             'priority': ( 'drug_source_value', 2)
         },
         'drug_source_value_code': {
-       	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.concat_fields,  
-    	    'argument_names': {
-    		    'first_field': 'drug_concept_code_code',
-    		    'second_field': 'drug_concept_codeSystem_code',
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.concat_fields,
+            'argument_names': {
+                'first_field': 'drug_concept_code_code',
+                'second_field': 'drug_concept_codeSystem_code',
                 'default': 'error'
-    	    },
+            },
             'priority': ( 'drug_source_value', 1)
         },
         'drug_source_value': {
             'config_type': 'PRIORITY',
             'order': 20
         },
-        
-        'drug_source_concept_id_translation': { 
+
+        'drug_source_concept_id_translation': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.codemap_xwalk_source_concept_id,  
+            'FUNCTION': VT.codemap_xwalk_source_concept_id,
             'argument_names': {
                 'concept_code': 'drug_concept_code_translation',
                 'vocabulary_oid': 'drug_concept_codeSystem_translation',
@@ -341,7 +341,7 @@ metadata = {
         },
         'drug_source_concept_id_code': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.codemap_xwalk_source_concept_id,  
+            'FUNCTION': VT.codemap_xwalk_source_concept_id,
             'argument_names': {
                 'concept_code': 'drug_concept_code_code',
                 'vocabulary_oid': 'drug_concept_codeSystem_code',
@@ -353,40 +353,40 @@ metadata = {
             'config_type': 'PRIORITY',
             'order': 21
         },
-        
+
         'route_source_value': { # CHRIS very nice
-       	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.concat_fields,  
-    	    'argument_names': {
-    		    'first_field': 'route_concept_code',
-    		    'second_field': 'route_concept_codeSystem',
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.concat_fields,
+            'argument_names': {
+                'first_field': 'route_concept_code',
+                'second_field': 'route_concept_codeSystem',
                 'default': 'error'
-    	    },
+            },
             'order': 22
         },
-               
-        'dose_unit_source_value': { 
-       	    'config_type': 'FIELD',
+
+        'dose_unit_source_value': {
+            'config_type': 'FIELD',
             'element': "../../../hl7:doseQuantity",
             'attribute': "unit",
             'order': 23
         },
         'data_partner_id': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.get_data_partner_id, 
+            'FUNCTION': VT.get_data_partner_id,
             'argument_names': { 'filename': 'filename' },
             'order': 24
         },
-        
-     	'filename' : {
-		    'config_type': 'FILENAME',
-		    'order':100
-	    },
-        'cfg_name' : { 
-			'config_type': 'CONSTANT', 
+
+        'filename' : {
+            'config_type': 'FILENAME',
+            'order':100
+        },
+        'cfg_name' : {
+            'config_type': 'CONSTANT',
             'constant_value': 'Immunization_immunization_activity',
-			'order':101
-		} 
+            'order':101
+        }
 
     }
 }

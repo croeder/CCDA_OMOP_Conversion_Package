@@ -1,7 +1,6 @@
 import subprocess
 
 import logging
-import sys
 import os
 import importlib.util
 from functools import reduce
@@ -35,7 +34,7 @@ METADATA_DIR = os.path.dirname(__file__)
 def get_branch():
     """
         This code attempts to use git to get a branch name.
-        It will only apply user mappings if it can verify it is not working in a main 
+        It will only apply user mappings if it can verify it is not working in a main
         or master branch. If git fails, it assumes master and doesn't apply them.
 
         Suggestions to use an environment variable FOUNDRY_BRANCH_NAME fail because the variable isn't set.
@@ -89,8 +88,8 @@ def discover_and_sort_metadata() -> Dict[str, Any]:
     if not os.path.isdir(METADATA_DIR):
         logging.error(f"Metadata directory not found at: {METADATA_DIR}")
         return {}
-            
-    files_to_skip = ['__init__.py', 'test.py', 'ddl.py', 'util.py', 
+
+    files_to_skip = ['__init__.py', 'test.py', 'ddl.py', 'util.py',
         'test' # (though a dir, still needs to be skipped, getting an error about test.py?
     ]
     filenames = os.listdir(METADATA_DIR)
@@ -123,7 +122,7 @@ def get_meta_dict():
 
     # Don't apply user mappings if we can't be sure we're not running in master.
     # i.e. Only apply user mappings in development branches.
-    current_branch = get_branch() 
+    current_branch = get_branch()
     if current_branch is not None and current_branch != 'master' and current_branch != 'main':
         try:
             from user_mappings import overlay_mappings

@@ -11,7 +11,7 @@ metadata = {
             'element': "./hl7:recordTarget/hl7:patientRole/hl7:addr"
         },
 
-        'location_id': { 
+        'location_id': {
             'config_type': 'HASH',
             'fields' : [ 'address_1', 'city', 'state', 'zip'  ],
             'order': 1
@@ -47,27 +47,27 @@ metadata = {
         'county': {
             'config_type': None,
             'order': 7
-        },   
-        'location_source_value': { 
+        },
+        'location_source_value': {
             'config_type': None,
             'order': 8
         },
         'data_partner_id': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.get_data_partner_id, 
+            'FUNCTION': VT.get_data_partner_id,
             'argument_names': { 'filename': 'filename' },
             'order': 20
         },
 
-	    'filename' : {
-		    'config_type': 'FILENAME',
-		    'order':100
-	    },
-        'cfg_name' : { 
-			'config_type': 'CONSTANT', 
+        'filename' : {
+            'config_type': 'FILENAME',
+            'order':100
+        },
+        'cfg_name' : {
+            'config_type': 'CONSTANT',
             'constant_value': 'Location',
-			'order':101
-		}         
+            'order':101
+        }
 
     }
 }

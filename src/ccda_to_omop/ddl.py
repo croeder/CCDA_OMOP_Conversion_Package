@@ -12,12 +12,10 @@
       compared to OMOP. Can you leave out unused nullable fields?
 """
 
-import io
 import os
-import re
 import logging
 import importlib.util
-from typing import Dict, Any
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -112,8 +110,8 @@ sql_import_dict = {
         'sql': None,
         'table_name': "device_exposure",
         'pk_query': """
-                SELECT count(*) as row_ct, 
-                       count(device_exposure_id) as p_id, 
+                SELECT count(*) as row_ct,
+                       count(device_exposure_id) as p_id,
                        count(distinct device_exposure_id) as d_p_id
                 FROM device_exposure
                 """
@@ -138,8 +136,8 @@ sql_import_dict = {
         'sql': None,
         'table_name': "procedure_occurrence",
         'pk_query': """
-                SELECT count(*) as row_ct, 
-                       count(procedure_occurrence_id) as p_id, 
+                SELECT count(*) as row_ct,
+                       count(procedure_occurrence_id) as p_id,
                        count(distinct procedure_occurrence_id) as d_p_id
                 FROM procedure_occurrence
                 """
@@ -173,8 +171,8 @@ sql_import_dict = {
         'sql': None,
         'table_name': "drug_exposure",
         'pk_query': """
-                SELECT count(*) as row_ct, 
-                       count(drug_exposure_id) as p_id, 
+                SELECT count(*) as row_ct,
+                       count(drug_exposure_id) as p_id,
                        count(distinct drug_exposure_id) as d_p_id
                 FROM drug_exposure
                 """
@@ -203,21 +201,21 @@ sql_import_dict = {
         'sql': None,
         'table_name': "observation",
         'pk_query': """
-                SELECT count(*) as row_ct, 
-                       count(observation_id) as p_id, 
+                SELECT count(*) as row_ct,
+                       count(observation_id) as p_id,
                        count(distinct observation_id) as d_p_id
                 FROM observation
                 """
     },
     'Location': {
         'column_list': [
-            'location_id', 'address_1', 'address_2', 'city', 'state', 'zip', 
+            'location_id', 'address_1', 'address_2', 'city', 'state', 'zip',
             'county', 'location_source_value'
         ],
         'sql': None,
         'table_name': "location",
         'pk_query': """
-                SELECT count(*) as row_ct, 
+                SELECT count(*) as row_ct,
                        count(location_id) as p_id,
                        count(distinct location_id) as d_p_id
                 FROM location
@@ -242,8 +240,8 @@ sql_import_dict = {
         'sql': None,
         'table_name': "provider",
         'pk_query': """
-                SELECT count(*) as row_ct, 
-                count(provider_id) as p_id, 
+                SELECT count(*) as row_ct,
+                count(provider_id) as p_id,
                 count(distinct provider_id) as d_p_id
                 FROM provider
                 """
@@ -253,15 +251,15 @@ sql_import_dict = {
             'care_site_id',
             'care_site_name',
             'place_of_service_concept_id',
-            'location_id', 
+            'location_id',
             'care_site_source_value',
             'place_of_service_source_value'
         ],
         'sql': None,
         'table_name': "care_site",
         'pk_query': """
-                SELECT count(*) as row_ct, 
-                       count(care_site_id) as p_id, 
+                SELECT count(*) as row_ct,
+                       count(care_site_id) as p_id,
                        count(distinct care_site_id) as d_p_id
                 FROM care_site
                 """
@@ -277,7 +275,7 @@ sql_import_dict = {
         'sql': None,
         'table_name': "person",
         'pk_query': """
-                SELECT count(*) as row_ct, 
+                SELECT count(*) as row_ct,
                        count(person_id) as p_id,
                        count(distinct person_id) as d_p_id
                 FROM person

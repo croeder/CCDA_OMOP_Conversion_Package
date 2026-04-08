@@ -3,11 +3,11 @@ import ccda_to_omop.value_transformations as VT
 """
     This is for caresites from encompassingEncounter/.../healthCareFacility
     Note: TODO need to snoop to check assumptions. So far it looks like we get either and id or a location. Will hash all together to form an id.
-    Note: TODO sometimes there are two streetAddressLine attributes. The first is the name. 
+    Note: TODO sometimes there are two streetAddressLine attributes. The first is the name.
        The second is the first line of the address. Ex. 170.314b2_AmbulatoryToC.xml
        I'm calling that an unaccepted violation. The spec. says 0..1.
     Note: TODO sometimes all  you get is an ID.
-    Note: TODO are the IDs root-only? or do we sometimes get an extension? 
+    Note: TODO are the IDs root-only? or do we sometimes get an extension?
     Note: TODO sometimes just an address. Ex. 170.314b2_AmbulatoryToC.xml
     NOTE: TODO: consdier the serviceProviderOrganization right next to location in healthCareFacility
 
@@ -34,11 +34,11 @@ metadata = {
             #    'element': 'hl7:id[not(@nullFlavor="UNK")]',
             'attribute': "extension",
         },
-        'care_site_id': { 
+        'care_site_id': {
             'config_type': 'HASH',
             #'fields': [ 'care_site_id_root', 'care_site_id_extension'],
             'fields': [ 'care_site_id_root', 'care_site_id_extension',
-                        'care_site_name', 
+                        'care_site_name',
                         'place_of_service_concept_code', 'place_of_service_concept_codeSystem',
                         'address_1', 'city', 'state', 'zip' ],
             'order': 1
@@ -86,8 +86,8 @@ metadata = {
                     'care_site_id_root',
                     'care_site_id_extension',
                     'care_site_name',
-                    'place_of_service_concept_code',      
-                    'place_of_service_concept_codeSystem',                   
+                    'place_of_service_concept_code',
+                    'place_of_service_concept_codeSystem',
                     'address_1',
                     'city',
                     'state',
@@ -133,7 +133,7 @@ metadata = {
         #'location_source_value': { TODO: concatentation of fields f"{address_1}|{address_2}|{city} "
         'data_partner_id': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.get_data_partner_id, 
+            'FUNCTION': VT.get_data_partner_id,
             'argument_names': { 'filename': 'filename' },
             'order': 20
         },
@@ -141,13 +141,13 @@ metadata = {
             'config_type': 'FILENAME',
             'order':100
         },
-        'cfg_name' : { 
-			'config_type': 'CONSTANT', 
+        'cfg_name' : {
+            'config_type': 'CONSTANT',
             'constant_value': 'Care_Site_ee',
-			'order':101
-		},  
+            'order':101
+        },
 
-        #'id_values': { 
+        #'id_values': {
         #    'config_type': 'DERIVED2',
         #    'FUNCTION': VT.concat_field_list_values,
         #    'argument_list': {
@@ -156,8 +156,8 @@ metadata = {
         #    },
         #    'order': 201
         #},
-        
-        #'id_names': { 
+
+        #'id_names': {
         #    'config_type': 'DERIVED2',
         #    'FUNCTION': VT.concat_field_list_names,
         #    'argument_list': {
@@ -166,7 +166,7 @@ metadata = {
         #    },
         #    'order': 202
         #},
-        #'care_site_id_values': { 
+        #'care_site_id_values': {
         #    'config_type': 'HASH',
         #    'fields': [ 'id_values'  ],
         #    'order': 203
@@ -174,4 +174,3 @@ metadata = {
 
     }
 }
-

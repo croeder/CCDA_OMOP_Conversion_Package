@@ -8,6 +8,10 @@ This is a project to convert CCDA documents to OMOP CDM format in Python.
 
 [![ccda_to_omop file comparisons](https://github.com/croeder/CCDA_OMOP_Conversion_Package/actions/workflows/file_comparisons.yml/badge.svg)](https://github.com/croeder/CCDA_OMOP_Conversion_Package/actions/workflows/file_comparisons.yml)
 
+[![Lint](https://github.com/croeder/CCDA_OMOP_Conversion_Package/actions/workflows/lint.yml/badge.svg)](https://github.com/croeder/CCDA_OMOP_Conversion_Package/actions/workflows/lint.yml)
+
+[![codecov](https://codecov.io/gh/croeder/CCDA_OMOP_Conversion_Package/graph/badge.svg)](https://codecov.io/gh/croeder/CCDA_OMOP_Conversion_Package)
+
 
 ## What it does
 
