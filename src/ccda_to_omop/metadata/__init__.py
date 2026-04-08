@@ -130,8 +130,7 @@ def get_meta_dict():
             metadata = discover_and_sort_metadata() | overlay_mappings
             logger.info("got user mappings  and overlaid them.")
         except Exception as e:
-            logger.info("no user mappings available, nothing overlaid, using package mappings as-is.")
-            print(f"    {e}")
+            logger.info(f"no user mappings available, nothing overlaid, using package mappings as-is. ({e})")
 
         return metadata
     else:

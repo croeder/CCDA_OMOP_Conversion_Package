@@ -106,6 +106,6 @@ def cast_to_datetime(string_value: str) -> datetime.datetime | None:
         datetime_val = parse(string_value, ignoretz=True)
         return datetime_val
     except Exception as x:
-        print(f"ERROR couldn't parse {string_value} as datetime. {x}")
+        logger.warning(f"ERROR couldn't parse {string_value} as datetime. {x}")
         return None
         #return  datetime.date.fromisoformat("1970-01-01T00:00:00"

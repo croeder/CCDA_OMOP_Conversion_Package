@@ -640,9 +640,9 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
                             matches.append(visit['visit_occurrence_id'])
 
                     except KeyError as ke:
-                        print(f"WARNING missing field  \"{ke}\", in visit reconciliation, got error {type(ke)} ")
+                        logger.warning(f"missing field \"{ke}\" in visit reconciliation, got error {type(ke)}")
                     except Exception as e:
-                        print(f"WARNING something wrong in visit reconciliation: {e}")
+                        logger.warning(f"something wrong in visit reconciliation: {e}")
 
                 if len(matches) == 1:
                     thing['visit_occurrence_id'] = matches[0]
@@ -657,8 +657,7 @@ def reconcile_visit_FK_with_specific_domain(domain: str,
 
             else:
                 # S.O.L.
-                print(f"ERROR no date available for visit reconciliation in domain {domain} (detail in logs)")
-                logger.warning(f" no date available for visit reconciliation in domain {domain} for {thing}")
+                logger.warning(f"no date available for visit reconciliation in domain {domain} for {thing}")
 
     else:
         logger.info("??? bust in domain_dates for reconciliation")
@@ -697,7 +696,7 @@ def assign_visit_occurrence_ids_to_events(data_dict: dict[str, list[OMOPRecord |
                 if VISIT_CFG_NAME in data_dict:
                     reconcile_visit_FK_with_specific_domain(domain_name, data_dict[cfg_name], data_dict[VISIT_CFG_NAME])
                 else:
-                    print(f"NO \"{VISIT_CFG_NAME}\", no visit reconciliation or inference done.")
+                    logger.warning(f"NO \"{VISIT_CFG_NAME}\", no visit reconciliation or inference done.")
 
     for cfg_name, domain_name in config_to_domain_map.items():
         if cfg_name in data_dict and data_dict[cfg_name]:
