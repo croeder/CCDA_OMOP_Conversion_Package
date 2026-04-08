@@ -13,6 +13,10 @@ jobs:
               python-version: '3.x'
           - name: Install packages
             run: pip install -r requirements.txt pytest pytest-cov
+          - name: get the concept map file
+            run: |
+              wget https://media.githubusercontent.com/media/croeder/CCDA_OMOP_Private/refs/heads/main/map.csv?token=AAA5CJJL5FBY6JPRDPD6TBTJ22HSQ
+              mv map.csv resources
           - name: Run tests with coverage
             run: cd src && python -m pytest tests/ --cov=ccda_to_omop --cov-report=xml
 #          - name: Upload coverage to Codecov
