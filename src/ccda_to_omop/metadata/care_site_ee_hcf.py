@@ -146,31 +146,5 @@ metadata = {
             'constant_value': 'Care_Site_ee',
             'order':101
         },
-
-        # 'id_values': {
-        #    'config_type': 'DERIVED2',
-        #    'FUNCTION': VT.concat_field_list_values,
-        #    'argument_list': {
-        #        'key_list': ['care_site_name', 'place_of_service_concept_code', 'care_site_id_root', 'city', 'place_of_service_concept_codeSystem',
-        #                'address_1', 'care_site_id_extension', 'state', 'zip']
-        #    },
-        #    'order': 201
-        # },
-
-        # 'id_names': {
-        #    'config_type': 'DERIVED2',
-        #    'FUNCTION': VT.concat_field_list_names,
-        #    'argument_list': {
-        #        'key_list': ['care_site_name', 'place_of_service_concept_code', 'care_site_id_root', 'city', 'place_of_service_concept_codeSystem',
-        #                'address_1', 'care_site_id_extension', 'state', 'zip']
-        #    },
-        #    'order': 202
-        # },
-        # 'care_site_id_values': {
-        #    'config_type': 'HASH',
-        #    'fields': [ 'id_values'  ],
-        #    'order': 203
-        # },
-
     }
 }
