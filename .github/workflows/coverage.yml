@@ -18,7 +18,7 @@ jobs:
               wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
                    --header="Accept: application/vnd.github.v3.raw" \
                    -O resources/map.csv \
-                   "https://githubusercontent.com"
+                   "https://github.com"
 
               mv map.csv resources
           - name: Run tests with coverage
