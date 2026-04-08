@@ -54,7 +54,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'gender_concept_id_direct': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'gender_concept_code_direct',
                                 'vocabulary_oid': 'gender_concept_codeSystem_direct',
                                 'default': None },
@@ -74,7 +74,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'gender_concept_id_translated': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'gender_concept_code_translated',
                                 'vocabulary_oid': 'gender_concept_codeSystem_translated',
                                 'default': None },
@@ -132,7 +132,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'race_concept_id_direct': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'race_concept_code_direct',
                                 'vocabulary_oid': 'race_concept_codeSystem_direct',
                                 'default': None },
@@ -152,7 +152,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'race_concept_id_sdtc': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'race_concept_code_sdtc',
                                 'vocabulary_oid': 'race_concept_codeSystem_sdtc',
                                 'default': None },
@@ -172,7 +172,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'race_concept_id_translated': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'race_concept_code_translated',
                                 'vocabulary_oid': 'race_concept_codeSystem_translated',
                                 'default': None },
@@ -198,7 +198,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'ethnicity_concept_id_direct': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'ethnicity_concept_code_direct',
                                 'vocabulary_oid': 'ethnicity_concept_codeSystem_direct',
                                 'default': None },
@@ -218,7 +218,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'ethnicity_concept_id_sdtc': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'ethnicity_concept_code_sdtc',
                                 'vocabulary_oid': 'ethnicity_concept_codeSystem_sdtc',
                                 'default': None },
@@ -238,7 +238,7 @@ metadata = {
         # must default to None for priority/coalesce mechanism to work
         'ethnicity_concept_id_translated': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.valueset_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': { 'concept_code': 'ethnicity_concept_code_translated',
                                 'vocabulary_oid': 'ethnicity_concept_codeSystem_translated',
                                 'default': None },

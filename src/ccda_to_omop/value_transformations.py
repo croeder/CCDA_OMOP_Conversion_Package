@@ -197,42 +197,6 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
 
 ############################################################################
 
-def visit_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
-    """Alias of codemap_xwalk_concept_id for visit-domain lookups."""
-    return codemap_xwalk_concept_id(args_dict)
-
-def visit_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
-    """Alias of codemap_xwalk_domain_id for visit-domain lookups."""
-    return codemap_xwalk_domain_id(args_dict)
-
-def visit_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
-    """Alias of codemap_xwalk_source_concept_id for visit-domain lookups."""
-    return codemap_xwalk_source_concept_id(args_dict)
-
-def _visit_xwalk(vocabulary_oid, concept_code, column_name, default):
-    """Internal alias of _codemap_xwalk for visit-domain lookups."""
-    return _codemap_xwalk(vocabulary_oid, concept_code, column_name, default)
-
-############################################################################
-
-def valueset_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
-    """Alias of codemap_xwalk_concept_id for valueset lookups."""
-    return codemap_xwalk_concept_id(args_dict)
-
-def valueset_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
-    """Alias of codemap_xwalk_domain_id for valueset lookups."""
-    return codemap_xwalk_domain_id(args_dict)
-
-def valueset_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
-    """Alias of codemap_xwalk_source_concept_id for valueset lookups."""
-    return codemap_xwalk_source_concept_id(args_dict)
-
-def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default=None):
-    """Internal alias of _codemap_xwalk for valueset lookups."""
-    return _codemap_xwalk(vocabulary_oid, concept_code, column_name, default)
-
-############################################################################
-
 
 @typechecked
 def extract_day_of_birth(args_dict : dict[str, any]) -> int32:

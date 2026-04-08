@@ -120,7 +120,7 @@ metadata = {
         },
         'visit_concept_id_encounter': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_encounter',
                 'vocabulary_oid': 'visit_concept_codeSystem_encounter',
@@ -129,7 +129,7 @@ metadata = {
         },
         'domain_id_encounter': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_domain_id,
+            'FUNCTION': VT.codemap_xwalk_domain_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_encounter',
                 'vocabulary_oid': 'visit_concept_codeSystem_encounter',
@@ -147,7 +147,7 @@ metadata = {
         },
         'visit_source_concept_id_encounter': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_source_concept_id,
+            'FUNCTION': VT.codemap_xwalk_source_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_encounter',
                 'vocabulary_oid': 'visit_concept_codeSystem_encounter',
@@ -169,7 +169,7 @@ metadata = {
         },
         'visit_concept_id_trans1': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans1',
                 'vocabulary_oid': 'visit_concept_system_trans1',
@@ -178,7 +178,7 @@ metadata = {
         },
         'domain_id_trans1': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_domain_id,
+            'FUNCTION': VT.codemap_xwalk_domain_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans1',
                 'vocabulary_oid': 'visit_concept_system_trans1',
@@ -196,7 +196,7 @@ metadata = {
         },
         'visit_source_concept_id_trans1': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_source_concept_id,
+            'FUNCTION': VT.codemap_xwalk_source_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans1',
                 'vocabulary_oid': 'visit_concept_system_trans1',
@@ -217,7 +217,7 @@ metadata = {
         },
         'visit_concept_id_trans2': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans2',
                 'vocabulary_oid': 'visit_concept_system_trans2',
@@ -226,7 +226,7 @@ metadata = {
         },
         'domain_id_trans2': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_domain_id,
+            'FUNCTION': VT.codemap_xwalk_domain_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans2',
                 'vocabulary_oid': 'visit_concept_system_trans2',
@@ -244,7 +244,7 @@ metadata = {
         },
         'visit_source_concept_id_trans2': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_source_concept_id,
+            'FUNCTION': VT.codemap_xwalk_source_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans2',
                 'vocabulary_oid': 'visit_concept_system_trans2',
@@ -264,7 +264,7 @@ metadata = {
         },
         'visit_concept_id_trans3': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans3',
                 'vocabulary_oid': 'visit_concept_system_trans3',
@@ -273,7 +273,7 @@ metadata = {
         },
         'domain_id_trans3': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_domain_id,
+            'FUNCTION': VT.codemap_xwalk_domain_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans3',
                 'vocabulary_oid': 'visit_concept_system_trans3',
@@ -291,7 +291,7 @@ metadata = {
         },
         'visit_source_concept_id_trans3': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_source_concept_id,
+            'FUNCTION': VT.codemap_xwalk_source_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans3',
                 'vocabulary_oid': 'visit_concept_system_trans3',
@@ -311,7 +311,7 @@ metadata = {
         },
         'visit_concept_id_trans4': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_concept_id,
+            'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans4',
                 'vocabulary_oid': 'visit_concept_system_trans4',
@@ -320,7 +320,7 @@ metadata = {
         },
         'domain_id_trans4': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_domain_id,
+            'FUNCTION': VT.codemap_xwalk_domain_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans4',
                 'vocabulary_oid': 'visit_concept_system_trans4',
@@ -338,7 +338,7 @@ metadata = {
         },
         'visit_source_concept_id_trans4': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.visit_xwalk_source_concept_id,
+            'FUNCTION': VT.codemap_xwalk_source_concept_id,
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans4',
                 'vocabulary_oid': 'visit_concept_system_trans4',
