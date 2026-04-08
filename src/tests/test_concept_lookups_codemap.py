@@ -21,7 +21,6 @@ test_data = {
         # args
         'vocabulary_oid': "2.16.840.1.113883.6.12",
         'concept_code': "99213",
-        'default':0,
         # expected outputs
         'source_concept_id': 2414397,
         'source_domain_id': 'Observation',
@@ -33,7 +32,6 @@ test_data = {
         # args
         'vocabulary_oid': "2.16.840.1.113883.6.96", 
         'concept_code': "266919005", 
-        'default':0,
         # expected outputs
         'source_concept_id': 4144272,
         'source_domain_id': 'Observation',
@@ -45,7 +43,6 @@ test_data = {
         # args
         'vocabulary_oid': "2.16.840.1.113883.6.1", 
         'concept_code': "788-0",
-        'default':0,
         # expected outputs
         'source_concept_id': 3019897,
         'source_domain_id': 'Measurement',
