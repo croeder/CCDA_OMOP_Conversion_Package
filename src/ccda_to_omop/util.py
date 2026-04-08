@@ -14,7 +14,7 @@ OMOPRecord = dict[str, None | str | float | int | int32 | int64 | datetime.datet
 
 logger = logging.getLogger(__name__)
 """
-    These three functions create dictionaries from the vocabulary xwalk 
+    These three functions create dictionaries from the vocabulary xwalk
     pandas dataframes.
     Each dictionary, given vocabulary and code, provides each of
     source_concept_id, target_domain_id, or target_concept_id.
@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
     target fields.
 
     Each key may have more than one value.
-    { 
+    {
         (vocab, code) : [
             {   'source_concept_id': None,
                 'target_domain_id': row['target_domain_id'],
-                'target_concept_id': row['target_concept_id'] 
+                'target_concept_id': row['target_concept_id']
             }
         ]
     }
@@ -76,7 +76,7 @@ def create_codemap_dict(codemap_df: pd.DataFrame) -> dict:
         })
 
     return codemap_dict
-    
+
 
 
 
@@ -93,11 +93,6 @@ def cast_to_date(string_value: str) -> datetime.date | None:
     except Exception as x:
         logger.warning(f"ERROR couldn't parse {string_value} as date. Exception:{x}")
         return None
-        #return  datetime.date.fromisoformat("1970-01-01")
-    except ValueError as ve:
-        logger.warning(f"ERROR couldn't parse {string_value} as date. ValueError:{ve}")
-        return None
-        #return  datetime.date.fromisoformat("1970-01-01")
 
 
 @typechecked

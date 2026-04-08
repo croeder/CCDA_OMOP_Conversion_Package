@@ -12,19 +12,19 @@ import logging
     Functions for use in DERVIED fields.
     The configuration for this type of field is:
         <new field name>: {
-    	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.<function_name>
-    	    'argument_names': {
-    		    <arg_name_1>: <field_name_1>
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.<function_name>
+            'argument_names': {
+                <arg_name_1>: <field_name_1>
                 ...
-       		    <arg_name_n>: <field_name_n>
+                <arg_name_n>: <field_name_n>
                 'default': <default_value>
-    	    }
+            }
         }
     The config links argument names to functions defined here to field names
     for the values. The code that calls these functions does the value lookup,
     so they operate on values, not field names or keys.
-"""    
+"""
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +96,7 @@ def cast_as_concept_id(args_dict: dict[str, any]) -> int32 | None:
 
 
 
-    
+
 ############################################################################
 """
     table: codemap_xwalk
@@ -110,9 +110,9 @@ def codemap_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
                  Control this via set_allow_no_macthing_concept() in package_constant_access.
         throws/raises when codemap_xwalk is None
     """
-    
-    id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'], 
-                'target_concept_id', args_dict.get('default')) 
+
+    id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'],
+                'target_concept_id', args_dict.get('default'))
 
     if id_value is not None and (id_value != 0 or package_constant_access.get_allow_no_matching_concept()):
         logger.debug(f"codemap_xwalk_concept_id concept_id is {id_value}  for {args_dict}")
@@ -127,8 +127,8 @@ def codemap_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
         returns: always returns domain_id
         throws/raises when codemap_xwalk is None
     """
-    id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'], 
-                'target_domain_id', args_dict.get('default')) 
+    id_value = _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'],
+                'target_domain_id', args_dict.get('default'))
 
     if id_value is not None:
         return str(id_value)
@@ -141,8 +141,8 @@ def codemap_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
         returns: unmapped concept_id AS INTEGER (because that's what's in the table), not necessarily standard
         throws/raises when codemap_xwalk is None
     """
-    id_value =  _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'], 
-                'source_concept_id', args_dict.get('default')) 
+    id_value =  _codemap_xwalk(args_dict['vocabulary_oid'], args_dict['concept_code'],
+                'source_concept_id', args_dict.get('default'))
 
     if id_value is not None and (id_value != 0 or package_constant_access.get_allow_no_matching_concept()):
         return int32(id_value)
@@ -218,7 +218,7 @@ def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default=None):
 
 ############################################################################
 
-    
+
 @typechecked
 def extract_day_of_birth(args_dict : dict[str, any]) -> int32:
     # assumes input is a datetime
@@ -254,7 +254,7 @@ def concat_field_list_names(args_dict: dict[str, any], data_dict: dict[str, any]
         whose data we're interested in fetching from the data_dict.
 
         args_dict: the field's paragraph in the parse configuration
-        data_dict: the dictionary of values being built up for an OMOP row 
+        data_dict: the dictionary of values being built up for an OMOP row
            by the parse configuration where all this comes from.
 
         Returns: a joined list of the keys. The data_dict is unused.
@@ -278,7 +278,7 @@ def concat_field_list_values(args_dict: dict[str, any], data_dict: dict[str, any
         whose data we're interested in fetching from the data_dict.
 
         args_dict: the field's paragraph in the parse configuration
-        data_dict: the dictionary of values being built up for an OMOP row 
+        data_dict: the dictionary of values being built up for an OMOP row
            by the parse configuration where all this comes from.
 
         Returns: a joined list of the data values associated with those keys.
@@ -300,24 +300,22 @@ def concat_fields(args_dict: dict[str, any]) -> str:
       A DERIVED style function.
       input key "delimiter" is a character to use to separate the fields
       following items in dict are the names of keys in the values to concat
-      
+
       returns one string, the concatenation of values corresponding to args 2-n, using arg 1 as a delimieter
     """
     delimiter = '|'
 
-        
-    if (args_dict['first_field'] is None) & (args_dict['second_field'] is None):
+
+    if (args_dict['first_field'] is None) and (args_dict['second_field'] is None):
         return ''
-    
-    elif (args_dict['first_field'] is None) & (args_dict['second_field'] is not None):
+    elif (args_dict['first_field'] is None) and (args_dict['second_field'] is not None):
         return args_dict['second_field']
-    
-    elif (args_dict['first_field'] is not None) & (args_dict['second_field'] is None):
+    elif (args_dict['first_field'] is not None) and (args_dict['second_field'] is None):
         return args_dict['first_field']
     else :
         values_to_concat = [ args_dict['first_field'], args_dict['second_field'] ]
         return delimiter.join(values_to_concat)
-    
+
 ####################################################################################################
 
 def set_partner_map(m: dict | None) -> None:
@@ -333,10 +331,10 @@ def get_data_partner_id(args_dict: dict[str, any]) -> int32:
     Strictly returns an integer per the component contract.
     """
     fname = args_dict.get('filename')
-    mapping = get_partner_map() 
+    mapping = get_partner_map()
     if mapping is None:
         raise ValueError("Data partner id map is missing")
-    # We don't catch errors here; if mapping[fname] is garbage, 
+    # We don't catch errors here; if mapping[fname] is garbage,
     # int32() will raise an error 'loudly' as requested.
     return int32(mapping.get(fname, 0))
 
@@ -354,10 +352,10 @@ def map_filename_to_mspi(args_dict: dict[str, any]) -> int:
     Raises if the MSPI map has not been initialized.
     """
     fname = args_dict.get('filename')
-    mapping = get_mspi_map() 
+    mapping = get_mspi_map()
     if mapping is None:
         raise ValueError("MSPI map is missing")
-    # If filename is missing, returns 0. 
+    # If filename is missing, returns 0.
     # If value exists but isn't an integer, int() will raise a ValueError.
     return int(mapping.get(fname, 0))
 
@@ -366,15 +364,15 @@ def map_filename_to_mspi(args_dict: dict[str, any]) -> int:
 def transform_datetime_low(args) -> datetime.datetime | None:
     """
     Transforms a date-only string into a full ISO 8601 datetime defaulting to 00:00:00.
-    
-    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD) 
-    format. We can make this assumption because this transformation is typically 
+
+    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD)
+    format. We can make this assumption because this transformation is typically
     called after 'parseutils.parser' has already standardized the raw input.
     """
     val = args.get('input_value')
     if not val:
         return args.get('default')
-    
+
     val_str = str(val).strip()
     # HL7 format (YYYYMMDD)
     if len(val_str) == HL7_DATE_LENGTH and val_str.isdigit():
@@ -382,22 +380,22 @@ def transform_datetime_low(args) -> datetime.datetime | None:
     # ISO 8601 format (YYYY-MM-DD)
     if len(val_str) == ISO_DATE_LENGTH and '-' in val_str:
         return cast_to_datetime(f"{val_str}{DATETIME_LOW_SUFFIX}")
-    
+
     return cast_to_datetime(val_str)
 
 @typechecked
 def transform_datetime_high(args) -> datetime.datetime | None:
     """
     Transforms a date-only string into a full ISO 8601 datetime defaulting to 23:59:59.
-    
-    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD) 
-    format. We can make this assumption because this transformation is typically 
+
+    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD)
+    format. We can make this assumption because this transformation is typically
     called after 'parseutils.parser' has already standardized the raw input.
     """
     val = args.get('input_value')
     if not val:
         return args.get('default')
-    
+
     val_str = str(val).strip()
     # HL7 format (YYYYMMDD)
     if len(val_str) == HL7_DATE_LENGTH and val_str.isdigit():

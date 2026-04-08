@@ -9,8 +9,6 @@ from typeguard import typechecked
 import traceback
 
 from collections import defaultdict
-import lxml
-import tempfile
 from numpy import int32
 from numpy import int64
 from numpy import float32
@@ -28,22 +26,22 @@ from ccda_to_omop.ddl import sql_import_dict
 from ccda_to_omop.ddl import config_to_domain_name_dict
 from ccda_to_omop.ddl import domain_name_to_table_name
 from ccda_to_omop.metadata import get_meta_dict
-from ccda_to_omop.domain_dataframe_column_types import domain_dataframe_column_types 
+from ccda_to_omop.domain_dataframe_column_types import domain_dataframe_column_types
 from ccda_to_omop.domain_dataframe_column_types import domain_dataframe_column_required
 
 DO_VISIT_DETAIL = False
 
 
 """ layer_datasets.py
-    This is a layer over data_driven_parse.py that takes the 
+    This is a layer over data_driven_parse.py that takes the
     dictionary of lists of dictionaries, a dictionary of rows
     where the keys are dataset_names. It converts these structures
     to pandas dataframes and then merges dataframes destined for /
     the same domain. Reason being that multiple places in CCDA
     generate data for the same OMOP domain. It then publishes
     the dataframes as datasets into the Spark world in Foundry.
-    
-    Run 
+
+    Run
         - from dataset named "ccda_documents" with export:
             bash> python3 -m ccda_to_omop.layer_datasets -ds ccda_documents -x
         - from directory named "resources" without export:
@@ -51,11 +49,7 @@ DO_VISIT_DETAIL = False
 """
 
 
-#****************************************************************
-#*                                                              *
-warnings.simplefilter(action='ignore', category=FutureWarning) #*
-#*                                                              * 
-#****************************************************************a
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -66,12 +60,12 @@ def show_column_dict(config_name: str, column_dict: dict[str, list]) -> None:
 
 
 def find_max_columns(config_name :str, domain_list: list[OMOPRecord | None]) -> dict[str, any]:
-    """  Give a list of dictionaries, find the maximal set of columns that has the basic OMOP columns. 
+    """  Give a list of dictionaries, find the maximal set of columns that has the basic OMOP columns.
 
          Trying to deal with a list that may have dictionaries that lack certain fields.
          An option is to go with a completely canonical list, like from the DDL, but we want
-         to remain flexible and be able to easily add columns that are not part of the DDL for 
-         use later in Spark. It is also true that we do load into an RDB here, DuckDB, to 
+         to remain flexible and be able to easily add columns that are not part of the DDL for
+         use later in Spark. It is also true that we do load into an RDB here, DuckDB, to
          check PKs and FK constraints, but only on the OMOP columns. The load scripts there
          use the DDL and ignore columns to the right we want to allow here.
     """
@@ -124,7 +118,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[OMOPRecord | None] |
             logger.error(f"(create_omop_domain_dataframes) No data to create dataframe for {config_name} from {filepath} {domain_list}")
         else:
             column_list = find_max_columns(config_name, domain_list)
-            column_dict = dict((k, []) for k in column_list) #dict.fromkeys(column_list)
+            column_dict = dict((k, []) for k in column_list)
 
             # Add the data from all the rows
             for domain_data_dict in domain_list:
@@ -134,7 +128,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[OMOPRecord | None] |
                         if domain_data_dict[field] == 'RECONCILE FK':
                             logger.error(f"RECONCILE FK for {field} in {config_name}")
                             prepared_value = None
-                        elif field == 'visit_concept_id' and type(domain_data_dict[field]) == str:
+                        elif field == 'visit_concept_id' and isinstance(domain_data_dict[field], str):
                             # hack when visit_type_xwalk returns a string
                             prepared_value =  int32(domain_data_dict[field])
                         elif field[-8:] == "datetime" and domain_data_dict[field] is not None:
@@ -183,8 +177,7 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[OMOPRecord | None] |
                                     elif column_type == int32:
                                         domain_df[column_name] = domain_df[column_name].astype('Int32')
                                     else:
-                                        # leave as None/NaN for other types
-                                        domain_df[column_name] = domain_df[column_name]
+                                        pass  # leave as None/NaN for other types
                                 else:
                                     domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)
                             except (TypeError, ValueError) as e:
@@ -265,7 +258,7 @@ def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, c
     """
         Processes an XML CCDA string, returns data as Python structures.
 
-        Requires python dictionaries for mapping, brought in here, initialized to the package as 
+        Requires python dictionaries for mapping, brought in here, initialized to the package as
         part of making them available to executors in Spark.
 
         Returns  dict of column lists
@@ -340,29 +333,29 @@ def build_file_to_domain_dict(meta_config_dict :dict[str, dict[str, dict[str, st
         has the data that drives the conversion. Included is a 'root' element
         that has an attribute 'expected_domain_id' that we're after to identify
         the OMOP domain that a file's data is destined for.
-        This is where multiple files for the same domain get combined.     
-        
-        For example, the Measurement domain, rows for the measurement table can 
+        This is where multiple files for the same domain get combined.
+
+        For example, the Measurement domain, rows for the measurement table can
         come from at least two kinds of files:
          <file>__Measurement_results.csv
          <file>__Measurement_vital_signs.csv
-         
+
        This map maps from filenames to domains
     """
-    file_domain_map = {} 
+    file_domain_map = {}
     for file_domain in meta_config_dict:
         file_domain_map[file_domain] = meta_config_dict[file_domain]['root']['expected_domain_id']
     return file_domain_map
 
 
-        
+
 def combine_datasets(omop_dataset_dict: dict[str, pd.DataFrame | None]) -> dict[str, pd.DataFrame]:
 
     # COMBINE like datasets, datasets from different parse configurations in the metadata
-    # that produce rows for the same domain. 
+    # that produce rows for the same domain.
     #
     # We need to collect all files/datasets that have the same expected_domain_id.
-    # For example, the Measurement domain, rows for the measurement table can 
+    # For example, the Measurement domain, rows for the measurement table can
     # come from at least two kinds of files:
     #     <file>__Measurement_results.csv
     #     <file>__Measurement_vital_signs.csv
@@ -378,14 +371,14 @@ def combine_datasets(omop_dataset_dict: dict[str, pd.DataFrame | None]) -> dict[
             if domain_id in domain_dataset_dict and domain_dataset_dict[domain_id] is not None:
                 domain_dataset_dict[domain_id] = pd.concat([ domain_dataset_dict[domain_id], omop_dataset_dict[filename] ])
             else:
-                domain_dataset_dict[domain_id] = omop_dataset_dict[filename]      
+                domain_dataset_dict[domain_id] = omop_dataset_dict[filename]
         else:
             logger.error(f"NO DATA for config {filename} in LD.combine_datasets()")
 
     return domain_dataset_dict
 
 
-        
+
 def do_write_csv_files(domain_dataset_dict: dict[str, pd.DataFrame | None]) -> None:
     for domain_id in domain_dataset_dict:
         if domain_id in domain_dataset_dict and domain_dataset_dict[domain_id] is not None:
@@ -393,14 +386,14 @@ def do_write_csv_files(domain_dataset_dict: dict[str, pd.DataFrame | None]) -> N
             domain_dataset_dict[domain_id].to_csv(f"output/domain_{domain_id}.csv")
         else:
             logger.error(f"Error Writing CSV for domain:{domain_id} no such table in dict")
- 
 
-        
-    
+
+
+
 # ENTRY POINT for directory of files
-def process_directory(directory_path: str, export_datasets: bool, write_csv_flag: bool, parse_config: str) -> None:
+def process_directory(directory_path: str, write_csv_flag: bool, parse_config: str) -> None:
     omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
-    
+
     only_files = [f for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]
     for file in (only_files):
         if file.endswith(".xml"):
@@ -415,14 +408,11 @@ def process_directory(directory_path: str, export_datasets: bool, write_csv_flag
                     logger.info(f"{file} {key} {len(omop_dataset_dict)} {omop_dataset_dict[key].shape} {new_data_dict[key].shape}")
                 else:
                     logger.info(f"{file} {key} {len(omop_dataset_dict)} None / no data")
-                    
+
     domain_dataset_dict = combine_datasets(omop_dataset_dict)
     if write_csv_flag:
         do_write_csv_files(domain_dataset_dict)
 
-    if export_datasets:
-        do_export_datasets(domain_dataset_dict)
-         
 
 # JUPYTER ENTRY POINT
 def main() -> None:
@@ -434,18 +424,17 @@ def main() -> None:
     parser.add_argument('-f', '--filename', help="XML filename to parse")
     parser.add_argument('-ds', '--dataset', help="dataset to parse")
     parser.add_argument('-g', '--config', default='', help="parse configuration filename to use")
-    parser.add_argument('-x', '--export', action=argparse.BooleanOptionalAction, help="export to foundry")
     parser.add_argument('-c', '--write_csv', action=argparse.BooleanOptionalAction, help="write CSV files to local")
     parser.add_argument('-l', '--limit', type=int, help="max files to process", default=0)
-    parser.add_argument('-s', '--skip', type=int, help="files to skip before processing to limit, -s 100 ", default=0) 
+    parser.add_argument('-s', '--skip', type=int, help="files to skip before processing to limit, -s 100 ", default=0)
     args = parser.parse_args()
-    print(f"got args:  dataset:{args.dataset} filename:{args.filename} directory:{args.directory} export:{args.export} ")
+    print(f"got args:  dataset:{args.dataset} filename:{args.filename} directory:{args.directory} ")
     print(f"got args 2: csv:{args.write_csv} limit:{args.limit} skip:{args.skip} config:{args.config}   ")
     print(f" ARGS: {args}")
 
-    
+
     omop_dataset_dict = {} # keyed by dataset_names (legacy domain names)
-    
+
     try:
         codemap_df = Dataset.get("codemap_xwalk").read_table(format="pandas")
         codemap_dict = U.create_codemap_dict(codemap_df)
@@ -471,7 +460,7 @@ def main() -> None:
         process_file(args.filename, args.write_csv, args.config)
 
     elif args.directory is not None:
-        domain_dataset_dict = process_directory(args.directory, args.export, args.write_csv, args.config)
+        domain_dataset_dict = process_directory(args.directory, args.write_csv, args.config)
     elif args.dataset is not None:
         if args.filename is not None:
             domain_dataset_dict = process_file_from_dataset(args.dataset, args.export, args.write_csv, args.limit, args.skip, args.config, args.filename)
@@ -480,6 +469,6 @@ def main() -> None:
     else:
         logger.error("Did args parse let us  down? Have neither a file, nor a directory.")
 
-            
+
 if __name__ == '__main__':
     main()

@@ -429,7 +429,7 @@ def reclassify_nested_visit_occurrences_as_detail(omop_dict: dict[str, list[OMOP
     return omop_dict
 
 
-""" domain_dates tell the FK functionality in do_foreign_keys() how to 
+""" domain_dates tell the FK functionality in do_foreign_keys() how to
     choose visits for domain_rows.It is one of the most encumbered parts of the code.
 
     Rules:
@@ -438,16 +438,16 @@ def reclassify_nested_visit_occurrences_as_detail(omop_dict: dict[str, list[OMOP
     - This structure must include a mapping from start or start and end to
       names of the fields for each specific domain to be processed.
     - These are _config_ names, not domain names. For example, the domain
-      Measurement is fed by configs names Measurement_vital_signs, and 
+      Measurement is fed by configs names Measurement_vital_signs, and
       Measurement_results. They are the keys into the output dict where the
       visit candidates will be found.
-    + This all happens in the do_basic_keys 
+    + This all happens in the do_basic_keys
 
-    Background: An xml file is processed in phases, one for each configuration file in 
+    Background: An xml file is processed in phases, one for each configuration file in
     the metadata directory. Since the configuration files are organized by omop table,
-    it's helpful to think of the phases being the OMOP tables too.  Within each config 
-    phase, there is another level of phases: the types of the fields: none, constant, 
-    basic, derived, domain, hash, and foreign key. This means any fields in the current 
+    it's helpful to think of the phases being the OMOP tables too.  Within each config
+    phase, there is another level of phases: the types of the fields: none, constant,
+    basic, derived, domain, hash, and foreign key. This means any fields in the current
     config phase are available for looking up the value of a foreign key.
 
 """
@@ -456,7 +456,7 @@ domain_dates = {
                     'id': 'measurement_id'},
     'Observation': {'date': ['observation_date', 'observation_datetime'],
                     'id': 'observation_id'},
-    'Condition'  : {'start': ['condition_start_date', 'condition_start_datetime'], 
+    'Condition'  : {'start': ['condition_start_date', 'condition_start_datetime'],
                     'end':   ['condition_end_date', 'condition_end_datetime'],
                     'id': 'condition_id'},
     'Procedure'  : {'date': ['procedure_date', 'procedure_datetime'],
