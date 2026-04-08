@@ -1,8 +1,8 @@
 name: Prototype 2
-run-name: ${{ github.actor }} is testing Prototype 2
+run-name: ${{ github.actor }} is testing 
 on: [push, workflow_dispatch]
 jobs:
-    Run-prototype-2:
+    Run-ccda_to_omop:
         runs-on: ubuntu-latest
         steps:
           - name: Check out repository code
@@ -39,11 +39,11 @@ jobs:
                 pip install lxml
           - name: Run data_driven_parse.py
             run: |
-                python3 -m prototype_2.data_driven_parse -d CCDA-data/resources
+                python3 -m ccda_to_omop.data_driven_parse -d CCDA-data/resources
           - name: Run layer_datsets.py
             run: |
                 mkdir -p logs
-                python3 -m prototype_2.layer_datasets -d CCDA-data/resources
+                python3 -m ccda_to_omop.layer_datasets -d CCDA-data/resources
           - name: compare output
             run: |
                 bin/compare_correct.sh
