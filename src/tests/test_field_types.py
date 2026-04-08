@@ -4,12 +4,17 @@ import numpy as np
 from lxml import etree as ET
 from collections import defaultdict
 import ccda_to_omop.value_transformations as VT
+import ccda_to_omop.util as U
+import pathlib
 from ccda_to_omop.data_driven_parse import parse_config_from_xml_file
 
 mock_map = { 
     ('2.16.840.1.113883.6.1', '742-7'): [{'target_concept_id': np.int32(3033575), 'target_domain_id': 'Measurement', 'source_concept_id': np.int32(3033575)}] 
 }
-VT.set_codemap_dict(mock_map)
+#VT.set_codemap_dict(mock_map)
+home=pathlib.Path(__file__).parent.parent.parent.resolve()
+codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+VT.set_codemap_dict(codemap_dict)
 
 class FieldTypeTest_DERIVED(unittest.TestCase):
     def __init__(self, *args, **kwargs):

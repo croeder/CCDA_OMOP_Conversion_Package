@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
 import ccda_to_omop.value_transformations as VT
+import ccda_to_omop.util as U
+import pathlib
 
 
 # Lots of context to call do_derived_fields directly. Testing here from how that
@@ -11,7 +13,10 @@ import ccda_to_omop.value_transformations as VT
 mock_map = {
     ('2.16.840.1.113883.5.1', 'M'): [{'target_concept_id': np.int32(8532)}]
 }
-VT.set_codemap_dict(mock_map)
+#VT.set_codemap_dict(mock_map)
+home=pathlib.Path(__file__).parent.parent.parent.resolve()
+codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+VT.set_codemap_dict(codemap_dict)
         
 
 

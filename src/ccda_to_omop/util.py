@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 def create_codemap_dict_from_csv(map_csv_filepath: str) -> dict:
     """ creates a dictionary (code_system, code) --> {source_concept_id: n, target_domain_id: m, target_concept_id: o}
         from a CSV file:
-           OID, code, codeSystem, target_id, target_domain
+           OID, code, codeSystem, target_id, target_domain, source_concept_id
     """
     concept_map = defaultdict(list)
     with open(map_csv_filepath) as f:
@@ -47,11 +47,12 @@ def create_codemap_dict_from_csv(map_csv_filepath: str) -> dict:
         for row in reader:
             if len(row) < 5 or not row[0].strip():
                 continue
-            oid, code, _, concept_id, domain = [r.strip() for r in row[:5]]
+            oid, code, _, concept_id, domain, source_concept_id = [r.strip() for r in row[:6]]
             concept_map[(oid, code)].append({
                 'source_concept_id': int(concept_id),
                 'target_concept_id': int(concept_id),
                 'target_domain_id': domain,
+                'source_concept_id': source_concept_id
             })
     return concept_map
 

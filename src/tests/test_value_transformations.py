@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
 import ccda_to_omop.value_transformations as VT
+import ccda_to_omop.util as U
+import pathlib
 
 
 class ValueTransformTest_map_to_standard_1(unittest.TestCase):
@@ -18,7 +20,10 @@ class ValueTransformTest_map_to_standard_1(unittest.TestCase):
             ('2.16.840.1.113883.5.1', 'F'): [{'target_concept_id': np.int32(8532), 'target_domain_id': 'Gender'}],
             ('2.16.840.1.113883.6.1', '11579-0'): [{'target_concept_id': np.int32(3019762), 'target_domain_id': 'Measurement'}]
         }
-        VT.set_codemap_dict(mock_map)
+        #VT.set_codemap_dict(mock_map)
+        home=pathlib.Path(__file__).parent.parent.parent.resolve()
+        codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+        VT.set_codemap_dict(codemap_dict)
 
     def test_map_hl7_to_omop_concept_id(self):
         args_dict = { 'vocabulary_oid': self.vocab_oid,

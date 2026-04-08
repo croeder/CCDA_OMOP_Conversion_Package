@@ -1,5 +1,7 @@
 import unittest
 import ccda_to_omop.value_transformations as VT
+import ccda_to_omop.util as U
+import pathlib
 import numpy as np
 from ccda_to_omop import package_constant_access
 
@@ -17,7 +19,10 @@ class ValueTransformTest_codemap(unittest.TestCase):
         mock_map = { 
             ('2.16.840.1.113883.6.1', '11579-0'): [{'target_concept_id': np.int32(3019762), 'target_domain_id': 'Measurement', 'source_concept_id': np.int32(3019762)}] 
         }
-        VT.set_codemap_dict(mock_map)
+        #VT.set_codemap_dict(mock_map)
+        home=pathlib.Path(__file__).parent.parent.parent.resolve()
+        codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+        VT.set_codemap_dict(codemap_dict)
     
 
     def test_concept_id(self):

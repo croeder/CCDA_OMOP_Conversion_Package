@@ -3,6 +3,7 @@ import unittest
 import ccda_to_omop.value_transformations as VT
 ##from foundry.transforms import Dataset
 import ccda_to_omop.util as U
+import pathlib
 import numpy as np
 
 mock_map = { 
@@ -11,7 +12,10 @@ mock_map = {
     ('2.16.840.1.113883.6.96', '266919005'): [{'target_concept_id': np.int32(903653), 'target_domain_id': 'Observation', 'source_concept_id': np.int32(4144272)} ], 
     ('2.16.840.1.113883.6.12', '99213'): [{'target_concept_id': np.int32(9202), 'target_domain_id': 'Visit', 'source_concept_id': np.int32(2414397)}] 
 }
-VT.set_codemap_dict(mock_map)
+#VT.set_codemap_dict(mock_map)
+home=pathlib.Path(__file__).parent.parent.parent.resolve()
+codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+VT.set_codemap_dict(codemap_dict)
 
 
 # test_data includes keys used in newer codemap and valueset calls so
@@ -57,17 +61,10 @@ test_data = {
 class TestConceptLookup_codemap(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        #visit_map_df = Dataset.get("visit_concept_xwalk_mapping_dataset").read_table(format="pandas")
-        #visitmap_dict = U.create_visit_dict(visit_map_df)
-        #VT.set_visitmap_dict(visitmap_dict)
-
-        #valueset_map_df = Dataset.get("ccda_value_set_mapping_table_dataset").read_table(format="pandas")
-        #valueset_dict = U.create_valueset_dict(valueset_map_df)
-        #VT.set_valueset_dict(valueset_dict)
         
-        #codemap_df = Dataset.get("codemap_xwalk").read_table(format="pandas")
-        #codemap_dict = U.create_codemap_dict(codemap_df)
-        #VT.set_codemap_xwalk_dict(codemap_dict)
+        home=pathlib.Path(__file__).parent.parent.parent.resolve()
+        codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+        VT.set_codemap_dict(codemap_dict)
 
         
     def test_concept_id_lookup(self):

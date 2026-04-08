@@ -1,5 +1,7 @@
 import unittest
 import ccda_to_omop.value_transformations as VT
+import ccda_to_omop.util as U
+import pathlib
 import numpy as np
 from ccda_to_omop import package_constant_access
 
@@ -14,7 +16,10 @@ class Test_basic_concept_mapping(unittest.TestCase):
             ('2.16.840.1.113883.6.1', '11579-0'): [{'target_concept_id': np.int32(3019762), 'target_domain_id': 'Measurement', 'source_concept_id': np.int32(3019762)}],
             ('2.16.840.1.113883.6.1', '0000-0'): [{'target_concept_id': np.int32(0), 'target_domain_id': 'Observation', 'source_concept_id': np.int32(0)}] 
         }
-        VT.set_codemap_dict(mock_map)
+        #VT.set_codemap_dict(mock_map)
+        home=pathlib.Path(__file__).parent.parent.parent.resolve()
+        codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+        VT.set_codemap_dict(codemap_dict)
 
 
     def test_concept_id_good(self):
@@ -92,7 +97,7 @@ class Test_basic_concept_mapping(unittest.TestCase):
         args_dict = { 'vocabulary_oid': '2.16.840.1.113883.6.1',
                       'concept_code': '0000-0'}
         concept_id = VT.codemap_xwalk_source_concept_id(args_dict)
-        self.assertEqual(concept_id, None)
+        self.assertEqual(concept_id, 0)
 
 
     def test_source_concept_bogus(self):

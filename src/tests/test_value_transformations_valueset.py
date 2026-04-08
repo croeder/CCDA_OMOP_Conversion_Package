@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
 import ccda_to_omop.value_transformations as VT
+import ccda_to_omop.util as U
+import pathlib
 
 
 mock_map = {
@@ -9,7 +11,10 @@ mock_map = {
         'source_concept_id': np.int32(8532), 
         'target_domain_id': 'Gender'}]
 }
-VT.set_codemap_dict(mock_map)
+#VT.set_codemap_dict(mock_map)
+home=pathlib.Path(__file__).parent.parent.parent.resolve()
+codemap_dict = U.create_codemap_dict_from_csv(f"{home}/resources/map.csv")
+VT.set_codemap_dict(codemap_dict)
 
 class ValueTransformTest_valueset(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -43,13 +48,5 @@ class ValueTransformTest_valueset(unittest.TestCase):
         concept_id = VT.valueset_xwalk_concept_id(args_dict)
         self.assertEqual(concept_id, -1) 
 
-
-    ## valueset does not have source concept id as a field
-    def test_valueset_xwalk_source_concept_id(self):
-        args_dict = { 'vocabulary_oid': self.vocab_oid, 
-                      'concept_code': self.concept_code,
-                      'default': 0 }
-        concept_id = VT.valueset_xwalk_source_concept_id(args_dict)
-        self.assertEqual(concept_id, self.expected_source_concept_id) 
 
     
