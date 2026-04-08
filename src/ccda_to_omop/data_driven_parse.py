@@ -276,6 +276,7 @@ def do_none_fields(output_dict :OMOPRecord,
                    root_element, root_path, config_name,
                    config_dict :dict[str, dict[str, str | None]],
                    error_fields_set :set[str]):
+    """Set fields whose config_type is None to None in output_dict."""
     for (field_tag, field_details_dict) in config_dict.items():
         logger.info((f"     NONE FIELD config:'{config_name}' field_tag:'{field_tag}'"
                      f" {field_details_dict}"))
@@ -289,7 +290,7 @@ def do_constant_fields(output_dict :OMOPRecord,
                        root_element, root_path, config_name,
                        config_dict :dict[str, dict[str, str | None]],
                        error_fields_set :set[str]):
-
+    """Write CONSTANT fields from config into output_dict, truncating strings to the allowed length."""
     for (field_tag, field_details_dict) in config_dict.items():
         logger.info((f"     CONSTANT FIELD config:'{config_name}' field_tag:'{field_tag}'"
                      f" {field_details_dict}"))
@@ -312,6 +313,7 @@ def do_filename_fields(output_dict :OMOPRecord,
                        config_dict :dict[str, dict[str, str | None]],
                        error_fields_set :set[str],
                        filename :str):
+    """Write the source filename into any FILENAME-typed fields in output_dict."""
     for (field_tag, field_details_dict) in config_dict.items():
         logger.info((f"     FILENAME FIELD config:'{config_name}' field_tag:'{field_tag}'"
                      f" {field_details_dict}"))
@@ -326,6 +328,11 @@ def do_basic_fields(output_dict :OMOPRecord,
                     config_dict :dict[str, dict[str, str | None] ],
                     error_fields_set :set[str],
                     pk_dict :dict[str, list[any]] ):
+    """Extract FIELD and PK values from the XML element and write them into output_dict.
+
+    PK values are also appended to pk_dict so downstream FK fields can reference them.
+    String values are whitespace-normalized and truncated to the configured max length.
+    """
     for (field_tag, field_details_dict) in config_dict.items():
         logger.info((f"     FIELD config:'{config_name}' field_tag:'{field_tag}'"
                      f" {field_details_dict}"))
@@ -513,10 +520,11 @@ def do_derived2_fields(output_dict :OMOPRecord,
                       root_element, root_path, config_name,
                       config_dict :dict[str, dict[str, str | None | list]],
                       error_fields_set :set[str]):
-    '''
-    This version is for functions that are smart enough to mine the output_dict with keys passed in.
-    It allows for a list of arguments, but requires looking the value up explicitly
-    '''
+    """Compute DERIVED2 fields using functions that receive the full output_dict and argument_list.
+
+    Unlike DERIVED, the called function is responsible for fetching its own values from
+    output_dict using the key_list in argument_list, allowing a variable number of inputs.
+    """
 
 
     for (field_tag, field_details_dict) in config_dict.items():
@@ -539,10 +547,12 @@ def do_hash_fields(output_dict: OMOPRecord,
                    config_dict: dict[str, dict[str, str | None]],
                    error_fields_set: set[str],
                    pk_dict: dict[str, list[any]]):
-    """ These are basically derived, but the argument is a lsit of field names, instead of
-        a fixed number of individually named fields.
-        Dubiously useful in an environment where IDs are  32 bit integers.
-        See the code above for converting according to the data_type attribute
+    """Compute HASH fields by hashing a list of named input fields into a single ID.
+
+    Similar to DERIVED but takes a list of field names rather than individually named arguments.
+    The resulting hash is also stored in pk_dict so it can be used as a PK/FK reference.
+    Note: hash IDs are 64-bit but OMOP integer columns are typically 32-bit — use with care.
+    See the code for data_type-based conversion logic.
         where a different kind of hash is beat into an integer.
 
         ALSO A PK
@@ -637,6 +647,11 @@ def do_priority_fields(output_dict: OMOPRecord,
 
 @typechecked
 def get_extract_order_fn(dict):
+    """Return a sort-key function that reads the 'order' attribute from a config dict entry.
+
+    Fields without an 'order' attribute sort last (sys.maxsize).
+    Intended for use with sorted() when ordering output fields.
+    """
     def get_order_from_dict(field_key):
         if 'order' in dict[field_key]:
             logger.info(f"{field_key} {dict[field_key]['order']}")
@@ -650,6 +665,7 @@ def get_extract_order_fn(dict):
 
 @typechecked
 def get_filter_fn(dict):
+    """Return a predicate function that is True only for fields that have a non-None 'order' attribute."""
     def has_order_attribute(key):
         return 'order' in dict[key] and dict[key]['order'] is not None
     return has_order_attribute
@@ -1005,10 +1021,7 @@ def parse_doc(file_path,
 @typechecked
 def print_omop_structure(omop :dict[str, list[OMOPRecord]],
                          metadata :dict[str, dict[str, dict[str, str ] ] ] ):
-
-    """ prints a dict of parsed domains as returned from parse_doc()
-        or parse_domain_from_dict()
-    """
+    """Print the full parsed OMOP structure returned by parse_doc() or parse_domain_from_dict()."""
     for domain, domain_list in omop.items():
         if domain_list is None:
             logger.warning(f"no data for domain {domain}")
@@ -1030,13 +1043,10 @@ def print_omop_structure(omop :dict[str, list[OMOPRecord]],
 
 @typechecked
 def process_file(filepath :str, print_output: bool, parse_config :str):
-    """ Process each configuration in the metadata for one file.
-        - filepath
-        - print_output
-        - parse_config is the name or key of the configuration, the top-level entry in the
-          metadata dictionary in the parse configuration files, like OBSERVATION-from-Procedure
-        Returns nothing.
-        Prints the omop_data. See better functions in layer_datasets.puy
+    """Parse one CCDA XML file and optionally print the resulting OMOP structure.
+
+    parse_config is the top-level metadata key to use (e.g. 'OBSERVATION-from-Procedure').
+    For production use that returns DataFrames, see layer_datasets.py instead.
     """
     print(f"PROCESSING {filepath} ")
     logger.info(f"PROCESSING {filepath} ")

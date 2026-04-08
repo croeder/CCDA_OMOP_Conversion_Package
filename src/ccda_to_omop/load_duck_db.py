@@ -72,6 +72,7 @@ processing_status = True
 
 
 def _apply_ddl(ddl_file):
+    """Read and execute a DuckDB DDL file. DuckDB connection is currently commented out."""
     print(f"Applying DDL file {ddl_file}")
     with io.open(OMOP_CDM_DIR / ddl_file, "r") as ddl_file:
         ddl_statements = ddl_file.read()
@@ -86,6 +87,7 @@ def _apply_ddl(ddl_file):
 
 
 def _import_CSVs(domain):
+    """Load output CSV files for a domain into DuckDB. DuckDB connection is currently commented out."""
     print(f"Importing domain {domain} data")
     files = [f for f in os.listdir(OMOP_CSV_DATA_DIR) if os.path.isfile(os.path.join(OMOP_CSV_DATA_DIR, f)) ]
     files = [f for f in files if  re.match('.*' + f"{domain}" + '.csv',f) ]
@@ -116,6 +118,7 @@ def _import_CSVs(domain):
 
 
 def check_PK(domain):
+    """Check primary key uniqueness for a domain table in DuckDB. DuckDB connection is currently commented out."""
     print(f"Checking PK on domain {domain} ")
 #    table_name = sql_import_dict[domain]['table_name']
 #    pk_query = sql_import_dict[domain]['pk_query']
