@@ -23,6 +23,7 @@ import ccda_to_omop.data_driven_parse as DDP
 import ccda_to_omop.visit_reconciliation as VR
 import ccda_to_omop.value_transformations as VT
 import ccda_to_omop.util as U
+from ccda_to_omop.util import OMOPRecord
 from ccda_to_omop.ddl import sql_import_dict
 from ccda_to_omop.ddl import config_to_domain_name_dict
 from ccda_to_omop.ddl import domain_name_to_table_name
@@ -64,7 +65,7 @@ def show_column_dict(config_name: str, column_dict: dict[str, list]) -> None:
         print(f"   config: {config_name}  key:{key} length(val):{len(val)}")
 
 
-def find_max_columns(config_name :str, domain_list: list[ dict[str, tuple[ None | str | float | int | int64, str]] | None  ]) -> dict[str, any]:
+def find_max_columns(config_name :str, domain_list: list[OMOPRecord | None]) -> dict[str, any]:
     """  Give a list of dictionaries, find the maximal set of columns that has the basic OMOP columns. 
 
          Trying to deal with a list that may have dictionaries that lack certain fields.
@@ -109,7 +110,7 @@ NON_NULLABLE_COLUMNS = {
 }
 
 @typechecked
-def create_omop_domain_dataframes(omop_data: dict[str, list[ dict[str,  None | str | float | int | int64] | None  ] | None],
+def create_omop_domain_dataframes(omop_data: dict[str, list[OMOPRecord | None] | None],
                                   filepath) ->  dict[str, pd.DataFrame]:
     """ transposes the rows into columns,
         creates a Pandas dataframe

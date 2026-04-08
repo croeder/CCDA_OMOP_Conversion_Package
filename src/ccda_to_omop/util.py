@@ -6,6 +6,11 @@ from dateutil.parser import parse
 import csv
 import datetime
 import pandas as pd
+from numpy import int32, int64
+
+# Canonical type alias for a single OMOP output record dictionary.
+# int32 is included because numpy vocabulary lookups return int32 concept IDs.
+OMOPRecord = dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date]
 
 logger = logging.getLogger(__name__)
 """
