@@ -19,8 +19,6 @@ jobs:
                    --header="Accept: application/vnd.github.v3.raw" \
                    -O resources/map.csv \
                    "https://github.com"
-
-              mv map.csv resources
           - name: Run tests with coverage
             run: cd src && python -m pytest tests/ --cov=ccda_to_omop --cov-report=xml
 #          - name: Upload coverage to Codecov
