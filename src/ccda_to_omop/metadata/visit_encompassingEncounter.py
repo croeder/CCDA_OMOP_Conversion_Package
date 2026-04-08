@@ -151,7 +151,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_encounter',
                 'vocabulary_oid': 'visit_concept_codeSystem_encounter',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 1]
         },
@@ -200,7 +199,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans1',
                 'vocabulary_oid': 'visit_concept_system_trans1',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 2]
         },
@@ -248,7 +246,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans2',
                 'vocabulary_oid': 'visit_concept_system_trans2',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 3]
         },
@@ -295,7 +292,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans3',
                 'vocabulary_oid': 'visit_concept_system_trans3',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 4]
         },
@@ -342,7 +338,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'visit_concept_code_trans4',
                 'vocabulary_oid': 'visit_concept_system_trans4',
-                'default': None
             },
             'priority': ['visit_source_concept_id', 5]
         },

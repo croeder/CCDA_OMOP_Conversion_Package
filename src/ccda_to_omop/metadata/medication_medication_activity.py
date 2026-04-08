@@ -62,7 +62,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code_code',
                 'vocabulary_oid': 'drug_concept_codeSystem_code',
-                'default': 0
             },
             'priority': ('drug_concept_id', 1)
         },
@@ -73,7 +72,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code_code',
                 'vocabulary_oid': 'drug_concept_codeSystem_code',
-                'default': 0
             },
             'priority': ('domain_id', 1)
         },
@@ -94,7 +92,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code_translation',
                 'vocabulary_oid': 'drug_concept_codeSystem_translation',
-                'default': 0
             },
             'priority': ('drug_concept_id', 2)
         },
@@ -109,7 +106,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code_translation',
                 'vocabulary_oid': 'drug_concept_codeSystem_translation',
-                'default': 0
             },
             'priority': ('domain_id', 1)
         },
@@ -286,7 +282,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'route_concept_code',
                 'vocabulary_oid': 'route_concept_codeSystem',
-                'default': 0
             },
             'order': 15
         },
@@ -313,7 +308,6 @@ metadata = {
             'argument_names': {
                 'first_field': 'drug_concept_code_translation',
                 'second_field': 'drug_concept_codeSystem_translation',
-                'default': 'error'
             },
             'priority': ( 'drug_source_value', 2)
         },
@@ -323,7 +317,6 @@ metadata = {
             'argument_names': {
                 'first_field': 'drug_concept_code_code',
                 'second_field': 'drug_concept_codeSystem_code',
-                'default': 'error'
             },
             'priority': ( 'drug_source_value', 1)
         },
@@ -338,7 +331,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code_translation',
                 'vocabulary_oid': 'drug_concept_codeSystem_translation',
-                'default': 0
             },
             'priority' : ('drug_source_concept_id', 2)
         },
@@ -348,7 +340,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'drug_concept_code_code',
                 'vocabulary_oid': 'drug_concept_codeSystem_code',
-                'default': 0
             },
             'priority' : ('drug_source_concept_id', 1)
         },
@@ -364,7 +355,6 @@ metadata = {
             'argument_names': {
                 'first_field': 'route_concept_code',
                 'second_field': 'route_concept_codeSystem',
-                'default': 'error'
             },
             'order': 22
         },

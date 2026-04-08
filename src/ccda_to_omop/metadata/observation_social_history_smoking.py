@@ -58,7 +58,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'observation_concept_code',
                 'vocabulary_oid': 'observation_concept_codeSystem',
-                'default': 0
             },
             'order': 3
         },
@@ -69,7 +68,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'observation_concept_code',
                 'vocabulary_oid': 'observation_concept_codeSystem',
-                'default': 0
             }
         },
 
@@ -134,7 +132,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'value_as_code',
                 'vocabulary_oid': 'value_as_codeSystem',
-                'default': None
             },
             'order':  11
         },
@@ -171,7 +168,6 @@ metadata = {
             'argument_names': {
                 'first_field': 'value_as_codeSystem',
                 'second_field': 'value_as_code',
-                'default': 'n/a'
             },
             'order':  21
         },

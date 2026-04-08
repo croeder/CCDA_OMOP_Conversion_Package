@@ -68,7 +68,6 @@ metadata = {
             'argument_names':{
                 'first_field': 'provider_id_given',
                 'second_field': 'provider_id_family',
-                'default' : 'n/a'
             },
             'order': 2
         },
@@ -102,7 +101,6 @@ metadata = {
                 'argument_names': {
                     'concept_code': 'specialty_concept_id_code',
                     'vocabulary_oid': 'specialty_concept_id_codeSystem',
-                    'default': 0
                  },
             'order': 5
         },

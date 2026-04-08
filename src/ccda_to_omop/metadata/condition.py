@@ -58,7 +58,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'condition_concept_code',
                 'vocabulary_oid': 'condition_concept_codeSystem',
-                'default': 0
             },
             'order': 3
         },
@@ -69,7 +68,6 @@ metadata = {
             'argument_names': {
                 'concept_code': 'condition_concept_code',
                 'vocabulary_oid': 'condition_concept_codeSystem',
-                'default': 0
             }
         },
 
@@ -167,7 +165,6 @@ metadata = {
             'argument_names':{
                 'first_field': 'condition_concept_code',
                 'second_field': 'condition_concept_codeSystem',
-                'default' : None
             },
             'order': 14
         },

@@ -54,7 +54,6 @@ metadata = {
         'argument_names': {
             'concept_code': 'device_concept_id_code',
             'vocabulary_oid': 'device_concept_id_codeSystem',
-            'default': 0
         },
         'order': 3
     },
@@ -65,7 +64,6 @@ metadata = {
         'argument_names': {
             'concept_code': 'device_concept_id_code',
             'vocabulary_oid': 'device_concept_id_codeSystem',
-            'default': 0
         }
     },
 
@@ -208,7 +206,6 @@ metadata = {
         'argument_names': {
             'first_field': 'device_concept_id_code',
             'second_field': 'device_concept_id_codeSystem',
-            'default': 'error'
         },
         'order': 14
     },
@@ -219,7 +216,6 @@ metadata = {
         'argument_names': {
             'concept_code': 'device_concept_id_code',
             'vocabulary_oid': 'device_concept_id_codeSystem',
-            'default': 0
         },
         'order': 15
     },
