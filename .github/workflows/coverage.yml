@@ -1,0 +1,22 @@
+name: Coverage
+run-name: ${{ github.actor }} is measuring ccda_to_omop coverage
+on: [push, workflow_dispatch]
+jobs:
+    Run-coverage:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Check out repository code
+            uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.x'
+          - name: Install packages
+            run: pip install -r requirements.txt pytest pytest-cov
+          - name: Run tests with coverage
+            run: cd src && python -m pytest tests/ --cov=ccda_to_omop --cov-report=xml
+          - name: Upload coverage to Codecov
+            uses: codecov/codecov-action@v4
+            with:
+              files: src/coverage.xml
+              fail_ci_if_error: false

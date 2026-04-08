@@ -6,14 +6,14 @@ import ccda_to_omop.value_transformations as VT
 """
 metadata = {
     'PROVIDER-from-encompassingEncounter_responsibleParty': {
-        
+
         'root': {
             'config_type': 'ROOT',
             'expected_domain_id': 'Provider',
             # Encounters section
             'element': './hl7:componentOf/hl7:encompassingEncounter/hl7:responsibleParty/hl7:assignedEntity'
         },
-      
+
         'provider_id_extension': {
             'config_type': 'FIELD',
             'element': 'hl7:id[not(@nullFlavor="UNK")]',
@@ -62,7 +62,7 @@ metadata = {
             'order': 1
         },
 
-        'provider_name': { 
+        'provider_name': {
             'config_type': 'DERIVED',
             'FUNCTION': VT.concat_fields,
             'argument_names':{
@@ -86,44 +86,44 @@ metadata = {
             'order': 4
         },
         #<code code="207QA0505X" displayName="Adult Medicine Physician" codeSystem="2.16.840.1.113883.6.101" codeSystemName="NUCC" />
-        'specialty_concept_id_code': { 
+        'specialty_concept_id_code': {
             'config_type': 'FIELD',
             'element': 'hl7:code',
             'attribute': "code"
         },
-        'specialty_concept_id_codeSystem': { 
+        'specialty_concept_id_codeSystem': {
             'config_type': 'FIELD',
             'element': 'hl7:code',
             'attribute': "codeSystem"
         },
         'specialty_concept_id': {
-       	    'config_type': 'DERIVED',
-    	    'FUNCTION': VT.codemap_xwalk_concept_id,
-    	        'argument_names': {
-    		        'concept_code': 'specialty_concept_id_code',
-    		        'vocabulary_oid': 'specialty_concept_id_codeSystem',
+            'config_type': 'DERIVED',
+            'FUNCTION': VT.codemap_xwalk_concept_id,
+                'argument_names': {
+                    'concept_code': 'specialty_concept_id_code',
+                    'vocabulary_oid': 'specialty_concept_id_codeSystem',
                     'default': 0
-    	         },
+                 },
             'order': 5
         },
-        
+
         # hl7:encounter/hl7:participant/hl7:participantRole
-        'care_site_id_root': { 
+        'care_site_id_root': {
             'config_type': 'FIELD',
             'element':'../../hl7:location/hl7:healthCareFacility',
             'attribute': "root",
         },
-        'care_site_id_extension': { 
+        'care_site_id_extension': {
             'config_type': 'FIELD',
             'element':'../../hl7:location/hl7:healthCareFacility',
             'attribute': "extension",
         },
-        'care_site_id': { 
+        'care_site_id': {
             'config_type': 'HASH',
             'fields': [ 'care_site_id_root', 'care_site_id_extension'],
             'order': 6
         },
-  
+
         'year_of_birth': {
             'config_type': None,
             'order' :7
@@ -135,21 +135,21 @@ metadata = {
         'provider_source_value': {
             'config_type': 'CONSTANT',
             'constant_value' : '',
-	    'order':9
+        'order':9
         },
         'specialty_source_value': {
             'config_type': 'CONSTANT',
             'constant_value' : '',
-	    'order':10
+        'order':10
         },
         'specialty_source_concept_id': {
             'config_type': None,
             'order' :11
-        }, 
+        },
         'gender_source_value': {
             'config_type': 'CONSTANT',
             'constant_value' : '',
-	    'order':12
+        'order':12
         },
         'gender_source_concept_id': {
             'config_type': None,
@@ -157,20 +157,20 @@ metadata = {
         },
         'data_partner_id': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.get_data_partner_id, 
+            'FUNCTION': VT.get_data_partner_id,
             'argument_names': { 'filename': 'filename' },
             'order': 20
         },
-        
+
         'filename' : {
             'config_type': 'FILENAME',
             'order':100
-		},
-        'cfg_name' : { 
-			'config_type': 'CONSTANT', 
+        },
+        'cfg_name' : {
+            'config_type': 'CONSTANT',
             'constant_value': 'PROVIDER-from-encompassingEncounter_responsibleParty',
-			'order':101
-		} 
+            'order':101
+        }
     },
-    
+
 }

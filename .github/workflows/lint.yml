@@ -1,0 +1,22 @@
+name: Lint
+run-name: ${{ github.actor }} is linting ccda_to_omop
+on: [push, workflow_dispatch]
+jobs:
+    Run-lint:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Check out repository code
+            uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.x'
+          - name: Install flake8
+            run: pip install flake8
+          - name: Run flake8
+            run: |
+                flake8 src/ccda_to_omop \
+                  --select=F,E9 \
+                  --extend-ignore=F841 \
+                  --exclude=src/ccda_to_omop/tutorial_code \
+                  --max-line-length=120

@@ -1,5 +1,5 @@
-''' 
-    
+'''
+
     This 1/2 abandonded wreck after spliting the Jupyter workspace into a package
     and Jupyter and Spark drivers.  No time to fix now. Kept in hope of ressurrecting
     use of DuckDB in the Jupyter environment for testing FK constraints.
@@ -16,7 +16,7 @@
       like OMOP
     - some compromise means getting a handle on how narrow the CSV can be
       compared to OMOP. Can you leave out unused nullable fields?
-''' 
+'''
 
 import io
 import os
@@ -30,13 +30,11 @@ _PACKAGE_ROOT = Path(__file__).parent.parent.parent
 OMOP_CDM_DIR = _PACKAGE_ROOT / "resources"
 OMOP_CSV_DATA_DIR = _PACKAGE_ROOT / "output"
 #import duckdb
-import importlib.util
-from typing import Dict, Any
 
 
 
 # These used to appear as vars in ddl.py and now
-# are entries in the 
+# are entries in the
 #from .ddl import  sql_import_dict
 #from .ddl import  person_ddl
 #from .ddl import  visit_ddl
@@ -56,7 +54,7 @@ processing_status = True
 #    for key in sql_import_dict:
 #        sql_import_dict[key]['sql'] = f"""
 #                INSERT INTO TABLENAME SELECT
-#                {", ".join(sql_import_dict[key]['column_list'])} 
+#                {", ".join(sql_import_dict[key]['column_list'])}
 #                FROM  read_csv('FILENAME', delim=',', header=True)
 #               """
 #    print(sql_import_dict)
@@ -172,6 +170,5 @@ def main():
 if __name__ == '__main__':
 #    init_sql_import_dict()
     main()
-    
 
 

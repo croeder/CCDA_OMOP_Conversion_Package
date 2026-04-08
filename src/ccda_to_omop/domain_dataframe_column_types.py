@@ -1,5 +1,4 @@
 import datetime
-from numpy import datetime64
 from numpy import float64
 from numpy import float32
 from numpy import int32  # int
@@ -299,7 +298,7 @@ domain_dataframe_column_required = {
         "visit_concept_id": True,
         "visit_start_date": True,
         "visit_start_datetime": False,
-        "visit_end_date": True, 
+        "visit_end_date": True,
         "visit_end_datetime": False,
         "visit_type_concept_id": True,
         "provider_id": False,
@@ -458,4 +457,3 @@ domain_dataframe_column_required = {
         "device_source_concept_id": False,
     },
 }
-

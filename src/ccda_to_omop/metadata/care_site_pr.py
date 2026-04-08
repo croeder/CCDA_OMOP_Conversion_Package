@@ -21,11 +21,11 @@ metadata = {
             'element': 'hl7:id',
             'attribute': "extension",
         },
-        'care_site_id': { 
+        'care_site_id': {
             'config_type': 'HASH',
             #'fields': [ 'care_site_id_root', 'care_site_id_extension'],
             'fields': [ 'care_site_id_root', 'care_site_id_extension',
-                        'care_site_name', 
+                        'care_site_name',
                         'place_of_service_concept_code', 'place_of_service_concept_codeSystem',
                         'address_1', 'city', 'state', 'zip' ],
             'order': 1
@@ -48,7 +48,7 @@ metadata = {
             'element': 'hl7:code',
             'attribute': "codeSystem",
         },
-        'place_of_service_concept_id': { 
+        'place_of_service_concept_id': {
             'config_type': 'DERIVED',
             'FUNCTION': VT.codemap_xwalk_concept_id,
             'argument_names': {
@@ -72,7 +72,7 @@ metadata = {
                     'care_site_id_root',
                     'care_site_id_extension',
                     'care_site_name',
-                    'place_of_service_concept_code',      
+                    'place_of_service_concept_code',
                     'place_of_service_concept_codeSystem',
                     'address_1',
                     'city',
@@ -117,7 +117,7 @@ metadata = {
         #'location_source_value': { TODO: concatentation of fields f"{address_1}|{address_2}|{city} "
         'data_partner_id': {
             'config_type': 'DERIVED',
-            'FUNCTION': VT.get_data_partner_id, 
+            'FUNCTION': VT.get_data_partner_id,
             'argument_names': { 'filename': 'filename' },
             'order': 20
         },
@@ -127,24 +127,24 @@ metadata = {
             'order':100
         },
 
-        'cfg_name': { 
-            'config_type': 'CONSTANT', 
+        'cfg_name': {
+            'config_type': 'CONSTANT',
             'constant_value': 'Care_Site_pr',
             'order': 101
         }
-        #'id_values': { 
+        #'id_values': {
         #    'config_type': 'DERIVED2',
         #    'FUNCTION': VT.concat_field_list_values,
         #    'argument_list': {
         #        'key_list': ['care_site_name', 'place_of_service_concept_code', 'care_site_id_root', 'city', 'place_of_service_concept_codeSystem',
         #                'address_1', 'care_site_id_extension', 'state', 'zip']
-        #       #'fields': ['care_site_name', 'place_of_service_concept_code', 'care_site_id_root', 
-        #       #       'city', 'place_of_service_concept_codeSystem', 'address_1', 
+        #       #'fields': ['care_site_name', 'place_of_service_concept_code', 'care_site_id_root',
+        #       #       'city', 'place_of_service_concept_codeSystem', 'address_1',
         #       #       'care_site_id_extension', 'state', 'zip'],
         #    },
         #    'order': 201
         #},
-        #'id_names': { 
+        #'id_names': {
         #    'config_type': 'DERIVED2',
         #    'FUNCTION': VT.concat_field_list_names,
         #    'argument_list': {
@@ -153,7 +153,7 @@ metadata = {
         #    },
         #    'order': 202
         #},
-        #'care_site_id_values': { 
+        #'care_site_id_values': {
         #    'config_type': 'HASH',
         #    'fields': ['id_values' ],
         #    'order': 203

@@ -63,15 +63,12 @@
 import argparse
 import csv
 import datetime
-from dateutil.parser import parse
 import hashlib
 import logging
-import math
 import os
 import pandas as pd
 import sys
 import traceback
-import zlib
 
 from numpy import int32
 from numpy import int64
@@ -82,7 +79,6 @@ from typeguard import typechecked
 
 from ccda_to_omop import value_transformations as VT
 from ccda_to_omop.metadata import get_meta_dict
-from ccda_to_omop import ddl as DDL
 from ccda_to_omop.util import create_codemap_dict_from_csv
 from ccda_to_omop.util import cast_to_date
 from ccda_to_omop.util import cast_to_datetime

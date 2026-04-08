@@ -26,13 +26,13 @@ def main() :
     source_concept_id = VT._codemap_xwalk(vocab, args.code, 'source_concept_id', 0)
     print(f"codemap concept_id:{concept_id} domain:{domain_id}   source concept_id:{source_concept_id}")
     print("")
-    
+
     print(f"Visit xwalk {vocab} {args.code}")
     concept_id = VT._visit_xwalk(vocab, args.code, 'target_concept_id', 0)
     domain_id = VT._visit_xwalk(vocab, args.code, 'target_domain_id', 0)
     print(f"visit map concept_id:{concept_id} domain_id:{domain_id}")
     print("")
-    
+
     print(f"Valueset xwalk {vocab} {args.code}")
     concept_id = VT._valueset_xwalk(vocab, args.code, 'target_concept_id', 0)
     domain_id = VT._valueset_xwalk(vocab, args.code, 'target_domain_id', 0)
@@ -41,4 +41,3 @@ def main() :
 
 if __name__ == '__main__':
     main()
-
