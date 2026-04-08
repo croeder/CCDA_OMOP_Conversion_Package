@@ -6,7 +6,6 @@ from dateutil.parser import parse
 import csv
 import datetime
 import pandas as pd
-import pathlib
 from numpy import int32, int64
 
 # Canonical type alias for a single OMOP output record dictionary.
