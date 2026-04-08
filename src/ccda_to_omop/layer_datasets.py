@@ -50,6 +50,7 @@ logger = logging.getLogger(__name__)
 
 @typechecked
 def show_column_dict(config_name: str, column_dict: dict[str, list]) -> None:
+    """Print column names and lengths for a single config's column dict (debug helper)."""
     for key,val in column_dict.items():
         print(f"   config: {config_name}  key:{key} length(val):{len(val)}")
 
@@ -318,6 +319,7 @@ def process_file(filepath: str, write_csv_flag: bool, parse_config: str) -> dict
 
 @typechecked
 def dict_summary(my_dict: dict) -> None:
+    """Log the key names and row counts of a dict of lists."""
     for key in my_dict:
         logger.info(f"Summary {key} {len(my_dict[key])}")
 
@@ -373,6 +375,7 @@ def combine_datasets(omop_dataset_dict: dict[str, pd.DataFrame | None]) -> dict[
 
 
 def do_write_csv_files(domain_dataset_dict: dict[str, pd.DataFrame | None]) -> None:
+    """Write each combined domain DataFrame to output/domain_<domain_id>.csv."""
     for domain_id in domain_dataset_dict:
         if domain_id in domain_dataset_dict and domain_dataset_dict[domain_id] is not None:
             logger.info(f"Writing CSV for domain:{domain_id} dim:{domain_dataset_dict[domain_id].shape}")
@@ -385,6 +388,7 @@ def do_write_csv_files(domain_dataset_dict: dict[str, pd.DataFrame | None]) -> N
 
 # ENTRY POINT for directory of files
 def process_directory(directory_path: str, write_csv_flag: bool, parse_config: str) -> None:
+    """Process all XML files in a directory, concatenate results by domain, and optionally write CSVs."""
     omop_dataset_dict = {}  # keyed by dataset_names (legacy domain names)
 
     only_files = [f for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]

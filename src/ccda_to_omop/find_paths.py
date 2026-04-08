@@ -292,6 +292,7 @@ def get_hash_fields(metadata: dict, derived_field_dict: dict) -> dict:
 
 
 def print_data_hash(data_hash: dict) -> None:
+    """Print a human-readable view of the nested field path/type/order structure produced by get_*_fields()."""
     for config_key in sorted(data_hash):
         for field_key in sorted(data_hash[config_key]):
             thing =  data_hash[config_key][field_key]
@@ -311,6 +312,7 @@ def print_data_hash(data_hash: dict) -> None:
 
 
 def merge_second_level_dict(dest_dict: dict, additional_dict: dict) -> None:
+    """Merge additional_dict into dest_dict, combining second-level dicts with | for shared keys."""
     for key in additional_dict:
         if key in dest_dict:
             dest_dict[key] = dest_dict[key] | additional_dict[key]

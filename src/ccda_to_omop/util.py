@@ -101,6 +101,7 @@ def cast_to_date(string_value: str) -> datetime.date | None:
 
 @typechecked
 def cast_to_datetime(string_value: str) -> datetime.datetime | None:
+    """Parse a datetime string and return a datetime.datetime, or None on failure."""
     try:
         datetime_val = parse(string_value, ignoretz=True)
         return datetime_val

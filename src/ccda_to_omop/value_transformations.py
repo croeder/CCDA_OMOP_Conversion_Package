@@ -62,11 +62,13 @@ def set_codemap_dict(map: dict | None) -> None:
     _context.codemap_dict = map
 
 def get_codemap_dict() -> dict | None:
+    """Return the currently loaded codemap crosswalk dictionary."""
     return _context.codemap_dict
 
 
 
 def cast_as_string(args_dict: dict[str, any]) -> str | None:
+    """Return args_dict['input'] as a string if type is 'ST' (HL7 string), else None."""
     string_value = args_dict['input']
     type_value = args_dict['type']
     if type_value == 'ST':
@@ -76,6 +78,7 @@ def cast_as_string(args_dict: dict[str, any]) -> str | None:
 
 
 def cast_as_number(args_dict: dict[str, any]) -> int | None:
+    """Return args_dict['input'] as an int if type is 'PQ' (HL7 physical quantity), else None."""
     string_value = args_dict['input']
     type_value = args_dict['type']
     if type_value == 'PQ':
@@ -85,6 +88,7 @@ def cast_as_number(args_dict: dict[str, any]) -> int | None:
 
 
 def cast_as_concept_id(args_dict: dict[str, any]) -> int32 | None:
+    """Return args_dict['input'] as an int32 concept ID if type is 'CD' or 'CE', else None."""
     string_value = args_dict['input']
     type_value = args_dict['type']
     if type_value == 'CD' or type_value == 'CE':
@@ -149,7 +153,12 @@ def codemap_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
 
 
 def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
+    """Look up a single column value from the codemap crosswalk dict.
 
+    Raises if the codemap is not initialized. Returns default if the
+    (vocabulary_oid, concept_code) key is absent or has no matching rows.
+    If NMC (no-matching-concept, value 0) is disallowed, also returns default.
+    """
     if get_codemap_dict() is None:
         logger.error("codemap_dict is not initialized in ccda_to_omop/value_transformations.py for value_transformations.py")
         raise Exception("codemap_dict is not initialized in ccda_to_omop/value_transformations.py for value_transformations.py")
@@ -189,29 +198,37 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name, default):
 ############################################################################
 
 def visit_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
+    """Alias of codemap_xwalk_concept_id for visit-domain lookups."""
     return codemap_xwalk_concept_id(args_dict)
 
 def visit_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
+    """Alias of codemap_xwalk_domain_id for visit-domain lookups."""
     return codemap_xwalk_domain_id(args_dict)
 
 def visit_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
+    """Alias of codemap_xwalk_source_concept_id for visit-domain lookups."""
     return codemap_xwalk_source_concept_id(args_dict)
 
 def _visit_xwalk(vocabulary_oid, concept_code, column_name, default):
+    """Internal alias of _codemap_xwalk for visit-domain lookups."""
     return _codemap_xwalk(vocabulary_oid, concept_code, column_name, default)
 
 ############################################################################
 
 def valueset_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
+    """Alias of codemap_xwalk_concept_id for valueset lookups."""
     return codemap_xwalk_concept_id(args_dict)
 
 def valueset_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
+    """Alias of codemap_xwalk_domain_id for valueset lookups."""
     return codemap_xwalk_domain_id(args_dict)
 
 def valueset_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
+    """Alias of codemap_xwalk_source_concept_id for valueset lookups."""
     return codemap_xwalk_source_concept_id(args_dict)
 
 def _valueset_xwalk(vocabulary_oid, concept_code, column_name, default=None):
+    """Internal alias of _codemap_xwalk for valueset lookups."""
     return _codemap_xwalk(vocabulary_oid, concept_code, column_name, default)
 
 ############################################################################
