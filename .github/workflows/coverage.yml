@@ -18,7 +18,7 @@ jobs:
               wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
                    --header="Accept: */*" \
                    -O resources/map.csv \
-                   "https://github.com"
+                   "https://media.githubusercontent.com/media/croeder/CCDA_OMOP_Private/refs/heads/main/map.csv"
               ls -lht resources/map.csv
               grep 9202 resources/map.csv
               grep comprehensive_migration resources/map.csv
