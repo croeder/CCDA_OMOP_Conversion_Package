@@ -16,5 +16,34 @@ jobs:
             run: |
                 bin/process.sh
           - name: run comparison
+            id: compare
             run: |
-                bin/compare_correct.sh
+                bin/compare_correct.sh > /tmp/compare_output.txt 2>&1 || true
+                cat /tmp/compare_output.txt
+                errors=$(grep "counted.*errors of" /tmp/compare_output.txt | awk '{print $2}')
+                total=$(grep "counted.*errors of" /tmp/compare_output.txt | awk '{print $5}')
+                missing=$(grep "counted.*missing of" /tmp/compare_output.txt | awk '{print $2}')
+                errors=${errors:-0}
+                total=${total:-0}
+                missing=${missing:-0}
+                matching=$(( total - errors - missing ))
+                echo "matching=$matching" >> $GITHUB_OUTPUT
+                echo "total=$total" >> $GITHUB_OUTPUT
+                echo "errors=$errors" >> $GITHUB_OUTPUT
+                [ $(( errors + missing )) -eq 0 ] && exit 0 || exit 1
+          - name: update badge
+            if: always()
+            env:
+              GIST_TOKEN: ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}
+            run: |
+                matching=${{ steps.compare.outputs.matching }}
+                total=${{ steps.compare.outputs.total }}
+                errors=${{ steps.compare.outputs.errors }}
+                [ "$errors" -eq 0 ] && color="brightgreen" || color="red"
+                message="${matching}/${total} matching"
+                payload=$(printf '{"files":{"comparison-badge.json":{"content":"{\"schemaVersion\":1,\"label\":\"file comparisons\",\"message\":\"%s\",\"color\":\"%s\"}"}}}' "$message" "$color")
+                curl -s -X PATCH \
+                  -H "Authorization: token $GIST_TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d "$payload" \
+                  "https://api.github.com/gists/d0babd0799291fc23d3173de510eb1d8"
