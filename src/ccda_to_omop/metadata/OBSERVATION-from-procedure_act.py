@@ -181,7 +181,7 @@ metadata = {
                     'observation_concept_codeSystem',
                     'value_codeSystem',
                     'value_code',
-                    'value_as_string',  # yes, redundant
+                    'value_as_string',
                     'value_as_number_string'
                 ]
             },
@@ -201,6 +201,19 @@ metadata = {
             'FUNCTION': VT.get_data_partner_id,
             'argument_names': { 'filename': 'filename' },
             'order': 20
+        },
+        'value_source_value': {
+            'config_type': 'DERIVED2',
+            'FUNCTION': VT.concat_field_list_values,
+            'argument_list': {
+                'key_list': [
+                    'value_codeSystem',
+                    'value_code',
+                    'value_as_string',  # yes, redundant
+                    'value_as_number_string'
+                ]
+            },
+            'order':  21
         },
 
         'filename' : {

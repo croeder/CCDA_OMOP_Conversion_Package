@@ -1081,11 +1081,18 @@ def write_individual_csv_files(out_filename, data: dict[str, list[OMOPRecord]]):
         if not records:
             continue
         with open(f"../output/{out_filename}__{domain_id}.csv", 'w', newline='') as f:
-            print(f"    WRITING {out_filename}_{domain_id}.csv len:{len(records)}")
-            writer = csv.DictWriter(f, fieldnames=records[0].keys())
-            writer.writeheader()
-            writer.writerows(records)
-    print(f"    done WRITING {out_filename}")
+            try:
+                print(f"    WRITING {out_filename}_{domain_id}.csv len:{len(records)}")
+                writer = csv.DictWriter(f, fieldnames=records[0].keys())
+                writer.writeheader()
+                writer.writerows(records)
+                print(f"    done WRITING {out_filename}")
+            except ValueError as ve: 
+                print(f"ERROR file:{out_filename} domain:{domain_id} {ve}")
+                raise
+            except Exception as e: 
+                printf("ERROR {e}")
+                raise
 
 # for argparse
 def str2bool(v):

@@ -1,7 +1,10 @@
 
 import unittest
+import logging
 from lxml import etree as ET
 import ccda_to_omop.metadata as MD
+from ccda_to_omop.domain_dataframe_column_types import domain_dataframe_column_types
+from ccda_to_omop.ddl import domain_name_to_table_name
 
 # Namespace map used in all CCDA XPath expressions
 NS = {
@@ -9,6 +12,9 @@ NS = {
     'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
     'sdtc': 'urn:hl7-org:sdtc',
 }
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 
 
@@ -26,11 +32,12 @@ class Linter(unittest.TestCase):
         once for each config. The setattr call renames it with the name of the configuration.
 
         Then within each such function, a number of tests are called, including 
-        check_paramters_by_field_type that runs through each field within a parse config.
+        check_parameters_by_field_type that runs through each field within a parse config.
 
         Be sure and check the stdout when diagnosing failures.
     """
 
+    # FIELD LEVEL functions used by check_parameters_by_field_type()
     def required_params(self, field_config, required_params):
         all_good=True
         for fname in required_params:
@@ -84,14 +91,17 @@ class Linter(unittest.TestCase):
         legit_args = list(config_dict.keys())
         for arg_name, arg_val in field_config['argument_names'].items():
             if arg_name != 'default' and arg_val not in legit_args:
-                print(f"ERROR: argument \"{arg_name}\" value \"{arg_val}\"  in this config")
+                #print(f"ERROR: argument \"{arg_name}\" value \"{arg_val}\"  in this config")
+                logger.error(f"ERROR: argument \"{arg_name}\" value \"{arg_val}\"  in this config {config_dict['cfg_name']['constant_value']}")
                 self.assertTrue(arg_val in legit_args)
+
         # Check default values. Should just remove them outright
         legit_defaults = [0, -1, None] 
         if 'default' in field_config['argument_names'].keys():
             default_value = field_config['argument_names']['default']
             if default_value not in legit_defaults:
                 print(f"Warning: \"{default_value}\" is a dubious default value ")
+
         function_args_dict = {
              'codemap_xwalk_concept_id': ['vocabulary_oid', 'concept_code', 'default'],
              'codemap_xwalk_domain_id': ['vocabulary_oid', 'concept_code', 'default'],
@@ -227,6 +237,7 @@ class Linter(unittest.TestCase):
             #self.assertTrue(field_config['constant_value'] not in bad_news)
 
 
+    # CONFIG level checks
     def check_xpath_syntax(self, config, config_name):
         """Validate XPath syntax on all element fields using lxml.etree.XPath()."""
         for field_name, field_config in config.items():
@@ -285,6 +296,7 @@ class Linter(unittest.TestCase):
 
 
     def check_parameters_by_field_type(self, config, config_name):
+        """Check each field in a config, branch out by field type"""
         for field_name in config.keys():
             if 'config_type' not in config[field_name]:
                 print(f"ERROR: config {config_name} has no config_type key: {config[field_name]} ")
@@ -321,8 +333,9 @@ class Linter(unittest.TestCase):
 
 
     def check_priority_chains(self, config, config_name):
-        # Checks to make sure there is a priority field that goes with the param
-        # here that sys the field in question is part of the named priority chain. 
+        """ Checks to make sure there is a priority field that goes with the param
+            here that sys the field in question is part of the named priority chain. 
+        """
         priority_fields = [ field_name for field_name, field_config in config.items() if field_config['config_type'] == 'PRIORITY'  ]
         for p_field_name in priority_fields:
             has_at_least_one = False
@@ -339,8 +352,7 @@ class Linter(unittest.TestCase):
 
 
     def check_for_domain_id(self, config_name):
-        ''' Checks to see that the config has a domain_id field.
-        '''
+        """ Checks to see that the config has a domain_id field."""
         meta_dict = MD.get_meta_dict()
         config_dict = meta_dict[config_name]
         if config_name not in meta_dict:
@@ -368,17 +380,24 @@ class Linter(unittest.TestCase):
         self.assertTrue(True)
 
 
-    # TODO
-    #def check_required fields(self, fi):
-    """ 
-        person_id, 
-        <domain>_date or <domain>_start_date, <domain>_end_date, etc.
-        <domain>_id
-        <domain>_concept_id
-        value_as_concept_id, value_as_number, value_as_string
+    def check_required_fields(self, config_dict, config_name):
+        """ For a given config's domain, this checks that the list of 
+            fields specified in a config is the same as the list of
+            fileds in OMOP
+        """
+        #domain_name = config_dict[config_name]['root']['expected_domain_id']
 
-        see ddl.py for usefull metaata
-    """
+        domain_name = config_dict['root']['expected_domain_id']
+        table_name= domain_name_to_table_name[domain_name]
+        required_config_fields_set = set(domain_dataframe_column_types[table_name])
+        #present_config_fields_set = set(config_dict[domain_name].keys())
+        present_config_fields_set = set(config_dict.keys())
+        intersection = required_config_fields_set.intersection(present_config_fields_set)
+        if len(present_config_fields_set) != len(intersection):
+            print(f"missing: {required_config_fields_set - present_config_fields_set}")
+            print(f"extra: {present_config_fields_set - required_config_fields_set}")
+        self.assertEqual(len(present_config_fields_set), len(intersection))
+    
        
 
 # These fail as a way of testing this testing code
@@ -445,13 +464,13 @@ for config_name in  meta_dict.keys():
     if config_name != 'VISITDETAIL_visit_occurrence':
         def _test_method(self, config_name=config_name):
             config_dict = meta_dict[config_name]
-            #print(f"testing {config_name} {config_dict.keys()}")
             print(f"\ntesting {config_name}")
-            #self._check_for_domain_id(config_name)
+            ####self.check_for_domain_id(config_name)
             self.check_priority_chains(config_dict, config_name)
             self.check_parameters_by_field_type(config_dict, config_name)
             self.check_xpath_syntax(config_dict, config_name)
             self.check_circular_dependencies(config_dict, config_name)
+            ##self.check_required_fields(config_dict, config_name)
         # changes the name of the _test_method just created, effectively creating a new function.
         setattr(Linter, f"test_{config_name}", _test_method)
     
