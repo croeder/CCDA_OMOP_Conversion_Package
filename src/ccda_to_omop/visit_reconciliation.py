@@ -907,7 +907,7 @@ def reconcile_visit_detail_FK_with_specific_domain(domain: str,
 
 
 @typechecked
-def get_visit_detail_duration(visit_detail_dict: dict) -> float:
+def get_visit_detail_duration(visit_detail_dict: OMOPRecord) -> float:
     """
     Calculate duration of a visit_detail in days.
 

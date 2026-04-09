@@ -1,7 +1,8 @@
 import datetime
+from typing import Any
 from typeguard import typechecked
 from numpy import int32
-from ccda_to_omop.util import cast_to_datetime
+from ccda_to_omop.util import cast_to_datetime, CodemapDict
 from ccda_to_omop import package_constant_access
 from ccda_to_omop.constants import HL7_DATE_LENGTH, ISO_DATE_LENGTH, DATETIME_LOW_SUFFIX, DATETIME_HIGH_SUFFIX
 import logging
@@ -54,20 +55,20 @@ def reset_context():
     _context.__init__()
 
 
-def set_codemap_dict(map: dict | None) -> None:
+def set_codemap_dict(map: CodemapDict | None) -> None:
     if map is not None:
         logger.info(f"set_codemap_dict {len(map)}")
     else:
         logger.info("set_codemap_dict None map")
     _context.codemap_dict = map
 
-def get_codemap_dict() -> dict | None:
+def get_codemap_dict() -> CodemapDict | None:
     """Return the currently loaded codemap crosswalk dictionary."""
     return _context.codemap_dict
 
 
 
-def cast_as_string(args_dict: dict[str, any]) -> str | None:
+def cast_as_string(args_dict: dict[str, Any]) -> str | None:
     """Return args_dict['input'] as a string if type is 'ST' (HL7 string), else None."""
     string_value = args_dict['input']
     type_value = args_dict['type']
@@ -77,7 +78,7 @@ def cast_as_string(args_dict: dict[str, any]) -> str | None:
         return None
 
 
-def cast_as_number(args_dict: dict[str, any]) -> int | None:
+def cast_as_number(args_dict: dict[str, Any]) -> int | None:
     """Return args_dict['input'] as an int if type is 'PQ' (HL7 physical quantity), else None."""
     string_value = args_dict['input']
     type_value = args_dict['type']
@@ -87,7 +88,7 @@ def cast_as_number(args_dict: dict[str, any]) -> int | None:
         return None
 
 
-def cast_as_concept_id(args_dict: dict[str, any]) -> int32 | None:
+def cast_as_concept_id(args_dict: dict[str, Any]) -> int32 | None:
     """Return args_dict['input'] as an int32 concept ID if type is 'CD' or 'CE', else None."""
     string_value = args_dict['input']
     type_value = args_dict['type']
@@ -105,7 +106,7 @@ def cast_as_concept_id(args_dict: dict[str, any]) -> int32 | None:
     functions: codemap_xwalk...
 """
 
-def codemap_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
+def codemap_xwalk_concept_id(args_dict: dict[str, Any]) -> int32 | None:
     """ expects: vocabulary_oid, concept_code
         returns: concept_id AS INTEGER (because that's what's in the table), not necessarily standard
                  If NMC is disallowed, it will return None instead of 0.
@@ -124,7 +125,7 @@ def codemap_xwalk_concept_id(args_dict: dict[str, any]) -> int32 | None:
         return None
 
 
-def codemap_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
+def codemap_xwalk_domain_id(args_dict: dict[str, Any]) -> str | None:
     """ expects: vocabulary_oid, concept_code
         returns: always returns domain_id
         throws/raises when codemap_xwalk is None
@@ -138,7 +139,7 @@ def codemap_xwalk_domain_id(args_dict: dict[str, any]) -> str | None:
         return None
 
 
-def codemap_xwalk_source_concept_id(args_dict: dict[str, any]) -> int32 | None:
+def codemap_xwalk_source_concept_id(args_dict: dict[str, Any]) -> int32 | None:
     """ expects: vocabulary_oid, concept_code
         returns: unmapped concept_id AS INTEGER (because that's what's in the table), not necessarily standard
         throws/raises when codemap_xwalk is None
@@ -198,7 +199,7 @@ def _codemap_xwalk(vocabulary_oid, concept_code, column_name):
 
 
 @typechecked
-def extract_day_of_birth(args_dict : dict[str, any]) -> int32:
+def extract_day_of_birth(args_dict : dict[str, Any]) -> int32:
     """Extract day of birth from args_dict['date_object'] (assumes a date/datetime)."""
     date_object = args_dict['date_object']
     if date_object is not None:
@@ -207,7 +208,7 @@ def extract_day_of_birth(args_dict : dict[str, any]) -> int32:
 
 
 @typechecked
-def extract_month_of_birth(args_dict : dict[str, any]) -> int32:
+def extract_month_of_birth(args_dict : dict[str, Any]) -> int32:
     """Extract month of birth from args_dict['date_object'] (assumes a date/datetime)."""
     date_object = args_dict['date_object']
     if date_object is not None:
@@ -216,7 +217,7 @@ def extract_month_of_birth(args_dict : dict[str, any]) -> int32:
 
 
 @typechecked
-def extract_year_of_birth(args_dict : dict[str, any]) -> int32:
+def extract_year_of_birth(args_dict : dict[str, Any]) -> int32:
     """Extract year of birth from args_dict['date_object'] (assumes a date/datetime)."""
     date_object = args_dict['date_object']
     if date_object is not None:
@@ -224,7 +225,7 @@ def extract_year_of_birth(args_dict : dict[str, any]) -> int32:
     return None
 
 
-def concat_field_list_names(args_dict: dict[str, any], data_dict: dict[str, any]) -> str:
+def concat_field_list_names(args_dict: dict[str, Any], data_dict: dict[str, Any]) -> str:
     '''
         A DERIVED2 style function.
         Looks for a argument with the name of 'args' under the 'argument_list'
@@ -248,7 +249,7 @@ def concat_field_list_names(args_dict: dict[str, any], data_dict: dict[str, any]
     return  "|".join(args_dict['argument_list']['key_list'])
 
 
-def concat_field_list_values(args_dict: dict[str, any], data_dict: dict[str, any]) -> str:
+def concat_field_list_values(args_dict: dict[str, Any], data_dict: dict[str, Any]) -> str:
     '''
         A DERIVED2 style function.
         Looks for a argument with the name of 'args' under the 'argument_list'
@@ -273,7 +274,7 @@ def concat_field_list_values(args_dict: dict[str, any], data_dict: dict[str, any
 
 
 
-def concat_fields(args_dict: dict[str, any]) -> str:
+def concat_fields(args_dict: dict[str, Any]) -> str:
     """
       A DERIVED style function.
       input key "delimiter" is a character to use to separate the fields
@@ -296,14 +297,14 @@ def concat_fields(args_dict: dict[str, any]) -> str:
 
 ####################################################################################################
 
-def set_partner_map(m: dict | None) -> None:
+def set_partner_map(m: dict[str, int] | None) -> None:
     """Initializes the partner map on the executor."""
     _context.partner_map = m
 
-def get_partner_map() -> dict | None:
+def get_partner_map() -> dict[str, int] | None:
     return _context.partner_map
 
-def get_data_partner_id(args_dict: dict[str, any]) -> int32:
+def get_data_partner_id(args_dict: dict[str, Any]) -> int32:
     """
     Returns Data Partner ID. Defaults to 0 if filename is not in map.
     Strictly returns an integer per the component contract.
@@ -317,14 +318,14 @@ def get_data_partner_id(args_dict: dict[str, any]) -> int32:
     return int32(mapping.get(fname, 0))
 
 
-def set_mspi_map(m: dict | None) -> None:
+def set_mspi_map(m: dict[str, int] | None) -> None:
     """Initializes the MSPI (person_id) map on the executor."""
     _context.mspi_lookup_map = m
 
-def get_mspi_map() -> dict | None:
+def get_mspi_map() -> dict[str, int] | None:
     return _context.mspi_lookup_map
 
-def map_filename_to_mspi(args_dict: dict[str, any]) -> int:
+def map_filename_to_mspi(args_dict: dict[str, Any]) -> int:
     """
     Returns MSPI (person_id). Defaults to 0 if filename is not in map.
     Raises if the MSPI map has not been initialized.

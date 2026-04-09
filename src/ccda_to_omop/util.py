@@ -12,6 +12,11 @@ from numpy import int32, int64
 # int32 is included because numpy vocabulary lookups return int32 concept IDs.
 OMOPRecord = dict[str, None | str | float | int | int32 | int64 | datetime.datetime | datetime.date]
 
+# Type alias for a single codemap entry: source/target concept IDs plus domain string.
+CodemapEntry = dict[str, int | str]
+# Type alias for the codemap dictionary: (vocabulary_oid, concept_code) -> list of entries.
+CodemapDict = dict[tuple[str, str], list[CodemapEntry]]
+
 logger = logging.getLogger(__name__)
 """
     These three functions create dictionaries from the vocabulary xwalk
@@ -35,7 +40,7 @@ logger = logging.getLogger(__name__)
     }
 """
 
-def create_codemap_dict_from_csv(map_csv_filepath: str) -> dict:
+def create_codemap_dict_from_csv(map_csv_filepath: str) -> CodemapDict:
     """ creates a dictionary (code_system, code) --> {source_concept_id: n, target_domain_id: m, target_concept_id: o}
         from a CSV file:
            OID, code, codeSystem, target_id, target_domain, source_concept_id
@@ -57,7 +62,7 @@ def create_codemap_dict_from_csv(map_csv_filepath: str) -> dict:
     return concept_map
 
 
-def create_codemap_dict(codemap_df: pd.DataFrame) -> dict:
+def create_codemap_dict(codemap_df: pd.DataFrame) -> CodemapDict:
     """ creates a dictionary (code_system, code) --> {source_concept_id: n, target_domain_id: m, target_concept_id: o}
         from a spark dataframe
     """
