@@ -34,7 +34,7 @@ jobs:
           - name: update badge
             if: always()
             env:
-              GIST_TOKEN: ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}
+              GIST_TOKEN: ${{ secrets.CROEDER_CCDA_OMOP_PAT }}
             run: |
                 matching=${{ steps.compare.outputs.matching }}
                 total=${{ steps.compare.outputs.total }}
