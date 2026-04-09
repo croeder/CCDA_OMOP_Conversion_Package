@@ -18,6 +18,6 @@ jobs:
               wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
                    --header="Accept: */*" \
                    -O resources/map.csv \
-                   "https://github.com"
+                   "https://media.githubusercontent.com/media/croeder/CCDA_OMOP_Private/refs/heads/main/map.csv"
           - name: run unit tests
             run: bin/run_unittests.sh
