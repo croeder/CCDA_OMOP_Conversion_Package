@@ -352,7 +352,10 @@ class Linter(unittest.TestCase):
 
 
     def check_for_domain_id(self, config_name):
-        """ Checks to see that the config has a domain_id field."""
+        """ Checks to see that the config has a domain_id field.
+            Particulars of the field depending on type are checked elsewhere.
+            This just makes sure a domain_id field is present.
+        """
         meta_dict = MD.get_meta_dict()
         config_dict = meta_dict[config_name]
         if config_name not in meta_dict:
@@ -365,19 +368,8 @@ class Linter(unittest.TestCase):
             self.assertTrue(False)
         if 'domain_id' not in config_dict and config_dict['root']['expected_domain_id'] not in domainless_domains:
             print(f'ERROR:  {config_name} is missing a domain_id field.')
-            self.assertTrue(False)
+            self.assertTrue('domain_id' in config_dict)
 
-        if config_dict['root']['expected_domain_id'] not in domainless_domains and 'domain_id' in config_dict:
-            domain_id_dict = config_dict['domain_id']
-            if 'argument_names' not in domain_id_dict.keys():
-                print(f"ERROR:  {config_name}'s domain_id field is missing argument_names.")
-                self.assertTrue(False)
-            else:
-                args_dict = domain_id_dict['argument_names']
-                # need to really check these
-                ###print(args_dict)
-
-        self.assertTrue(True)
 
 
     def check_required_fields(self, config_dict, config_name):
@@ -390,12 +382,12 @@ class Linter(unittest.TestCase):
         domain_name = config_dict['root']['expected_domain_id']
         table_name= domain_name_to_table_name[domain_name]
         required_config_fields_set = set(domain_dataframe_column_types[table_name])
-        #present_config_fields_set = set(config_dict[domain_name].keys())
-        present_config_fields_set = set(config_dict.keys())
+        present_config_fields_set = {k for k in config_dict.keys() if 'order' in config_dict[k]}
+
         intersection = required_config_fields_set.intersection(present_config_fields_set)
         if len(present_config_fields_set) != len(intersection):
-            print(f"missing: {required_config_fields_set - present_config_fields_set}")
-            print(f"extra: {present_config_fields_set - required_config_fields_set}")
+            logger.error(f"{config_name} missing fields: {required_config_fields_set - present_config_fields_set}")
+            logger.error(f"{config_name} extra fields: {present_config_fields_set - required_config_fields_set}")
         self.assertEqual(len(present_config_fields_set), len(intersection))
     
        
@@ -465,12 +457,12 @@ for config_name in  meta_dict.keys():
         def _test_method(self, config_name=config_name):
             config_dict = meta_dict[config_name]
             print(f"\ntesting {config_name}")
-            ####self.check_for_domain_id(config_name)
+            self.check_for_domain_id(config_name)
             self.check_priority_chains(config_dict, config_name)
             self.check_parameters_by_field_type(config_dict, config_name)
             self.check_xpath_syntax(config_dict, config_name)
             self.check_circular_dependencies(config_dict, config_name)
-            ##self.check_required_fields(config_dict, config_name)
+            self.check_required_fields(config_dict, config_name)
         # changes the name of the _test_method just created, effectively creating a new function.
         setattr(Linter, f"test_{config_name}", _test_method)
     

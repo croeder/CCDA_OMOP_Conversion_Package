@@ -13,11 +13,6 @@ metadata = {
                "/../hl7:entry/hl7:act[@moodCode='EVN']/"
                "hl7:statusCode[@code='active' or @code='completed']/..")
         },
-        'source_section': {
-            'config_type': 'CONSTANT',
-            'constant_value': 'RESULTS',
-            'order': 9999
-        },
 
         'measurement_id_root': {
             'config_type': 'FIELD',

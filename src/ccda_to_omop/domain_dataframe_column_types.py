@@ -16,7 +16,9 @@ domain_dataframe_column_types = {
         "location_id": int64,
         "care_site_source_value": str,
         "place_of_service_source_value": str,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "location": {
         "location_id": int64,
@@ -27,7 +29,9 @@ domain_dataframe_column_types = {
         "zip": str,
         "county": str,
         "location_source_value": str,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "provider": {
         "provider_id": int64,
@@ -43,7 +47,9 @@ domain_dataframe_column_types = {
         "specialty_source_concept_id": int32,
         "gender_source_value": str,
         "gender_source_concept_id": int32,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "person": {
         "person_id": int64,
@@ -65,7 +71,9 @@ domain_dataframe_column_types = {
         "race_source_concept_id": int32,
         "ethnicity_source_value": str,
         "ethnicity_source_concept_id": int32,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "visit_occurrence": {
         "visit_occurrence_id": int64,
@@ -85,7 +93,9 @@ domain_dataframe_column_types = {
         "discharge_to_concept_id": int32,
         "discharge_to_source_value": str,
         "preceding_visit_occurrence_id": int64,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "visit_detail": {
         "visit_detail_id": int64,
@@ -107,7 +117,9 @@ domain_dataframe_column_types = {
         "preceding_visit_detail_id": int64,
         "visit_detail_parent_id": int64,
         "visit_occurrence_id": int64,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "measurement": {
         "measurement_id": int64,
@@ -130,7 +142,9 @@ domain_dataframe_column_types = {
         "measurement_source_concept_id": int32,
         "unit_source_value": str,
         "value_source_value": str,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "observation": {
         "observation_id": int64,
@@ -151,7 +165,9 @@ domain_dataframe_column_types = {
         "observation_source_concept_id": int32,
         "unit_source_value": str,
         "qualifier_source_value": str,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "condition_occurrence": {
         "condition_occurrence_id": int64,
@@ -170,7 +186,9 @@ domain_dataframe_column_types = {
         "condition_source_value": str,
         "condition_source_concept_id": int32,
         "condition_status_source_value": str,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "procedure_occurrence": {
         "procedure_occurrence_id": int64,
@@ -187,7 +205,9 @@ domain_dataframe_column_types = {
         "procedure_source_value": str,
         "procedure_source_concept_id": int32,
         "modifier_source_value": str,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "drug_exposure": {
         "drug_exposure_id": int64,
@@ -213,11 +233,14 @@ domain_dataframe_column_types = {
         "drug_source_concept_id": int32,
         "route_source_value": str,
         "dose_unit_source_value": str,
+        "data_partner_id": int32,
         "filename": str,
+        "cfg_name": str,
     },
     "device_exposure": {
-        "device_concept_id": int32,
+        "device_exposure_id": int64,
         "person_id": int64,
+        "device_concept_id": int32,
         "device_exposure_start_date": datetime.date,
         "device_exposure_start_datetime": datetime.datetime,
         "device_exposure_end_date": datetime.date,
@@ -230,6 +253,9 @@ domain_dataframe_column_types = {
         "visit_detail_id": int64,
         "device_source_value": str,
         "device_source_concept_id": int32,
+        "data_partner_id": int32,
+        "filename": str,
+        "cfg_name": str,
     },
 }
 domain_dataframe_column_required = {

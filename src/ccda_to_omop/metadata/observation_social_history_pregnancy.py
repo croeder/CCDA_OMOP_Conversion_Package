@@ -116,13 +116,12 @@ metadata = {
         'observation_type_concept_id': {
             'config_type': 'CONSTANT',
             'constant_value' : 32035,
-            'order': 7
+            'order': 6
         },
-        'operator_concept_id': { 'config_type': None, 'order': 8 },
 
-        'value_as_number': { 'config_type': None,'order': 9 },
+        'value_as_number': { 'config_type': None,'order': 7 },
 
-        'value_as_string': { 'config_type': None,'order': 10},
+        'value_as_string': { 'config_type': None,'order': 8},
 
 
         'value_as_code': {
@@ -142,44 +141,35 @@ metadata = {
                 'concept_code': 'value_as_code',
                 'vocabulary_oid': 'value_as_codeSystem',
             },
-            'order':  11
+            'order': 9 
         },
 
-        'qualifier_concept_id': { 'config_type': None,'order': 12   },
+        'qualifier_concept_id': { 'config_type': None,'order': 10 },
 
-        'unit_concept_id': { 'config_type': None, 'order':  13 },
+        'unit_concept_id': { 'config_type': None, 'order':  11 },
 
-        'provider_id': { 'config_type': None, 'order':  14 },
+        'provider_id': { 'config_type': None, 'order':  12 },
 
         'visit_occurrence_id':  {
             'config_type': 'FK',
             'FK': 'visit_occurrence_id',
-            'order':  15
+            'order':  13
         },
-        'visit_detail_id':  { 'config_type': None, 'order':  16 },
+        'visit_detail_id':  { 'config_type': None, 'order':  14 },
 
 
         'observation_source_value': {
             'config_type': 'FIELD',
             'element': "hl7:code" ,
             'attribute': "code",
-            'order':  17
+            'order':  15
         },
 
-        'observation_source_concept_id':    { 'config_type': None, 'order':  18 },
+        'observation_source_concept_id':    { 'config_type': None, 'order':  16 },
 
-        'unit_source_value':    { 'config_type': None, 'order':  19 },
-        'qualifier_source_value':   { 'config_type': None, 'order':  20 },
+        'unit_source_value':    { 'config_type': None, 'order':  17 },
+        'qualifier_source_value':   { 'config_type': None, 'order':  18 },
 
-        'value_source_value': {
-            'config_type': 'DERIVED',
-            'FUNCTION': VT.concat_fields,
-            'argument_names': {
-                'first_field': 'value_as_codeSystem',
-                'second_field': 'value_as_code',
-            },
-            'order':  21
-        },
         'data_partner_id': {
             'config_type': 'DERIVED',
             'FUNCTION': VT.get_data_partner_id,
