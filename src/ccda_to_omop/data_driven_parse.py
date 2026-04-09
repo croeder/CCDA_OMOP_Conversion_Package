@@ -42,11 +42,11 @@
     Each field_spec. has multiple attributes driving that field's
     retrieval or derivation.
 
-    PK_dict :dict[str, any]
+    PK_dict :dict[str, Any]
     key is the field_name, any is the value. Value can be a string, int, None or a list of same.
 
-    output_dict :dict[str, any]
-    omop_dict : dict[str, list[any] for each config you have a list of records
+    output_dict :dict[str, Any]
+    omop_dict : dict[str, list[Any] for each config you have a list of records
 
 
 
@@ -65,6 +65,7 @@ import csv
 import datetime
 import hashlib
 import logging
+from typing import Any
 import os
 import pandas as pd
 import pathlib
@@ -328,7 +329,7 @@ def do_basic_fields(output_dict :OMOPRecord,
                     root_element, root_path, config_name,
                     config_dict :dict[str, dict[str, str | None] ],
                     error_fields_set :set[str],
-                    pk_dict :dict[str, list[any]] ):
+                    pk_dict :dict[str, list[Any]] ):
     """Extract FIELD and PK values from the XML element and write them into output_dict.
 
     PK values are also appended to pk_dict so downstream FK fields can reference them.
@@ -379,7 +380,7 @@ def do_foreign_key_fields(output_dict :OMOPRecord,
                     root_element, root_path, config_name,
                     config_dict :dict[str, dict[str, str | None] ],
                     error_fields_set :set[str],
-                    pk_dict :dict[str, list[any]] ):
+                    pk_dict :dict[str, list[Any]] ):
     """
         When a configuration has an FK field, it uses the tag in that configuration
         to find corresponding values from PK fields.  This mechanism is intended for
@@ -445,7 +446,7 @@ def do_derived_fields(output_dict: OMOPRecord,
                       root_element, root_path, config_name,
                       config_dict: dict[str, dict[str, str | None]],
                       error_fields_set: set[str],
-                      pk_dict: dict[str, list[any]]):
+                      pk_dict: dict[str, list[Any]]):
     """ Do/compute derived values now that their inputs should be available in the output_dict
         Except for a special argument named 'default', when the value is what is other wise the field to look up in the output dict.
 
@@ -547,7 +548,7 @@ def do_hash_fields(output_dict: OMOPRecord,
                    root_element, root_path, config_name,
                    config_dict: dict[str, dict[str, str | None]],
                    error_fields_set: set[str],
-                   pk_dict: dict[str, list[any]]):
+                   pk_dict: dict[str, list[Any]]):
     """Compute HASH fields by hashing a list of named input fields into a single ID.
 
     Similar to DERIVED but takes a list of field names rather than individually named arguments.
@@ -582,7 +583,7 @@ def do_priority_fields(output_dict: OMOPRecord,
                        root_element, root_path, config_name,
                        config_dict: dict[str, dict[str, str | None]],
                        error_fields_set: set[str],
-                       pk_dict: dict[str, list[any]]) -> dict[str, list]:
+                       pk_dict: dict[str, list[Any]]) -> dict[str, list]:
     """
         ARGS expected in config:
             'config_type': 'PRIORITY',
@@ -698,7 +699,7 @@ def sort_output_and_omit_dict(output_dict :OMOPRecord,
 def parse_config_for_single_root(root_element, root_path, config_name,
                                  config_dict :dict[str, dict[str, str | None]],
                                  error_fields_set : set[str],
-                                 pk_dict :dict[str, list[any]],
+                                 pk_dict :dict[str, list[Any]],
                                  filename :str) -> OMOPRecord | None:
 
     """  Parses for each field in the metadata for a config out of the root_element passed in.
@@ -711,7 +712,7 @@ def parse_config_for_single_root(root_element, root_path, config_name,
 
          Returns output_dict, a record, a single row for the domain involved.
     """
-    output_dict = {}  # :dict[str, any]  a record, a single row for a given domain.
+    output_dict = {}  # :dict[str, Any]  a record, a single row for a given domain.
     domain_id = None
     logger.info((f"DDP.parse_config_for_single_root()  ROOT for config:{config_name}, we have tag:{root_element.tag}"
                  f" attributes:{root_element.attrib}"))
@@ -833,7 +834,7 @@ def make_distinct(rows):
 @typechecked
 def parse_config_from_xml_file(tree, config_name,
                            config_dict :dict[str, dict[str, str | None]], filename,
-                           pk_dict :dict[str, list[any]]) -> list[OMOPRecord | None] | None:
+                           pk_dict :dict[str, list[Any]]) -> list[OMOPRecord | None] | None:
 
     """
     Basically returns a list of rows for one domain that a parse configuration, config_name, creates.
@@ -1063,7 +1064,7 @@ def process_file(filepath :str, print_output: bool, parse_config :str):
     print(f"done PROCESSING {filepath} ")
     return omop_data
 
-def write_all_csv_files(data: dict[str, list[dict]]):
+def write_all_csv_files(data: dict[str, list[OMOPRecord]]):
     for domain_id, records in data.items():
         if not records:
             continue
@@ -1073,7 +1074,7 @@ def write_all_csv_files(data: dict[str, list[dict]]):
             writer.writeheader()
             writer.writerows(records)
 
-def write_individual_csv_files(out_filename, data: dict[str, list[dict]]):
+def write_individual_csv_files(out_filename, data: dict[str, list[OMOPRecord]]):
     """ writes csv files to a folder "output", one folder up
     """
     for domain_id, records in data.items():

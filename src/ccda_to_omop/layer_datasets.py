@@ -16,7 +16,8 @@ import ccda_to_omop.data_driven_parse as DDP
 import ccda_to_omop.visit_reconciliation as VR
 import ccda_to_omop.value_transformations as VT
 import ccda_to_omop.util as U
-from ccda_to_omop.util import OMOPRecord
+from typing import Any
+from ccda_to_omop.util import OMOPRecord, CodemapDict
 from ccda_to_omop.ddl import sql_import_dict
 from ccda_to_omop.ddl import config_to_domain_name_dict
 from ccda_to_omop.ddl import domain_name_to_table_name
@@ -49,13 +50,13 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 logger = logging.getLogger(__name__)
 
 @typechecked
-def show_column_dict(config_name: str, column_dict: dict[str, list]) -> None:
+def show_column_dict(config_name: str, column_dict: dict[str, list[Any]]) -> None:
     """Print column names and lengths for a single config's column dict (debug helper)."""
     for key,val in column_dict.items():
         print(f"   config: {config_name}  key:{key} length(val):{len(val)}")
 
 
-def find_max_columns(config_name :str, domain_list: list[OMOPRecord | None]) -> dict[str, any]:
+def find_max_columns(config_name :str, domain_list: list[OMOPRecord | None]) -> OMOPRecord | None:
     """  Give a list of dictionaries, find the maximal set of columns that has the basic OMOP columns.
 
          Trying to deal with a list that may have dictionaries that lack certain fields.
@@ -250,7 +251,7 @@ def process_string(contents: str, filepath: str, write_csv_flag: bool) -> dict[s
 
 
 @typechecked
-def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, codemap_dict: dict, mspi_map_dict: dict | None, partner_map_dict: dict | None) -> dict[str, list[dict]]:
+def process_string_to_dict(contents: str, filepath: str, write_csv_flag: bool, codemap_dict: CodemapDict, mspi_map_dict: dict[str, int] | None, partner_map_dict: dict[str, int] | None) -> dict[str, list[OMOPRecord]]:
     """
         Processes an XML CCDA string, returns data as Python structures.
 
@@ -318,7 +319,7 @@ def process_file(filepath: str, write_csv_flag: bool, parse_config: str) -> dict
 
 
 @typechecked
-def dict_summary(my_dict: dict) -> None:
+def dict_summary(my_dict: dict[str, Any]) -> None:
     """Log the key names and row counts of a dict of lists."""
     for key in my_dict:
         logger.info(f"Summary {key} {len(my_dict[key])}")
