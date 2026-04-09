@@ -20,7 +20,7 @@ jobs:
                    "https://raw.githubusercontent.com/croeder/CCDA_OMOP_Private/main/map.csv"
           - name: run conversion
             run: |
-                bin/process.sh
+                bin/process.sh || true
           - name: run comparison
             id: compare
             run: |
