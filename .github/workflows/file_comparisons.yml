@@ -47,10 +47,10 @@ jobs:
                 errors=${{ steps.compare.outputs.errors }}
                 [ "$errors" -eq 0 ] && color="brightgreen" || color="red"
                 message="${matching}/${total} matching"
-                payload=$(python3 -c "
-import json
-content = json.dumps({'schemaVersion': 1, 'label': 'file comparisons', 'message': '$message', 'color': '$color'})
-print(json.dumps({'files': {'comparison-badge.json': {'content': content}}}))")
+                payload=$(jq -n \
+                  --arg msg "$message" \
+                  --arg color "$color" \
+                  '{files: {"comparison-badge.json": {content: ({schemaVersion: 1, label: "file comparisons", message: $msg, color: $color} | tojson)}}}')
                 curl -s -X PATCH \
                   -H "Authorization: token $GIST_TOKEN" \
                   -H "Content-Type: application/json" \
