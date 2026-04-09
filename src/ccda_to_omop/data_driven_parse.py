@@ -1091,7 +1091,7 @@ def write_individual_csv_files(out_filename, data: dict[str, list[OMOPRecord]]):
                 print(f"ERROR file:{out_filename} domain:{domain_id} {ve}")
                 raise
             except Exception as e: 
-                printf("ERROR {e}")
+                print(f"ERROR {e}")
                 raise
 
 # for argparse
