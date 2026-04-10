@@ -1089,7 +1089,7 @@ def write_individual_csv_files(out_file_path, data: dict[str, list[OMOPRecord]])
                 writer.writerows(records)
                 print(f"    done WRITING {out_file_path}")
             except ValueError as ve: 
-                print(f"ERROR file:{out_filename} domain:{domain_id} {ve}")
+                print(f"ERROR file:{out_file_path} domain:{domain_id} {ve}")
                 raise
             except Exception as e: 
                 print(f"ERROR {e}")
