@@ -19,7 +19,6 @@ from typing import Dict, Any
 """
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 
 # ***

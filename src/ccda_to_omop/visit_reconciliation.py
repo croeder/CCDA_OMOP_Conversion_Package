@@ -30,7 +30,6 @@ from ccda_to_omop.constants import INPATIENT_CONCEPT_IDS, MAX_PARENT_DURATION_DA
 from ccda_to_omop.util import OMOPRecord
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
 
 
 @typechecked

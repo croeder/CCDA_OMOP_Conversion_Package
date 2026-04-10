@@ -9,6 +9,7 @@ rm -f output/*
 
 # run the main conversion and compare
 cd src
-python3 -m ccda_to_omop.data_driven_parse -f ../resources/test_585.xml  -g Condition
+#python3 -m ccda_to_omop.data_driven_parse -f ../resources/test_585.xml  -g Condition
+python3 -m ccda_to_omop.data_driven_parse -f ../resources/test_585.xml  -g Visit
 
 

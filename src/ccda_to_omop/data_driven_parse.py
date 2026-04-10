@@ -91,7 +91,7 @@ from ccda_to_omop.constants import MAX_FIELD_LENGTH
 import re
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 DO_VISIT_DETAIL = False
 
