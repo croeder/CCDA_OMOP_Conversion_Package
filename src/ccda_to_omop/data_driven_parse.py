@@ -1074,19 +1074,20 @@ def write_all_csv_files(data: dict[str, list[OMOPRecord]]):
             writer.writeheader()
             writer.writerows(records)
 
-def write_individual_csv_files(out_filename, data: dict[str, list[OMOPRecord]]):
+def write_individual_csv_files(out_file_path, data: dict[str, list[OMOPRecord]]):
     """ writes csv files to a folder "output", one folder up
     """
     for domain_id, records in data.items():
         if not records:
             continue
-        with open(f"../output/{out_filename}__{domain_id}.csv", 'w', newline='') as f:
+        cfg_name = data[domain_id][0]['cfg_name']
+        with open(f"../{out_file_path}__{cfg_name}.csv", 'w', newline='') as f:
             try:
-                print(f"    WRITING {out_filename}_{domain_id}.csv len:{len(records)}")
+                print(f"    WRITING {out_file_path}_{domain_id}.csv len:{len(records)}")
                 writer = csv.DictWriter(f, fieldnames=records[0].keys())
                 writer.writeheader()
                 writer.writerows(records)
-                print(f"    done WRITING {out_filename}")
+                print(f"    done WRITING {out_file_path}")
             except ValueError as ve: 
                 print(f"ERROR file:{out_filename} domain:{domain_id} {ve}")
                 raise
@@ -1129,58 +1130,65 @@ def main() :
     codemap_dict = create_codemap_dict_from_csv(f"{home}/resources/map.csv")
     VT.set_codemap_dict(codemap_dict)
 
-    all_data_dict = defaultdict(list)
 
     if args.filename is not None:
-        process_file(args.filename, args.print_output)
+        base_name = os.path.basename(args.filename)
+        output_file_path  = os.path.join('output', base_name)
+        process_and_save_file(args.filename, output_file_path, args.print_output, args.write_individual_csvs, args.generate_all_output)
     elif args.directory is not None:
         only_files = [f for f in os.listdir(args.directory) if os.path.isfile(os.path.join(args.directory, f))]
         for file in (only_files):
-            if file.endswith(".xml"):
-                if False:  # placeholder for doing just one config or not
-                    print("n/a")
-                else:
-                    meta_dict = get_meta_dict()
-                    file_data_dict = {}
-                    for key in meta_dict.keys():
-                        omop_dict = process_file(os.path.join(args.directory, file), args.print_output, key)
-                        domain_id = meta_dict[key]['root']['expected_domain_id']
-                        rows = omop_dict[key]
-                        if rows is not None and len(rows) > 0:
-                            # all data
-                            if domain_id in all_data_dict:
-                                if all_data_dict[domain_id] is None:
-                                    all_data_dict[domain_id] = []
-                                all_data_dict[domain_id] = all_data_dict[domain_id].extend(rows)
+            base_name = os.path.basename(file)
+            input_file_path  = os.path.join(args.directory, base_name)
+            output_file_path  = os.path.join('output', base_name)
+            process_and_save_file(input_file_path,output_file_path, args.print_output, args.write_individual_csvs, args.generate_all_output)
 
-                            else:  # I thought this is why we have defaultdict(list) above
-                                all_data_dict[domain_id] = rows
 
-                            # just single file's data
-                            if domain_id not in file_data_dict or file_data_dict[domain_id] is None:
-                                file_data_dict[domain_id] = []
-                            file_data_dict[domain_id].extend(rows)
-                            print(f"WTF rows {domain_id} {len(rows)} ")
-                            print(f"WTF dict[domain]  {domain_id} {file_data_dict.keys()}")
+def process_and_save_file(input_file_path, output_file_path, print_output, write_individual_csvs, generate_all_output):
+    all_data_dict = defaultdict(list)
+    print(f"PROCESSING: {input_file_path}")
+    if input_file_path.endswith(".xml"):
+        meta_dict = get_meta_dict()
+        file_data_dict = {}
+        for key in meta_dict.keys():
+            omop_dict = process_file(input_file_path, print_output, key)
+            domain_id = meta_dict[key]['root']['expected_domain_id']
+            rows = omop_dict[key]
+            if rows is not None and len(rows) > 0:
+                # all data
+                if domain_id in all_data_dict:
+                    if all_data_dict[domain_id] is None:
+                        all_data_dict[domain_id] = []
+                    all_data_dict[domain_id] = all_data_dict[domain_id].extend(rows)
 
-                            print(f"INFO: key:{key} domain_id:{domain_id} rows:{len(omop_dict[key])}")
+                else:  # I thought this is why we have defaultdict(list) above
+                    all_data_dict[domain_id] = rows
 
-                            if args.write_individual_csvs:
-                                print(f"WRITING INDIVIDUAL len:{len(rows)}  {file}   {key}  {file_data_dict.keys()} {domain_id} ")
-                                for domain_key in file_data_dict.keys():
-                                    if domain_key in file_data_dict and file_data_dict[domain_key] is not None:
-                                        print(f"     {domain_key} {len(file_data_dict[domain_key])} WRITING")
-                                    else:
-                                        print(f"     BUST {domain_key}  WRITING")
-                                write_individual_csv_files(file, file_data_dict)
-                            else:
-                                print(f"no data for WRITING INDIVIDUAL {file}   {key} {len(rows)} {file_data_dict.keys()} {domain_id} ")
+                # just single file's data
+                if domain_id not in file_data_dict or file_data_dict[domain_id] is None:
+                    file_data_dict[domain_id] = []
+                file_data_dict[domain_id].extend(rows)
+                print(f"WTF rows {domain_id} {len(rows)} ")
+                print(f"WTF dict[domain]  {domain_id} {file_data_dict.keys()}")
+
+                print(f"INFO: key:{key} domain_id:{domain_id} rows:{len(omop_dict[key])}")
+
+                if write_individual_csvs:
+                    print(f"WRITING INDIVIDUAL len:{len(rows)}  {input_file_path}   {key}  {file_data_dict.keys()} {domain_id} ")
+                    for domain_key in file_data_dict.keys():
+                        if domain_key in file_data_dict and file_data_dict[domain_key] is not None:
+                            print(f"     {domain_key} {len(file_data_dict[domain_key])} WRITING")
                         else:
-                            print(f"WARNING: {key} has no data")
+                            print(f"     BUST {domain_key}  WRITING")
+                    write_individual_csv_files(output_file_path, file_data_dict)
+                else:
+                    print(f"no data for WRITING INDIVIDUAL {file}   {key} {len(rows)} {file_data_dict.keys()} {domain_id} ")
+            else:
+                print(f"WARNING: {key} has no data")
     else:
         logger.error("Did args parse let us  down? Have neither a file, nor a directory.")
 
-    if args.generate_all_output:
+    if generate_all_output:
         print("WRITE all ")
         write_all_csv_files(all_data_dict)
 
