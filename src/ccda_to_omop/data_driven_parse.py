@@ -1118,12 +1118,9 @@ def main() :
     parser.add_argument('-p', '--print_output',
             type=str2bool, const=True, default=True,  nargs="?",
             help="print out the output values, -p False to have it not print")
-    parser.add_argument('-c', '--write_individual_csvs', type=str2bool,
-            const=True, default=True, nargs="?",
-            help="write inidividual csv files")
-    parser.add_argument('-o', '--generate_all_output', type=str2bool,
-            const=True, default=True, nargs="?",
-            help="write csv files")
+    parser.add_argument('-g', '--config', type=str,
+             nargs="?",
+            help="use specific parse configuratoin name")
     args = parser.parse_args()
 
     home=pathlib.Path(__file__).parent.parent.parent.resolve()
@@ -1134,23 +1131,26 @@ def main() :
     if args.filename is not None:
         base_name = os.path.basename(args.filename)
         output_file_path  = os.path.join('output', base_name)
-        process_and_save_file(args.filename, output_file_path, args.print_output, args.write_individual_csvs, args.generate_all_output)
+        if args.config:
+            process_single_file_single_config(args.filename, output_file_path, args.print_output,  args.config)
+        else:
+            process_and_save_file(args.filename, output_file_path, args.print_output)
     elif args.directory is not None:
         only_files = [f for f in os.listdir(args.directory) if os.path.isfile(os.path.join(args.directory, f))]
         for file in (only_files):
             base_name = os.path.basename(file)
             input_file_path  = os.path.join(args.directory, base_name)
             output_file_path  = os.path.join('output', base_name)
-            process_and_save_file(input_file_path,output_file_path, args.print_output, args.write_individual_csvs, args.generate_all_output)
+            if args.config:
+                process_single_file_single_config(args.filename, output_file_path, args.print_output, args.config)
+            else:
+                process_and_save_file(input_file_path,output_file_path, args.print_output)
 
 
-def process_and_save_file(input_file_path, output_file_path, print_output, write_individual_csvs, generate_all_output):
-    all_data_dict = defaultdict(list)
-    print(f"PROCESSING: {input_file_path}")
-    if input_file_path.endswith(".xml"):
-        meta_dict = get_meta_dict()
-        file_data_dict = {}
-        for key in meta_dict.keys():
+def process_single_file_single_config(input_file_path, output_file_path, print_output, key):
+            file_data_dict = {}
+            meta_dict = get_meta_dict()
+            all_data_dict = defaultdict(list)
             omop_dict = process_file(input_file_path, print_output, key)
             domain_id = meta_dict[key]['root']['expected_domain_id']
             rows = omop_dict[key]
@@ -1173,24 +1173,26 @@ def process_and_save_file(input_file_path, output_file_path, print_output, write
 
                 print(f"INFO: key:{key} domain_id:{domain_id} rows:{len(omop_dict[key])}")
 
-                if write_individual_csvs:
-                    print(f"WRITING INDIVIDUAL len:{len(rows)}  {input_file_path}   {key}  {file_data_dict.keys()} {domain_id} ")
-                    for domain_key in file_data_dict.keys():
-                        if domain_key in file_data_dict and file_data_dict[domain_key] is not None:
-                            print(f"     {domain_key} {len(file_data_dict[domain_key])} WRITING")
-                        else:
-                            print(f"     BUST {domain_key}  WRITING")
-                    write_individual_csv_files(output_file_path, file_data_dict)
-                else:
-                    print(f"no data for WRITING INDIVIDUAL {file}   {key} {len(rows)} {file_data_dict.keys()} {domain_id} ")
+                print(f"WRITING INDIVIDUAL len:{len(rows)}  {input_file_path}   {key}  {file_data_dict.keys()} {domain_id} ")
+                for domain_key in file_data_dict.keys():
+                    if domain_key in file_data_dict and file_data_dict[domain_key] is not None:
+                        print(f"     {domain_key} {len(file_data_dict[domain_key])} WRITING")
+                    else:
+                        print(f"     BUST {domain_key}  WRITING")
+                write_individual_csv_files(output_file_path, file_data_dict)
             else:
                 print(f"WARNING: {key} has no data")
+
+
+def process_and_save_file(input_file_path, output_file_path, print_output):
+    meta_dict = get_meta_dict()
+    print(f"PROCESSING: {input_file_path}")
+    if input_file_path.endswith(".xml"):
+        for key in meta_dict.keys():
+            process_single_file_single_config(input_file_path, output_file_path, print_output, key)
     else:
         logger.error("Did args parse let us  down? Have neither a file, nor a directory.")
 
-    if generate_all_output:
-        print("WRITE all ")
-        write_all_csv_files(all_data_dict)
 
 
 if __name__ == '__main__':

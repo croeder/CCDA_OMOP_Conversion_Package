@@ -12,8 +12,6 @@ rm -f output/*
 
 # run the main conversion and compare
 cd src
-python3 -m ccda_to_omop.data_driven_parse -d ../resources 
+python3 -m ccda_to_omop.data_driven_parse -f ../resources/test_585.xml  
 
-# load into DuckDB for constraint errors
-## python3 -m omop.setup_omop
 
