@@ -1055,13 +1055,10 @@ def process_file(filepath :str, print_output: bool, parse_config :str):
 
     metadata = get_meta_dict()
 
-    print(f"    {filepath} parse_doc() ")
     omop_data = parse_doc(filepath, metadata, parse_config)
-    print(f"    {filepath} reconcile_visit()() ")
     VR.assign_visit_occurrence_ids_to_events(omop_data)
     VR.assign_visit_detail_ids_to_events(omop_data)
 
-    print(f"done PROCESSING {filepath} ")
     return omop_data
 
 def write_all_csv_files(data: dict[str, list[OMOPRecord]]):
@@ -1083,11 +1080,9 @@ def write_individual_csv_files(out_file_path, data: dict[str, list[OMOPRecord]])
         cfg_name = data[domain_id][0]['cfg_name']
         with open(f"../{out_file_path}__{cfg_name}.csv", 'w', newline='') as f:
             try:
-                print(f"    WRITING {out_file_path}_{domain_id}.csv len:{len(records)}")
                 writer = csv.DictWriter(f, fieldnames=records[0].keys())
                 writer.writeheader()
                 writer.writerows(records)
-                print(f"    done WRITING {out_file_path}")
             except ValueError as ve: 
                 print(f"ERROR file:{out_file_path} domain:{domain_id} {ve}")
                 raise
@@ -1168,8 +1163,6 @@ def process_single_file_single_config(input_file_path, output_file_path, print_o
                 if domain_id not in file_data_dict or file_data_dict[domain_id] is None:
                     file_data_dict[domain_id] = []
                 file_data_dict[domain_id].extend(rows)
-                print(f"WTF rows {domain_id} {len(rows)} ")
-                print(f"WTF dict[domain]  {domain_id} {file_data_dict.keys()}")
 
                 print(f"INFO: key:{key} domain_id:{domain_id} rows:{len(omop_dict[key])}")
 
