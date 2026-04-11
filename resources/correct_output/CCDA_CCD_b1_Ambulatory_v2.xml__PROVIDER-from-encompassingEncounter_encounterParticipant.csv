@@ -1,6 +1,2 @@
 provider_id,provider_name,npi,dea,specialty_concept_id,care_site_id,year_of_birth,gender_concept_id,provider_source_value,specialty_source_value,specialty_source_concept_id,gender_source_value,gender_source_concept_id,data_partner_id,filename,cfg_name
-3295431096837752,Henry|Seven,,,,1014281825791676,,,,,,,,,CCDA_CCD_b1_Ambulatory_v2.xml,PROVIDER-from-encompassingEncounter_encounterParti
-4428206052186291,Henry|Seven,,,,1014281825791676,,,,,,,,,CCDA_CCD_b1_Ambulatory_v2.xml,PROVIDER-from-encompassingEncounter_responsiblePar
-626096770566330,,,,,1014281825791676,,,,,,,,,CCDA_CCD_b1_Ambulatory_v2.xml,PROVIDER-from-encounter_performer_assignedEntity
-3992691966026025,Henry|Seven,PseudoMD-1,,,1014281825791676,,,,,,,,,CCDA_CCD_b1_Ambulatory_v2.xml,PROVIDER-from-serviceEvent_performer
-2789465355857086,Henry|Seven,PseudoMD-3,,,1014281825791676,,,,,,,,,CCDA_CCD_b1_Ambulatory_v2.xml,PROVIDER-from-serviceEvent_performer
+3295431096837752,Henry|Seven,,,,1014281825791676,,,,,,,,,CCDA_CCD_b1_Ambulatory_v2.xml,PROVIDER-from-encompassingEncounter_encounterParticipant

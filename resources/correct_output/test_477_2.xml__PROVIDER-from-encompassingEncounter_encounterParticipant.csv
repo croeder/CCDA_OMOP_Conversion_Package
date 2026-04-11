@@ -1,3 +1,2 @@
 provider_id,provider_name,npi,dea,specialty_concept_id,care_site_id,year_of_birth,gender_concept_id,provider_source_value,specialty_source_value,specialty_source_concept_id,gender_source_value,gender_source_concept_id,data_partner_id,filename,cfg_name
-2382595748689838,ARAME|MOTAZEDI,,,,1014281825791676,,,,,,,,,test_477_2.xml,PROVIDER-from-encompassingEncounter_encounterParti
-2382595748689838,ARAME|MOTAZEDI,,,,1014281825791676,,,,,,,,,test_477_2.xml,PROVIDER-from-encounter_performer_assignedEntity
+2382595748689838,ARAME|MOTAZEDI,,,,1014281825791676,,,,,,,,,test_477_2.xml,PROVIDER-from-encompassingEncounter_encounterParticipant

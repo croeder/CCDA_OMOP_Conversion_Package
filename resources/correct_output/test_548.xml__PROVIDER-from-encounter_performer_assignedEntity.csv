@@ -1,2 +1,4 @@
-provider_id,provider_name,npi,dea,specialty_concept_id,care_site_id,year_of_birth,gender_concept_id,provider_source_value,specialty_source_value,specialty_source_concept_id,gender_source_value,gender_source_concept_id,filename,cfg_name
-572741487201498,John|Smith,,,0,3720983147285715,,,,,,,,test_548.xml,Provider_encompassingEncounter
+provider_id,provider_name,npi,dea,specialty_concept_id,care_site_id,year_of_birth,gender_concept_id,provider_source_value,specialty_source_value,specialty_source_concept_id,gender_source_value,gender_source_concept_id,data_partner_id,filename,cfg_name
+2301588209453350,John|Smith,,,,3145341384234764,,,,,,,,,test_548.xml,PROVIDER-from-encounter_performer_assignedEntity
+2113330138060894,Adams|Smith,,,,1077557549249363,,,,,,,,,test_548.xml,PROVIDER-from-encounter_performer_assignedEntity
+1959881771360287,Brown|Smith,,,,2688593080725097,,,,,,,,,test_548.xml,PROVIDER-from-encounter_performer_assignedEntity

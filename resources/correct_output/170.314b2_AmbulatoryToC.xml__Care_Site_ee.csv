@@ -1,2 +1,2 @@
-care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,filename
-3720983147285715,0,0,2908688309907338,,,170.314b2_AmbulatoryToC.xml
+care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
+2747727116433373,,,3184517141420874,None|None|None|None|None|Get Well Clinic|Protland|OR|97005,,,170.314b2_AmbulatoryToC.xml,Care_Site_ee

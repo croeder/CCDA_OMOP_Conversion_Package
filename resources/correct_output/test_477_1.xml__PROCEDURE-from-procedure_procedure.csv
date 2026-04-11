@@ -1,2 +1,2 @@
-procedure_occurrence_id,person_id,procedure_concept_id,procedure_date,procedure_datetime,procedure_type_concept_id,modifier_concept_id,quantity,provider_id,visit_occurrence_id,visit_detail_id,procedure_source_value,procedure_source_concept_id,modifier_source_value,filename,cfg_name
-1829454458605839,1501606930159724,4198190,2013-11-03,2013-11-03,32817,,,-1,2491371535745561,,80146002|2.16.840.1.113883.6.96,4198190,,test_477_1.xml,Procedure_activity_procedure
+procedure_occurrence_id,person_id,procedure_concept_id,procedure_date,procedure_datetime,procedure_type_concept_id,modifier_concept_id,quantity,provider_id,visit_occurrence_id,visit_detail_id,procedure_source_value,procedure_source_concept_id,modifier_source_value,data_partner_id,filename,cfg_name
+2916789300930191,,4198190,2013-11-03,2013-11-03 00:00:00,32817,,,,,,80146002|2.16.840.1.113883.6.96,,,,test_477_1.xml,PROCEDURE-from-procedure_procedure

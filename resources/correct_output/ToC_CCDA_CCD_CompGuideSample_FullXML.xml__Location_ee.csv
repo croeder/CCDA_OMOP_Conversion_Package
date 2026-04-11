@@ -1,2 +1,2 @@
-location_id,address_1,address_2,city,state,zip,county,location_source_value,filename
-428843798293578,1400 Main Street Ste G,0,Springfield,VA,22150,0,0,ToC_CCDA_CCD_CompGuideSample_FullXML.xml
+location_id,address_1,address_2,city,state,zip,county,location_source_value,data_partner_id,filename,cfg_name
+539915745759579,1400 Main Street Ste G,,Springfield,VA,22150,,,,ToC_CCDA_CCD_CompGuideSample_FullXML.xml,Location_ee

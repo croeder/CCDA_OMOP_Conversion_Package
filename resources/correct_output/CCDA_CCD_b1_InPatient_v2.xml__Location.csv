@@ -1,3 +1,2 @@
 location_id,address_1,address_2,city,state,zip,county,location_source_value,data_partner_id,filename,cfg_name
 40437208747559,1357 Amber Drive,,Beaverton,OR,97006,,,,CCDA_CCD_b1_InPatient_v2.xml,Location
-1820708774233422,1002 Healthcare Dr,,Portland,OR,97266,,,,CCDA_CCD_b1_InPatient_v2.xml,Location_pr

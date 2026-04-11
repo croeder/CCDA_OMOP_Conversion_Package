@@ -1,2 +1,2 @@
-care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,filename
-2678648339528750,0,0,2956139368317343,2.16.840.1.113883.4.6,,CCDA_CCD_b1_Ambulatory_v2.xml
+care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
+2334105306417885,,,3264669127043930,2.16.840.1.113883.4.6|None|None|None|None|None|None|None|None,,,CCDA_CCD_b1_Ambulatory_v2.xml,Care_Site_ee

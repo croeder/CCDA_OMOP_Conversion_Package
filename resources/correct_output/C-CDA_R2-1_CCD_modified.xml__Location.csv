@@ -1,3 +1,2 @@
 location_id,address_1,address_2,city,state,zip,county,location_source_value,data_partner_id,filename,cfg_name
 4104571567668891,2222 Home Street,,Beaverton,OR,97867,,,,C-CDA_R2-1_CCD_modified.xml,Location
-4101535202204253,1007 Health Drive,,Portland,OR,99123,,,,C-CDA_R2-1_CCD_modified.xml,Location_pr

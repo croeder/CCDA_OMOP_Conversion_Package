@@ -1,2 +1,2 @@
-care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,filename,cfg_name
-463240307571943,,0,2956139368317343,50905|WARD-GENERAL,,test_566_2.xml,Care_Site_ee
+care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
+229931293508024,,,3264669127043930,50905|WARD-GENERAL|None|None|None|None|None|None|None,,,test_566_2.xml,Care_Site_ee
