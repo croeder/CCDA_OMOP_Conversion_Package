@@ -235,6 +235,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'DEVICE-from-medications_consumable',
+            'length': 100,
             'order':101
         }
     }

@@ -232,6 +232,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Device_organizer_supply',
+            'length': 100,
             'order':101
         }
     }

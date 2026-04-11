@@ -151,6 +151,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'PROCEDURE-from-encounter_encounter',
+            'length': 100,
             'order':101
         }
     }

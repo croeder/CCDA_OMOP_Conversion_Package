@@ -528,6 +528,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Visit',
+            'length': 100,
             'order':101
         }
     }

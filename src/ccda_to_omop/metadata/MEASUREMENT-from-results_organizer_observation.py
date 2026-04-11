@@ -316,6 +316,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'MEASUREMENT-from-results_organizer_observation',
+            'length': 100,
             'order':101
         }
     }

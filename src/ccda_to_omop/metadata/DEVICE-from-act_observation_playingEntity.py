@@ -233,7 +233,8 @@ metadata = {
     'cfg_name': {
         'config_type': 'CONSTANT',
         'constant_value': 'DEVICE-from-act_observation_playingEntity',
-        'order': 101
+            'length': 100,
+            'order': 101
     }
 }
 }

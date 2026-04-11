@@ -153,6 +153,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'PROCEDURE-from-results_procedure',
+            'length': 100,
             'order':101
         }
     }

@@ -153,6 +153,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'PROCEDURE-from-Immunization_manufactured_material',
+            'length': 100,
             'order':101
         }
     }

@@ -167,6 +167,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'PROVIDER-from-encompassingEncounter_responsibleParty',
+            'length': 100,
             'order':101
         }
     },

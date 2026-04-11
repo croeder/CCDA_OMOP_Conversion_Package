@@ -178,6 +178,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Device_procedure',
+            'length': 100,
             'order':101
         }
     }

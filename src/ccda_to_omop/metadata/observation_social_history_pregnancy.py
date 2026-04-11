@@ -184,6 +184,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Observation_social_history_pregnancy',
+            'length': 100,
             'order':101
         }
     }

@@ -375,6 +375,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Immunization_immunization_activity',
+            'length': 100,
             'order':101
         }
 

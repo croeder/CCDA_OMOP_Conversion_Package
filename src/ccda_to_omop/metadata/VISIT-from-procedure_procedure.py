@@ -458,6 +458,7 @@ not_running_this_one = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'VISIT-from-procedure_procedure',
+            'length': 100,
             'order':101
          }
     }

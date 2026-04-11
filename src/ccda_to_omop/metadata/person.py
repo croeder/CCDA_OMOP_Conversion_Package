@@ -362,6 +362,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Person',
+            'length': 100,
             'order':101
         }
 

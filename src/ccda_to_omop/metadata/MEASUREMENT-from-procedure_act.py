@@ -303,6 +303,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'MEASUREMENT-from-procedure_act',
+            'length': 100,
             'order':101
         }
     }

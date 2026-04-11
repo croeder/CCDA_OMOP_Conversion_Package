@@ -193,7 +193,8 @@ metadata = {
     'cfg_name': {
         'config_type': 'CONSTANT',
         'constant_value': 'DEVICE-from-procedures',
-        'order': 101
+            'length': 100,
+            'order': 101
     }
 }
 }

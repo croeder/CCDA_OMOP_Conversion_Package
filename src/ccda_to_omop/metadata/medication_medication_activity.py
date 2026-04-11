@@ -379,6 +379,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Medication_medication_activity',
+            'length': 100,
             'order':101
         }
     }

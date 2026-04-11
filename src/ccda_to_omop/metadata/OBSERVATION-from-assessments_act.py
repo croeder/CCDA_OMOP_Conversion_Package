@@ -227,6 +227,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'OBSERVATION-from-assessments_act',
+            'length': 100,
             'order':101
         }
     }

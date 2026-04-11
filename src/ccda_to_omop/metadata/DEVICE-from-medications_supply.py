@@ -229,7 +229,8 @@ metadata = {
     'cfg_name': {
         'config_type': 'CONSTANT',
         'constant_value': 'DEVICE-from-medications_supply',
-        'order': 101
+            'length': 100,
+            'order': 101
     }
 }
 }

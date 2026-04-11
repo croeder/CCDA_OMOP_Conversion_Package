@@ -173,6 +173,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'PROVIDER-from-encounter_performer_assignedEntity',
+            'length': 100,
             'order':101
         }
     },

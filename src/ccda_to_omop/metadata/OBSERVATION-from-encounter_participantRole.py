@@ -244,6 +244,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'OBSERVATION-from-Encounter_participantRole',
+            'length': 100,
             'order': 101
         }
     }

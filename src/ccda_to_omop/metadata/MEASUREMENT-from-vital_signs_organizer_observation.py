@@ -314,6 +314,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'MEASUREMENT-from-vital_signs_organizer_observation',
+            'length': 100,
             'order':101
         }
     }

@@ -242,6 +242,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'OBSERVATION-from-Procedure',
+            'length': 100,
             'order':101
         }
     }

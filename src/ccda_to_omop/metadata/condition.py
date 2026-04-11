@@ -188,6 +188,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Condition',
+            'length': 100,
             'order':101
         }
 

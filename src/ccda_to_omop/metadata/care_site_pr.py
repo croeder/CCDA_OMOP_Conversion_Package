@@ -128,6 +128,7 @@ metadata = {
         'cfg_name': {
             'config_type': 'CONSTANT',
             'constant_value': 'Care_Site_pr',
+            'length': 100,
             'order': 101
         }
     }

@@ -62,6 +62,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'Location_pr',
+            'length': 100,
             'order':101
         }
 

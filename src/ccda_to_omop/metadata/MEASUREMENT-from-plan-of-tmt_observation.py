@@ -313,6 +313,7 @@ metadata = {
         'cfg_name' : {
             'config_type': 'CONSTANT',
             'constant_value': 'MEASUREMENT-from-plan-of-tmt_observation',
+            'length': 100,
             'order':101
         }
     }
