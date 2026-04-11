@@ -1,0 +1,3 @@
+device_exposure_id,person_id,device_concept_id,device_exposure_start_date,device_exposure_start_datetime,device_exposure_end_date,device_exposure_end_datetime,device_type_concept_id,unique_device_id,quantity,provider_id,visit_occurrence_id,visit_detail_id,device_source_value,device_source_concept_id,data_partner_id,filename,cfg_name
+2499428697733626,,4030875,2007-01-03,2007-01-03 00:00:00,2013-07-03,2013-07-03 23:59:59,32817,,,,,,14106009|2.16.840.1.113883.6.96,,,C-CDA_R2-1_CCD_modified.xml,Device_organizer_supply
+3681256052695598,,4123620,2007-01-03,2007-01-03 00:00:00,2013-01-03,2013-01-03 23:59:59,32817,,,,,,303406003|2.16.840.1.113883.6.96,,,C-CDA_R2-1_CCD_modified.xml,Device_organizer_supply

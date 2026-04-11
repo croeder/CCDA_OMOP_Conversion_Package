@@ -1,0 +1,8 @@
+observation_id,person_id,observation_concept_id,observation_date,observation_datetime,observation_type_concept_id,value_as_number,value_as_string,value_as_concept_id,qualifier_concept_id,unit_concept_id,provider_id,visit_occurrence_id,visit_detail_id,observation_source_value,observation_source_concept_id,unit_source_value,qualifier_source_value,data_partner_id,filename,cfg_name
+3783773185819298,,,,,32827,,,,,,,,,1160-1|2.16.840.1.113883.6.259|None|None|None|None,,,,,bennis_shauna_ccda.xml,OBSERVATION-from-Encounter_participantRole
+1746527159198318,,,,,32827,,,,,,,,,1160-1|2.16.840.1.113883.6.259|None|None|None|None,,,,,bennis_shauna_ccda.xml,OBSERVATION-from-Encounter_participantRole
+4081350998044761,,,,,32827,,,,,,,,,1160-1|2.16.840.1.113883.6.259|None|None|None|None,,,,,bennis_shauna_ccda.xml,OBSERVATION-from-Encounter_participantRole
+4043787031573662,,,,,32827,,,,,,,,,1160-1|2.16.840.1.113883.6.259|None|None|None|None,,,,,bennis_shauna_ccda.xml,OBSERVATION-from-Encounter_participantRole
+1531499514491538,,,,,32827,,,,,,,,,1160-1|2.16.840.1.113883.6.259|None|None|None|None,,,,,bennis_shauna_ccda.xml,OBSERVATION-from-Encounter_participantRole
+208828547651573,,,,,32827,,,,,,,,,1108-0|2.16.840.1.113883.6.259|None|None|None|None,,,,,bennis_shauna_ccda.xml,OBSERVATION-from-Encounter_participantRole
+1483977956457253,,,,,32827,,,,,,,,,1160-1|2.16.840.1.113883.6.259|None|None|None|None,,,,,bennis_shauna_ccda.xml,OBSERVATION-from-Encounter_participantRole
