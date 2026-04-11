@@ -1,2 +1,0 @@
-care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
-3780067461355015,Good Health Urgent Care,,4101535202204253,None|None|Good Health Urgent Care|1160-1|2.16.840.1.113883.6.259|1007 Health Drive|Portland|OR|99123,1160-1|2.16.840.1.113883.6.259,,bare_minimum_procedure_encounters.xml,Care_Site_pr

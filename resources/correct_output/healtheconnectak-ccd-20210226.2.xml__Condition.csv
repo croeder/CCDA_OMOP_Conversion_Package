@@ -1,2 +1,0 @@
-condition_occurrence_id,person_id,condition_concept_id,condition_start_date,condition_start_datetime,condition_end_date,condition_end_datetime,condition_type_concept_id,condition_status_concept_id,stop_reason,provider_id,visit_occurrence_id,visit_detail_id,condition_source_value,condition_source_concept_id,condition_status_source_value,filename
-1453840788772510,456998014301909,0,2021-02-26,2021-02-26 08:46:22,,,32840,0,,252249330182120,0,0,55607006|2.16.840.1.113883.6.96,0,,healtheconnectak-ccd-20210226.2.xml
