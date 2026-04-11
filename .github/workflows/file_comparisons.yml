@@ -17,7 +17,7 @@ jobs:
               wget --header="Authorization: token ${{ secrets.CROEDER_CCDA_PRIVATE_ACCESS_TOKEN }}" \
                    --header="Accept: */*" \
                    -O resources/map.csv \
-                   "https://raw.githubusercontent.com/chrisroederucdenver/CCDA_OMOP_Private/main/map.csv"
+                   "https://raw.githubusercontent.com/croeder/CCDA_OMOP_Private/main/map.csv"
           - name: run conversion
             run: |
                 bin/process.sh || true
