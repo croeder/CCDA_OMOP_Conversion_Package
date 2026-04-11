@@ -1,3 +1,0 @@
-provider_id,provider_name,npi,dea,specialty_concept_id,care_site_id,year_of_birth,gender_concept_id,provider_source_value,specialty_source_value,specialty_source_concept_id,gender_source_value,gender_source_concept_id,data_partner_id,filename,cfg_name
-2156440391986209,Wilma|Colon,,,,1289372299681959,,,,,,,,,CCD-Sample.xml,PROVIDER-from-encounter_performer_assignedEntity
-214113783016517,Wilma|Colon,811111111,,,1014281825791676,,,,,,,,,CCD-Sample.xml,PROVIDER-from-serviceEvent_performer

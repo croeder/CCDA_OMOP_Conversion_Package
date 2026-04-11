@@ -1,5 +1,0 @@
-care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
-2959961021033729,,,3264669127043930,50905|1.2.840.114350.1.13.297.2.7.2.686980.509050001|None|None|None|None|None|None|None,,,test_548.xml,Care_Site_ee
-2959961021033729,,,3264669127043930,50905|1.2.840.114350.1.13.297.2.7.2.686980.509050001|None|None|None|None|None|None|None,,,test_548.xml,Care_Site_pr
-1137686747120405,,,3264669127043930,99999|1.2.840.114350.1.13.297.2.7.2.999999.888880001|None|None|None|None|None|None|None,,,test_548.xml,Care_Site_pr
-502700325438367,,,3264669127043930,88888|1.2.840.114350.1.13.297.2.7.2.999999.888880001|None|None|None|None|None|None|None,,,test_548.xml,Care_Site_pr

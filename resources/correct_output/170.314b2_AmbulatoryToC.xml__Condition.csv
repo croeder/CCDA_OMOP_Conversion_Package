@@ -1,3 +1,3 @@
-condition_occurrence_id,person_id,condition_concept_id,condition_start_date,condition_start_datetime,condition_end_date,condition_end_datetime,condition_type_concept_id,condition_status_concept_id,stop_reason,provider_id,visit_occurrence_id,visit_detail_id,condition_source_value,condition_source_concept_id,condition_status_source_value,filename
-456789042505560,2159604423394899,0,2012-08-15,2012-08-15,,,32840,0,,-1,-1,0,64109004|2.16.840.1.113883.6.96,0,,170.314b2_AmbulatoryToC.xml
-4314994354211243,2159604423394899,0,2011-09-25,2011-09-25,,,32840,0,,-1,-1,0,195967001|2.16.840.1.113883.6.96,0,,170.314b2_AmbulatoryToC.xml
+condition_occurrence_id,person_id,condition_concept_id,condition_start_date,condition_start_datetime,condition_end_date,condition_end_datetime,condition_type_concept_id,condition_status_concept_id,stop_reason,provider_id,visit_occurrence_id,visit_detail_id,condition_source_value,condition_source_concept_id,condition_status_source_value,data_partner_id,filename,cfg_name
+4435390680008183,,4016982,2012-08-15,2012-08-15 00:00:00,,,32840,,,,,,64109004|2.16.840.1.113883.6.96,,,,170.314b2_AmbulatoryToC.xml,Condition
+1547220102563679,,317009,2011-09-25,2011-09-25 00:00:00,,,32840,,,,,,195967001|2.16.840.1.113883.6.96,,,,170.314b2_AmbulatoryToC.xml,Condition
