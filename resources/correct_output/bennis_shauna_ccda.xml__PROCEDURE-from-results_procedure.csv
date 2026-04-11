@@ -1,0 +1,2 @@
+procedure_occurrence_id,person_id,procedure_concept_id,procedure_date,procedure_datetime,procedure_type_concept_id,modifier_concept_id,quantity,provider_id,visit_occurrence_id,visit_detail_id,procedure_source_value,procedure_source_concept_id,modifier_source_value,data_partner_id,filename,cfg_name
+1884607597712220,,3049950,2018-09-10,2018-09-10 11:22:56,32817,,,,,,,,,,bennis_shauna_ccda.xml,PROCEDURE-from-results_procedure

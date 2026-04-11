@@ -1,0 +1,2 @@
+device_exposure_id,person_id,device_concept_id,device_exposure_start_date,device_exposure_start_datetime,device_exposure_end_date,device_exposure_end_datetime,device_type_concept_id,unique_device_id,quantity,provider_id,visit_occurrence_id,visit_detail_id,device_source_value,device_source_concept_id,data_partner_id,filename,cfg_name
+82592598079203,,4038538,2013-05-12,2013-05-12 00:00:00,,,32817,(01)00848486001048(11)181015(10)ABC999(21)bi123422,,,,,2282003|2.16.840.1.113883.6.96,,,bare_minimum-observation_encounters.xml,Device_procedure
