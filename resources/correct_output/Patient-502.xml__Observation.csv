@@ -1,5 +1,0 @@
-observation_id,person_id,observation_concept_id,observation_date,observation_datetime,observation_type_concept_id,value_as_string,value_as_number,value_as_concept_id,qualifier_concept_id,unit_concept_id,provider_id,visit_occurrence_id,visit_detail_id,observation_source_value,observation_source_concept_id,unit_source_value,qualifier_source_value,filename
-4041728465362252,727979791772240,0,2010-04-14,2010-04-14 10:00:00,32827,0,55.0,0,0,0,0,2891623856154548,0,14646-4|2.16.840.1.113883.6.1,0,,,Patient-502.xml
-192090969268352,727979791772240,0,2010-04-14,2010-04-14 10:00:00,32827,0,153.0,0,0,0,0,2891623856154548,0,2089-1|2.16.840.1.113883.6.1,0,,,Patient-502.xml
-3508468129667978,727979791772240,0,2010-04-14,2010-04-14 10:00:00,32827,0,240.0,0,0,0,0,2891623856154548,0,2093-3|2.16.840.1.113883.6.1,0,,,Patient-502.xml
-1586682893419682,727979791772240,0,2010-04-14,2010-04-14 10:00:00,32827,0,160.0,0,0,0,0,2891623856154548,0,12951-0|2.16.840.1.113883.6.1,0,,,Patient-502.xml

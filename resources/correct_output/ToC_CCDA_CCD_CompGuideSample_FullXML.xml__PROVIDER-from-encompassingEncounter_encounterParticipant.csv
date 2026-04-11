@@ -1,4 +1,0 @@
-provider_id,provider_name,npi,dea,specialty_concept_id,care_site_id,year_of_birth,gender_concept_id,provider_source_value,specialty_source_value,specialty_source_concept_id,gender_source_value,gender_source_concept_id,data_partner_id,filename,cfg_name
-1129217627437228,Raymond|Boccino,12345,,,1014281825791676,,,,,,,,,ToC_CCDA_CCD_CompGuideSample_FullXML.xml,PROVIDER-from-encompassingEncounter_responsiblePar
-1983573694460112,Dwayne|Forge,34567,,,1014281825791676,,,,,,,,,ToC_CCDA_CCD_CompGuideSample_FullXML.xml,PROVIDER-from-serviceEvent_performer
-1906507312903342,Raymond|Boccino,12345,,,1014281825791676,,,,,,,,,ToC_CCDA_CCD_CompGuideSample_FullXML.xml,PROVIDER-from-serviceEvent_performer

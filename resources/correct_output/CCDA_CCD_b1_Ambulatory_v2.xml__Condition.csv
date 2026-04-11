@@ -1,3 +1,3 @@
-condition_occurrence_id,person_id,condition_concept_id,condition_start_date,condition_start_datetime,condition_end_date,condition_end_datetime,condition_type_concept_id,condition_status_concept_id,stop_reason,provider_id,visit_occurrence_id,visit_detail_id,condition_source_value,condition_source_concept_id,condition_status_source_value,filename
-336095683238992,2816544795221811,0,2012-08-06,2012-08-06,,,32840,0,,-1,207030484719751,0,233604007|2.16.840.1.113883.6.96,0,,CCDA_CCD_b1_Ambulatory_v2.xml
-4294535460244835,2816544795221811,0,2007-01-03,2007-01-03,,,32840,0,,-1,-1,0,195967001|2.16.840.1.113883.6.96,0,,CCDA_CCD_b1_Ambulatory_v2.xml
+condition_occurrence_id,person_id,condition_concept_id,condition_start_date,condition_start_datetime,condition_end_date,condition_end_datetime,condition_type_concept_id,condition_status_concept_id,stop_reason,provider_id,visit_occurrence_id,visit_detail_id,condition_source_value,condition_source_concept_id,condition_status_source_value,data_partner_id,filename,cfg_name
+385853654048538,,4214956,2012-08-06,2012-08-06 00:00:00,,,32840,,,,,,233604007|2.16.840.1.113883.6.96,,,,CCDA_CCD_b1_Ambulatory_v2.xml,Condition
+1260659914263267,,317009,2007-01-03,2007-01-03 00:00:00,,,32840,,,,,,195967001|2.16.840.1.113883.6.96,,,,CCDA_CCD_b1_Ambulatory_v2.xml,Condition

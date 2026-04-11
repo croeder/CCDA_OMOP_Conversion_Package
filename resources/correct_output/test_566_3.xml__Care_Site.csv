@@ -1,5 +1,0 @@
-care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
-229931293508024,,,3264669127043930,50905|WARD-GENERAL|None|None|None|None|None|None|None,,,test_566_3.xml,Care_Site_ee
-229931293508024,,,3264669127043930,50905|WARD-GENERAL|None|None|None|None|None|None|None,,,test_566_3.xml,Care_Site_pr
-1713158912523050,,,3264669127043930,50905|WARD-ICU|None|None|None|None|None|None|None,,,test_566_3.xml,Care_Site_pr
-519528094760147,,,3264669127043930,50905|WARD-SURGERY|None|None|None|None|None|None|None,,,test_566_3.xml,Care_Site_pr

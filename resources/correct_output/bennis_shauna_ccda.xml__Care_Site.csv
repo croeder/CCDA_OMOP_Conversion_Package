@@ -1,8 +1,0 @@
-care_site_id,care_site_name,place_of_service_concept_id,location_id,care_site_source_value,place_of_service_source_value,data_partner_id,filename,cfg_name
-4033589736099280,Anthem,,3264669127043930,ANTHEM|UNK|Anthem|1160-1|2.16.840.1.113883.6.259|None|None|None|None,1160-1|2.16.840.1.113883.6.259,,bennis_shauna_ccda.xml,Care_Site_pr
-3245054767819126,BlueShield,,3264669127043930,BSC|UNK|BlueShield|1160-1|2.16.840.1.113883.6.259|None|None|None|None,1160-1|2.16.840.1.113883.6.259,,bennis_shauna_ccda.xml,Care_Site_pr
-1291251410293001,Family HealthCare Network,,3264669127043930,2.16.840.1.113883.3.7732.100.3.13|None|Family HealthCare Network|1160-1|2.16.840.1.113883.6.259|None|None|None|None,1160-1|2.16.840.1.113883.6.259,,bennis_shauna_ccda.xml,Care_Site_pr
-3709316769504386,Hemet Valley Medical Center,,3264669127043930,2.16.840.1.113883.3.7732.100.3.29|ED|Hemet Valley Medical Center|1160-1|2.16.840.1.113883.6.259|None|None|None|None,1160-1|2.16.840.1.113883.6.259,,bennis_shauna_ccda.xml,Care_Site_pr
-2602947423883123,Family HealthCare Network,,3264669127043930,2.16.840.1.113883.3.7732.100.3.13|FHCN|Family HealthCare Network|1160-1|2.16.840.1.113883.6.259|None|None|None|None,1160-1|2.16.840.1.113883.6.259,,bennis_shauna_ccda.xml,Care_Site_pr
-2188118757181365,Hemet Valley Medical Center,,3264669127043930,2.16.840.1.113883.3.7732.100.3.29|None|Hemet Valley Medical Center|1108-0|2.16.840.1.113883.6.259|None|None|None|None,1108-0|2.16.840.1.113883.6.259,,bennis_shauna_ccda.xml,Care_Site_pr
-2884867240210212,Hemet Valley Medical Center,,3264669127043930,2.16.840.1.113883.3.7732.100.3.29|None|Hemet Valley Medical Center|1160-1|2.16.840.1.113883.6.259|None|None|None|None,1160-1|2.16.840.1.113883.6.259,,bennis_shauna_ccda.xml,Care_Site_pr
