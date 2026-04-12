@@ -9,4 +9,5 @@ Converts `C-CDA <https://www.hl7.org/ccdasearch/>`_ XML documents into
    :caption: Contents
 
    overview
+   metadata/index
    api/modules

@@ -27,6 +27,9 @@ jobs:
           pip install sphinx sphinx-rtd-theme
           pip install -r requirements.txt
 
+      - name: Generate metadata config docs
+        run: python docs/gen_metadata_docs.py
+
       - name: Regenerate API stubs
         run: |
           sphinx-apidoc \
