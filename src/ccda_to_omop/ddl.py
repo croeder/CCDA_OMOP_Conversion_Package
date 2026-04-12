@@ -1,15 +1,14 @@
-""" setup_omop
-    Initiates an in-memory instance of DuckDB, reads in the OMOP DDL,
-    and reads in any data provided.
+"""
+OMOP table definitions and domain routing maps.
 
-    For now, it's useful to see issues regarding  PK presence and uniqueness, datatypes..
+Provides three key dictionaries used to route parsed records to the correct
+output table:
 
-    TODO: This includes abuse of the OMOP DDL.  Better solutions  include
-    - better metadata so the resulting dataset and CSV look like OMOP
-    - a second stage here that modifies the resulting datasets to look more
-      like OMOP
-    - some compromise means getting a handle on how narrow the CSV can be
-      compared to OMOP. Can you leave out unused nullable fields?
+- ``config_to_domain_name_dict``: maps metadata config names (e.g. ``"Condition"``)
+  to OMOP domain names (e.g. ``"Condition"``)
+- ``domain_name_to_table_name``: maps OMOP domain names to CDM table names
+  (e.g. ``"Condition"`` → ``"condition_occurrence"``)
+- Column lists for each OMOP table, used to align DataFrame output to the CDM schema
 """
 
 import os

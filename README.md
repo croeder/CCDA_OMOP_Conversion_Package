@@ -19,6 +19,31 @@ This is a project to convert CCDA documents to OMOP CDM format in Python.
 
 Converts [C-CDA](https://www.hl7.org/ccdasearch/) (Consolidated Clinical Document Architecture) XML documents into [OMOP CDM](https://ohdsi.github.io/CommonDataModel/) tabular records. The conversion is driven by a metadata configuration layer so that new OMOP domains can be added without changing the core parsing engine.
 
+## Concept map (map.csv)
+
+The conversion requires a vocabulary cross-walk file `resources/map.csv` that maps
+source codes (ICD-10, SNOMED, LOINC, etc., identified by OID) to OMOP concept IDs.
+This file is not included in the repo because it is derived from licensed OMOP vocabulary data.
+
+**For evaluation and testing**, a stub file `resources/map_stub.csv` is included.
+It contains every `(OID, code)` pair that appears in the sample XML files in
+`resources/`, but leaves `target_concept_id` and `source_concept_id` as `0` and
+sets `target_domain` to `Observation` for all rows. This is enough to run the
+conversion without errors, but concept ID lookups will return 0 and domain routing
+will not be accurate — records may land in the wrong OMOP table.
+
+To use the stub:
+```bash
+cp resources/map_stub.csv resources/map.csv
+```
+
+To use a full vocabulary map, populate `resources/map.csv` with the schema:
+```
+OID, code, codeSystem, target_id, target_domain, source_concept_id
+```
+where `OID` is the vocabulary OID, `target_id` is the OMOP `concept_id`, and
+`target_domain` is the OMOP domain name (e.g. `Condition`, `Measurement`).
+
 ## Installation
 
 ```bash
@@ -27,6 +52,7 @@ cd CCDA_OMOP_Conversion_Package
 python -m venv env
 source env/bin/activate
 pip install -r requirements.txt
+cp resources/map_stub.csv resources/map.csv   # or supply a full vocabulary map
 ```
 
 ## Basic usage
@@ -73,10 +99,14 @@ Key modules:
 
 ## Adding a new OMOP domain mapping
 
-1. Create a new file in `src/ccda_to_omop/metadata/` following the naming convention `DOMAIN-from-section_name.py`.
-2. Define a `config` dict with `root`, `fields`, and optionally `pk`, `derived`, and `domain` sections. Use an existing metadata file as a template.
-3. Register the new config in `src/ccda_to_omop/metadata/__init__.py`.
-4. Run the conversion and compare against expected output with `bash bin/compare_correct.sh`.
+1. Copy `src/ccda_to_omop/metadata/TEMPLATE.py` to a new file following the naming
+   convention `DOMAIN-from-section_name.py` (e.g. `CONDITION-from-problems.py`).
+   See `src/ccda_to_omop/metadata/condition.py` for the simplest real-world example.
+2. Fill in the root XPath and field mappings. The template file is annotated with
+   comments explaining each `config_type`. See also the
+   [Field Types reference](https://croeder.github.io/CCDA_OMOP_Conversion_Package/field_types.html)
+   in the generated docs.
+3. Run the conversion and compare against expected output with `bash bin/compare_correct.sh`.
 
 ## Running the tests
 
