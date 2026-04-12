@@ -1,15 +1,18 @@
 """
-Generate RST documentation for all parse configuration files in metadata/.
+Generate RST documentation from metadata configs and data_driven_parse.py.
 
-Loads each file via exec() (works for hyphenated filenames that can't be
-imported as modules), reads the metadata dict, and writes:
-  - docs/metadata/<config_name>.rst  — one page per config
-  - docs/metadata/index.rst          — index listing all configs
+Writes:
+  - docs/metadata/<config_name>.rst  — one page per parse config
+  - docs/metadata/index.rst          — index of all configs
+  - docs/field_types.rst             — one section per do_* function in
+                                       data_driven_parse, documenting each
+                                       config_type from its docstring
 
 Run before sphinx-build:
     python docs/gen_metadata_docs.py
 """
 
+import inspect
 import os
 import sys
 import pathlib
@@ -174,6 +177,59 @@ def generate_config_rst(config_name: str, config: dict, source_file: str) -> str
     return "\n".join(lines)
 
 
+# Map do_* function name → the config_type string it handles (for the section heading)
+_FN_TO_CONFIG_TYPE = {
+    "do_none_fields":         "None",
+    "do_constant_fields":     "CONSTANT",
+    "do_filename_fields":     "FILENAME",
+    "do_basic_fields":        "FIELD",
+    "do_foreign_key_fields":  "FK",
+    "do_derived_fields":      "DERIVED",
+    "do_derived2_fields":     "DERIVED2",
+    "do_hash_fields":         "HASH",
+    "do_priority_fields":     "PRIORITY",
+}
+
+
+def generate_field_types_rst() -> str:
+    """Return RST content documenting each config_type from its do_* function docstring."""
+    src_path = str(REPO_ROOT / "src")
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+    # Temporarily remove our stubs so the real package can be imported
+    saved_stubs = {k: sys.modules.pop(k) for k in list(_STUBS) if k in sys.modules}
+    try:
+        import ccda_to_omop.data_driven_parse as ddp
+    finally:
+        sys.modules.update(saved_stubs)
+
+    lines = [
+        _rst_title("Field Types (config_type reference)"),
+        "Each field in a parse configuration has a ``config_type`` that controls how\n"
+        "the parser populates it. The behaviour of each type is implemented in\n"
+        "``data_driven_parse.py`` by a corresponding ``do_*`` function.\n",
+    ]
+
+    fns = [
+        (name, fn)
+        for name, fn in inspect.getmembers(ddp, inspect.isfunction)
+        if name.startswith("do_")
+    ]
+    # Sort by source line so the page follows execution order
+    fns.sort(key=lambda nf: inspect.getsourcelines(nf[1])[1])
+
+    for fn_name, fn in fns:
+        config_type = _FN_TO_CONFIG_TYPE.get(fn_name, fn_name)
+        doc = inspect.getdoc(fn) or "(no docstring)"
+
+        lines.append(_rst_title(config_type, "-"))
+        lines.append(f"*Implemented by:* ``{fn_name}()``\n")
+        lines.append(doc + "\n")
+
+    return "\n".join(lines)
+
+
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -214,6 +270,11 @@ def main():
 
     (OUT_DIR / "index.rst").write_text("\n".join(index_lines))
     print(f"  wrote metadata/index.rst ({len(generated)} configs)")
+
+    # Field types page
+    field_types_path = pathlib.Path(__file__).parent / "field_types.rst"
+    field_types_path.write_text(generate_field_types_rst())
+    print(f"  wrote field_types.rst")
 
 
 if __name__ == "__main__":
