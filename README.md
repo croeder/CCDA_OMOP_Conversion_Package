@@ -153,3 +153,11 @@ Regenerate with:
 ```
 
 Commit the updated lock files alongside any dependency changes.
+
+## License
+
+Copyright (c) 2024, 2025, 2026 UNC Chapel Hill; 2026 Chris Roeder.
+
+This project is licensed under the [MIT License](LICENSE).
+
+Third-party dependency licenses are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
