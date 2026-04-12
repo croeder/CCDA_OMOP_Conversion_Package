@@ -1,0 +1,479 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ccda_to_omop.ddl &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">ccda_to_omop</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ccda_to_omop.ddl</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ccda_to_omop.ddl</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; setup_omop</span>
+<span class="sd">    Initiates an in-memory instance of DuckDB, reads in the OMOP DDL,</span>
+<span class="sd">    and reads in any data provided.</span>
+
+<span class="sd">    For now, it&#39;s useful to see issues regarding  PK presence and uniqueness, datatypes..</span>
+
+<span class="sd">    TODO: This includes abuse of the OMOP DDL.  Better solutions  include</span>
+<span class="sd">    - better metadata so the resulting dataset and CSV look like OMOP</span>
+<span class="sd">    - a second stage here that modifies the resulting datasets to look more</span>
+<span class="sd">      like OMOP</span>
+<span class="sd">    - some compromise means getting a handle on how narrow the CSV can be</span>
+<span class="sd">      compared to OMOP. Can you leave out unused nullable fields?</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib.util</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+
+<span class="n">METADATA_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;metadata&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="generate_cfg_name_to_domain_map">
+<a class="viewcode-back" href="../../api/ccda_to_omop.ddl.html#ccda_to_omop.ddl.generate_cfg_name_to_domain_map">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_cfg_name_to_domain_map</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dict[table_name] --&gt; domain name</span>
+
+<span class="sd">    Scans all .py files in the metadata directory, inspects their</span>
+<span class="sd">    &#39;metadata&#39; variable, and builds a dictionary mapping config names</span>
+<span class="sd">    to their &#39;expected_domain_id&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">domain_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">METADATA_DIR</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata directory not found at: </span><span class="si">{</span><span class="n">METADATA_DIR</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="c1"># Scan the directory for Python files</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">METADATA_DIR</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">filename</span> <span class="o">!=</span> <span class="s1">&#39;__init__.py&#39;</span><span class="p">:</span>
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">METADATA_DIR</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Dynamically load the module from its file path</span>
+                <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+                <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+                <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+                <span class="c1"># Check if the module has the required &#39;metadata&#39; dictionary</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">):</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Module &#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&#39; does not contain a &#39;metadata&#39; attribute.&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Module &#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&#39; has a &#39;metadata&#39; attribute that is not a dict (got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">config_name</span><span class="p">,</span> <span class="n">domain_details</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">domain_details</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#39; has a non-dict value; skipping.&quot;</span><span class="p">)</span>
+                            <span class="k">continue</span>
+                        <span class="n">root_info</span> <span class="o">=</span> <span class="n">domain_details</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                        <span class="n">expected_domain</span> <span class="o">=</span> <span class="n">root_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;expected_domain_id&#39;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">expected_domain</span><span class="p">:</span>
+                            <span class="n">domain_map</span><span class="p">[</span><span class="n">config_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">expected_domain</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">&#39; in &#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#39; is missing &#39;expected_domain_id&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to process metadata from &#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">domain_map</span></div>
+
+
+
+<span class="n">config_to_domain_name_dict</span> <span class="o">=</span> <span class="n">generate_cfg_name_to_domain_map</span><span class="p">()</span>
+
+
+<span class="n">domain_name_to_table_name</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Care_Site&#39;</span>  <span class="p">:</span> <span class="s1">&#39;care_site&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Condition&#39;</span>  <span class="p">:</span> <span class="s1">&#39;condition_occurrence&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Drug&#39;</span>       <span class="p">:</span> <span class="s1">&#39;drug_exposure&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Location&#39;</span>   <span class="p">:</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Measurement&#39;</span><span class="p">:</span> <span class="s1">&#39;measurement&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Observation&#39;</span><span class="p">:</span> <span class="s1">&#39;observation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Person&#39;</span>     <span class="p">:</span> <span class="s1">&#39;person&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Procedure&#39;</span>  <span class="p">:</span> <span class="s1">&#39;procedure_occurrence&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Provider&#39;</span>   <span class="p">:</span> <span class="s1">&#39;provider&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Visit&#39;</span>      <span class="p">:</span> <span class="s1">&#39;visit_occurrence&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Device&#39;</span>     <span class="p">:</span> <span class="s1">&#39;device_exposure&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;VisitDetail&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">sql_import_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Device&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;device_exposure_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;person_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_exposure_start_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_exposure_start_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_exposure_end_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_exposure_end_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_type_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;unique_device_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;quantity&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;device_source_concept_id&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;device_exposure&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(device_exposure_id) as p_id,</span>
+<span class="s2">                       count(distinct device_exposure_id) as d_p_id</span>
+<span class="s2">                FROM device_exposure</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Procedure&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;procedure_occurrence_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;person_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;procedure_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;procedure_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;procedure_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;procedure_type_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;modifier_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;quantity&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;procedure_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;procedure_source_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;modifier_source_value&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;procedure_occurrence&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(procedure_occurrence_id) as p_id,</span>
+<span class="s2">                       count(distinct procedure_occurrence_id) as d_p_id</span>
+<span class="s2">                FROM procedure_occurrence</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Drug&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;drug_exposure_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;person_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_exposure_start_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_exposure_start_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_exposure_end_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_exposure_end_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;verbatim_end_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_type_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;stop_reason&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;refills integer&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;quantity&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;days_supply&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;sig&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;route_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;lot_number&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;drug_source_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;route_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;dose_unit_source_value&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;drug_exposure&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(drug_exposure_id) as p_id,</span>
+<span class="s2">                       count(distinct drug_exposure_id) as d_p_id</span>
+<span class="s2">                FROM drug_exposure</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Observation&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;observation_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;person_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;observation_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;observation_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;observation_datetime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;observation_type_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;value_as_number&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;value_as_string&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;value_as_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;qualifier_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;unit_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;observation_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;observation_source_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;unit_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;qualifier_source_value&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(observation_id) as p_id,</span>
+<span class="s2">                       count(distinct observation_id) as d_p_id</span>
+<span class="s2">                FROM observation</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Location&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;location_id&#39;</span><span class="p">,</span> <span class="s1">&#39;address_1&#39;</span><span class="p">,</span> <span class="s1">&#39;address_2&#39;</span><span class="p">,</span> <span class="s1">&#39;city&#39;</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">,</span> <span class="s1">&#39;zip&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;county&#39;</span><span class="p">,</span> <span class="s1">&#39;location_source_value&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;location&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(location_id) as p_id,</span>
+<span class="s2">                       count(distinct location_id) as d_p_id</span>
+<span class="s2">                FROM location</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Provider&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;provider_name&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;npi&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;dea&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;specialty_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;care_site_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;year_of_birth&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;gender_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;provider_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;specialty_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;specialty_source_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;gender_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;gender_source_concept_id&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;provider&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                count(provider_id) as p_id,</span>
+<span class="s2">                count(distinct provider_id) as d_p_id</span>
+<span class="s2">                FROM provider</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Care_Site&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;care_site_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;care_site_name&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;place_of_service_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;care_site_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;place_of_service_source_value&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;care_site&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(care_site_id) as p_id,</span>
+<span class="s2">                       count(distinct care_site_id) as d_p_id</span>
+<span class="s2">                FROM care_site</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Person&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;person_id&#39;</span><span class="p">,</span> <span class="s1">&#39;gender_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;year_of_birth&#39;</span><span class="p">,</span> <span class="s1">&#39;month_of_birth&#39;</span><span class="p">,</span> <span class="s1">&#39;day_of_birth&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;birth_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;race_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;ethnicity_concept_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location_id&#39;</span><span class="p">,</span> <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span> <span class="s1">&#39;care_site_id&#39;</span><span class="p">,</span> <span class="s1">&#39;person_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;gender_source_value&#39;</span><span class="p">,</span> <span class="s1">&#39;gender_source_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;race_source_value&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;race_source_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;ethnicity_source_value&#39;</span><span class="p">,</span> <span class="s1">&#39;ethnicity_source_concept_id&#39;</span>
+            <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;person&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(person_id) as p_id,</span>
+<span class="s2">                       count(distinct person_id) as d_p_id</span>
+<span class="s2">                FROM person</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Visit&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;person_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_start_date&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_start_datetime&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_end_date&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_end_datetime&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_type_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span> <span class="s1">&#39;care_site_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_source_value&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_source_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;admitting_source_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;admitting_source_value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;discharge_to_source_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;discharge_to_source_value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;preceding_visit_occurrence_id&#39;</span>
+                    <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;visit_occurrence&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(visit_occurrence_id) as p_id,</span>
+<span class="s2">                       count(distinct visit_occurrence_id) as d_p_id</span>
+<span class="s2">                FROM visit_occurrence</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;VisitDetail&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;person_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_detail_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_detail_start_date&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_detail_start_datetime&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_detail_end_date&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_detail_end_datetime&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_detail_type_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span> <span class="s1">&#39;care_site_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_detail_source_value&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_detail_source_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;admitting_source_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;admitting_source_value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;discharge_to_source_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;discharge_to_source_value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;preceding_visit_detail_id&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_detail_parent_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_occurrence_id&#39;</span>
+                    <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;visit_detail&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(visit_detail_id) as p_id,</span>
+<span class="s2">                       count(distinct visit_detail_id) as d_p_id</span>
+<span class="s2">                FROM visit_detail</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Measurement&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s1">&#39;measurement_id&#39;</span><span class="p">,</span> <span class="s1">&#39; person_id&#39;</span><span class="p">,</span> <span class="s1">&#39;measurement_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;measurement_date&#39;</span><span class="p">,</span> <span class="s1">&#39;measurement_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;measurement_time&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;measurement_type_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;operator_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;value_as_number&#39;</span><span class="p">,</span> <span class="s1">&#39;value_as_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;unit_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;range_low&#39;</span><span class="p">,</span> <span class="s1">&#39;range_high&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;measurement_source_value&#39;</span><span class="p">,</span> <span class="s1">&#39;measurement_source_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;unit_source_value&#39;</span><span class="p">,</span> <span class="s1">&#39;value_source_value&#39;</span>
+                    <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;measurement&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(measurement_id) as p_id,</span>
+<span class="s2">                       count(distinct measurement_id) as d_p_id</span>
+<span class="s2">                FROM measurement</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;Condition&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;column_list&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s1">&#39;condition_occurrence_id&#39;</span><span class="p">,</span> <span class="s1">&#39; person_id&#39;</span><span class="p">,</span> <span class="s1">&#39;condition_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;condition_start_date&#39;</span><span class="p">,</span> <span class="s1">&#39;condition_start_datetime&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;condition_end_date&#39;</span><span class="p">,</span> <span class="s1">&#39;condition_end_datetime&#39;</span>
+                    <span class="s1">&#39;condition_type_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;condition_status_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;stop_reason&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">,</span> <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;condition_source_value&#39;</span><span class="p">,</span> <span class="s1">&#39;condition_source_concept_id&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;condition_status_source_concept_id&#39;</span><span class="p">,</span> <span class="s1">&#39;condition_status_source_value&#39;</span>
+                    <span class="p">],</span>
+        <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;table_name&#39;</span><span class="p">:</span> <span class="s2">&quot;condition_occurrence&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;pk_query&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;### TODO</span>
+<span class="s2">                SELECT count(*) as row_ct,</span>
+<span class="s2">                       count(condition_occurrence_id) as p_id,</span>
+<span class="s2">                       count(distinct condition_occurrence_id) as d_p_id</span>
+<span class="s2">                FROM condition_occurrence</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

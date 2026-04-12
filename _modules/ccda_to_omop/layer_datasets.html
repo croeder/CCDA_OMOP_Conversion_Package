@@ -1,0 +1,601 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ccda_to_omop.layer_datasets &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">ccda_to_omop</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ccda_to_omop.layer_datasets</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ccda_to_omop.layer_datasets</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typeguard</span><span class="w"> </span><span class="kn">import</span> <span class="n">typechecked</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">int32</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">int64</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime64</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">DT</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ccda_to_omop.data_driven_parse</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">DDP</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ccda_to_omop.visit_reconciliation</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">VR</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ccda_to_omop.value_transformations</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">VT</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ccda_to_omop.util</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">U</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">OMOPRecord</span><span class="p">,</span> <span class="n">CodemapDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.ddl</span><span class="w"> </span><span class="kn">import</span> <span class="n">sql_import_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.ddl</span><span class="w"> </span><span class="kn">import</span> <span class="n">config_to_domain_name_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.ddl</span><span class="w"> </span><span class="kn">import</span> <span class="n">domain_name_to_table_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_meta_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.domain_dataframe_column_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">domain_dataframe_column_types</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.domain_dataframe_column_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">domain_dataframe_column_required</span>
+
+<span class="n">DO_VISIT_DETAIL</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="sd">&quot;&quot;&quot; layer_datasets.py</span>
+<span class="sd">    This is a layer over data_driven_parse.py that takes the</span>
+<span class="sd">    dictionary of lists of dictionaries, a dictionary of rows</span>
+<span class="sd">    where the keys are dataset_names. It converts these structures</span>
+<span class="sd">    to pandas dataframes and then merges dataframes destined for /</span>
+<span class="sd">    the same domain. Reason being that multiple places in CCDA</span>
+<span class="sd">    generate data for the same OMOP domain. It then publishes</span>
+<span class="sd">    the dataframes as datasets into the Spark world in Foundry.</span>
+
+<span class="sd">    Run</span>
+<span class="sd">        - from dataset named &quot;ccda_documents&quot; with export:</span>
+<span class="sd">            bash&gt; python3 -m ccda_to_omop.layer_datasets -ds ccda_documents -x</span>
+<span class="sd">        - from directory named &quot;resources&quot; without export:</span>
+<span class="sd">            bash&gt; python3 -m ccda_to_omop.layer_datasets -d resources</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="show_column_dict">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.show_column_dict">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_column_dict</span><span class="p">(</span><span class="n">config_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">column_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print column names and lengths for a single config&#39;s column dict (debug helper).&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">column_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   config: </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">  key:</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> length(val):</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="find_max_columns">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.find_max_columns">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_max_columns</span><span class="p">(</span><span class="n">config_name</span> <span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">domain_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">OMOPRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;  Give a list of dictionaries, find the maximal set of columns that has the basic OMOP columns.</span>
+
+<span class="sd">         Trying to deal with a list that may have dictionaries that lack certain fields.</span>
+<span class="sd">         An option is to go with a completely canonical list, like from the DDL, but we want</span>
+<span class="sd">         to remain flexible and be able to easily add columns that are not part of the DDL for</span>
+<span class="sd">         use later in Spark. It is also true that we do load into an RDB here, DuckDB, to</span>
+<span class="sd">         check PKs and FK constraints, but only on the OMOP columns. The load scripts there</span>
+<span class="sd">         use the DDL and ignore columns to the right we want to allow here.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">domain</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">config_to_domain_name_dict</span><span class="p">[</span><span class="n">config_name</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ERROR no domain for </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">config_to_domain_name_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                     <span class="s2">&quot;The config_to_domain_name_dict in ddl.py probably needs this to be added to it.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="n">chosen_row</span> <span class="o">=-</span><span class="mi">1</span>
+    <span class="n">num_columns</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">row_num</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">col_dict</span> <span class="ow">in</span> <span class="n">domain_list</span><span class="p">:</span>
+        <span class="c1"># Q1 does  this dict at least have what the ddl expects?</span>
+        <span class="n">good_row</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sql_import_dict</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;column_list&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">col_dict</span><span class="p">:</span>
+                <span class="n">good_row</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Q2: does it have the most extra</span>
+        <span class="k">if</span> <span class="n">good_row</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">num_columns</span><span class="p">:</span>
+            <span class="n">chosen_row</span> <span class="o">=</span> <span class="n">row_num</span>
+        <span class="n">row_num</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">domain_list</span><span class="p">[</span><span class="n">row_num</span><span class="p">]</span></div>
+
+
+
+<span class="c1"># List of columns disallowed to be NULL</span>
+<span class="n">NON_NULLABLE_COLUMNS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">table</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">field</span>
+        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">required</span> <span class="ow">in</span> <span class="n">domain_dataframe_column_required</span><span class="p">[</span><span class="n">table</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">required</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">domain_dataframe_column_required</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="create_omop_domain_dataframes">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.create_omop_domain_dataframes">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_omop_domain_dataframes</span><span class="p">(</span><span class="n">omop_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
+                                  <span class="n">filepath</span><span class="p">)</span> <span class="o">-&gt;</span>  <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; transposes the rows into columns,</span>
+<span class="sd">        creates a Pandas dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">config_name</span><span class="p">,</span> <span class="n">domain_list</span> <span class="ow">in</span> <span class="n">omop_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Transpose to a dictionary of named columns.</span>
+
+        <span class="c1"># Initialize a dictionary of columns from schema</span>
+        <span class="k">if</span> <span class="n">domain_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">domain_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(create_omop_domain_dataframes) No data to create dataframe for </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">domain_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">column_list</span> <span class="o">=</span> <span class="n">find_max_columns</span><span class="p">(</span><span class="n">config_name</span><span class="p">,</span> <span class="n">domain_list</span><span class="p">)</span>
+            <span class="n">column_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="p">[])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">column_list</span><span class="p">)</span>
+
+            <span class="c1"># Add the data from all the rows</span>
+            <span class="k">for</span> <span class="n">domain_data_dict</span> <span class="ow">in</span> <span class="n">domain_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">column_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">prepared_value</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">domain_data_dict</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;RECONCILE FK&#39;</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RECONCILE FK for </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">prepared_value</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;visit_concept_id&#39;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                            <span class="c1"># hack when visit_type_xwalk returns a string</span>
+                            <span class="n">prepared_value</span> <span class="o">=</span>  <span class="n">int32</span><span class="p">(</span><span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">])</span>
+                        <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;datetime&quot;</span> <span class="ow">and</span> <span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">prepared_value</span> <span class="o">=</span> <span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DATETIME conversion  </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">])</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">prepared_value</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ERROR  TZ </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">])</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2"> TB:</span><span class="si">{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">prepared_value</span> <span class="o">=</span> <span class="n">domain_data_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+
+                        <span class="k">if</span> <span class="n">prepared_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">prepared_value</span><span class="p">):</span>  <span class="c1"># NaN/NaT check, not None</span>
+                            <span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;layered_datasets.create_omop_domain_dataframes() NaN/NaT </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">prepared_value</span><span class="si">}</span><span class="s2"> &lt;--&quot;</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># field is not in dict, so would be null, but odd for other reasons, want to know about this</span>
+                        <span class="k">if</span> <span class="n">prepared_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="c1"># for debuggin in Spark, raise exception</span>
+                            <span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;layered_datasets.create_omop_domain_dataframes() not in dict </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">prepared_value</span><span class="si">}</span><span class="s2"> &lt;--&quot;</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="n">column_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prepared_value</span><span class="p">)</span>
+
+            <span class="c1"># Use domain_dataframe_colunn_types to cast dataframe columns as directed</span>
+            <span class="c1"># Create a Pandas dataframe from the data_dict</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">domain_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">column_dict</span><span class="p">)</span>
+                <span class="n">domain_name</span> <span class="o">=</span> <span class="n">config_to_domain_name_dict</span><span class="p">[</span><span class="n">config_name</span><span class="p">]</span>
+                <span class="n">table_name</span> <span class="o">=</span> <span class="n">domain_name_to_table_name</span><span class="p">[</span><span class="n">domain_name</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">table_name</span> <span class="ow">in</span> <span class="n">domain_dataframe_column_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">non_nullable_cols</span> <span class="o">=</span> <span class="n">NON_NULLABLE_COLUMNS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="p">[])</span>
+                    <span class="k">for</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">column_type</span> <span class="ow">in</span> <span class="n">domain_dataframe_column_types</span><span class="p">[</span><span class="n">table_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">column_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">datetime64</span><span class="p">,</span> <span class="n">DT</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">DT</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">domain_df</span><span class="p">:</span>
+                                <span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># Use pandas nullable int types for all integer columns (NA preferred over 0)</span>
+                                <span class="k">if</span> <span class="n">column_type</span> <span class="o">==</span> <span class="n">int64</span><span class="p">:</span>
+                                    <span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;Int64&#39;</span><span class="p">)</span>
+                                <span class="k">elif</span> <span class="n">column_type</span> <span class="o">==</span> <span class="n">int32</span><span class="p">:</span>
+                                    <span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;Int32&#39;</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="k">pass</span>  <span class="c1"># leave as None/NaN for other types</span>
+                            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CAST ERROR in layer_datasets.py create_omop_domain_dataframes() table:</span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2"> column:</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2"> type:</span><span class="si">{</span><span class="n">column_type</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">domain_df</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    (cont.)   value:</span><span class="si">{</span><span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">]</span><span class="si">}</span><span class="s2">  type:</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">domain_df</span><span class="p">[</span><span class="n">column_name</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    (cont.)  column </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> is not in the domain_df for domain </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">domain_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    (cont.)  exception:</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+                <span class="n">df_dict</span><span class="p">[</span><span class="n">config_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain_df</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;failed to create dataframe for </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">show_column_dict</span><span class="p">(</span><span class="n">config_name</span><span class="p">,</span> <span class="n">column_dict</span><span class="p">)</span>
+                <span class="n">df_dict</span><span class="p">[</span><span class="n">config_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(create_omop_domain_dataframes) No data to create dataframe for </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">domain_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_dict</span></div>
+
+
+
+<div class="viewcode-block" id="write_csvs_from_dataframe_dict">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.write_csvs_from_dataframe_dict">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_csvs_from_dataframe_dict</span><span class="p">(</span><span class="n">df_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; writes a CSV file for each dataframe</span>
+<span class="sd">        uses the key of the dict as filename</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">config_name</span><span class="p">,</span> <span class="n">domain_dataframe</span> <span class="ow">in</span> <span class="n">df_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+        <span class="k">if</span> <span class="n">domain_dataframe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">domain_dataframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ERROR: NOT WRITING domain </span><span class="si">{</span><span class="n">config_name</span><span class="si">}</span><span class="s2"> to file </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">, no dataframe&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process_string">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.process_string">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_string</span><span class="p">(</span><span class="n">contents</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write_csv_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        * E X P E R I M E N T A L *</span>
+
+<span class="sd">        Processes a string creates dataset and writes csv</span>
+<span class="sd">        returns dataset</span>
+
+<span class="sd">        (really calls into a lot of DDP detail and seems like it belongs there)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parsing string from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">omop_data</span> <span class="o">=</span> <span class="n">DDP</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">get_meta_dict</span><span class="p">())</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--parsing string from file:</span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> keys:</span><span class="si">{</span><span class="n">omop_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2"> p:</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_data</span><span class="p">[</span><span class="s1">&#39;Person&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> m:</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_data</span><span class="p">[</span><span class="s1">&#39;Measurement&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+
+    <span class="c1"># Visit FK reconciliation:</span>
+    <span class="n">VR</span><span class="o">.</span><span class="n">assign_visit_occurrence_ids_to_events</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">DO_VISIT_DETAIL</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span> <span class="ow">in</span> <span class="n">omop_data</span> <span class="ow">and</span> <span class="n">omop_data</span><span class="p">[</span><span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting visit_detail FK reconciliation&quot;</span><span class="p">)</span>
+            <span class="n">VR</span><span class="o">.</span><span class="n">assign_visit_detail_ids_to_events</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;-- after reconcile parsing string from file:</span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> keys:</span><span class="si">{</span><span class="n">omop_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2"> p:</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_data</span><span class="p">[</span><span class="s1">&#39;Person&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> m:</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_data</span><span class="p">[</span><span class="s1">&#39;Measurement&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">omop_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dataframe_dict</span> <span class="o">=</span> <span class="n">create_omop_domain_dataframes</span><span class="p">(</span><span class="n">omop_data</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no data from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">write_csv_flag</span><span class="p">:</span>
+        <span class="n">write_csvs_from_dataframe_dict</span><span class="p">(</span><span class="n">dataframe_dict</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dataframe_dict</span></div>
+
+
+
+<div class="viewcode-block" id="process_string_to_dict">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.process_string_to_dict">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_string_to_dict</span><span class="p">(</span><span class="n">contents</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write_csv_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">codemap_dict</span><span class="p">:</span> <span class="n">CodemapDict</span><span class="p">,</span> <span class="n">mspi_map_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">partner_map_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes an XML CCDA string, returns data as Python structures.</span>
+
+<span class="sd">        Requires python dictionaries for mapping, brought in here, initialized to the package as</span>
+<span class="sd">        part of making them available to executors in Spark.</span>
+
+<span class="sd">        Returns  dict of column lists</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">VT</span><span class="o">.</span><span class="n">set_codemap_dict</span><span class="p">(</span><span class="n">codemap_dict</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mspi_map_dict</span><span class="p">:</span>
+        <span class="n">VT</span><span class="o">.</span><span class="n">set_mspi_map</span><span class="p">(</span><span class="n">mspi_map_dict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">partner_map_dict</span><span class="p">:</span>
+        <span class="n">VT</span><span class="o">.</span><span class="n">set_partner_map</span><span class="p">(</span><span class="n">partner_map_dict</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">VT</span><span class="o">.</span><span class="n">get_codemap_dict</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;codemap length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">VT</span><span class="o">.</span><span class="n">get_codemap_dict</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">test_value</span> <span class="o">=</span> <span class="n">codemap_dict</span><span class="p">[(</span><span class="s1">&#39;2.16.840.1.113883.6.96&#39;</span><span class="p">,</span> <span class="s1">&#39;608837004&#39;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">test_value</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;target_concept_id&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1340204</span><span class="p">:</span>
+        <span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;codemap_xwalk test failed to deliver correct code, got: </span><span class="si">{</span><span class="n">test_value</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">omop_data</span> <span class="o">=</span> <span class="n">DDP</span><span class="o">.</span><span class="n">parse_string</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">get_meta_dict</span><span class="p">())</span>
+
+    <span class="c1"># Visit FK reconciliation:</span>
+    <span class="n">VR</span><span class="o">.</span><span class="n">assign_visit_occurrence_ids_to_events</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">DO_VISIT_DETAIL</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span> <span class="ow">in</span> <span class="n">omop_data</span> <span class="ow">and</span> <span class="n">omop_data</span><span class="p">[</span><span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting visit_detail FK reconciliation&quot;</span><span class="p">)</span>
+            <span class="n">VR</span><span class="o">.</span><span class="n">assign_visit_detail_ids_to_events</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">omop_data</span></div>
+
+
+
+<div class="viewcode-block" id="process_file">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.process_file">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write_csv_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">parse_config</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; processes file, processes visits, creates dataset, writes csv</span>
+<span class="sd">        returns dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="n">omop_data</span> <span class="o">=</span> <span class="n">DDP</span><span class="o">.</span><span class="n">parse_doc</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">get_meta_dict</span><span class="p">(),</span> <span class="n">parse_config</span><span class="p">)</span>
+
+    <span class="c1"># Visit FK reconciliation:</span>
+    <span class="n">VR</span><span class="o">.</span><span class="n">assign_visit_occurrence_ids_to_events</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">DO_VISIT_DETAIL</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span> <span class="ow">in</span> <span class="n">omop_data</span> <span class="ow">and</span> <span class="n">omop_data</span><span class="p">[</span><span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting visit_detail FK reconciliation&quot;</span><span class="p">)</span>
+            <span class="n">VR</span><span class="o">.</span><span class="n">assign_visit_detail_ids_to_events</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span>
+
+    <span class="c1"># Convert from list of dictionaries/records to dataframes/datasets</span>
+    <span class="k">if</span> <span class="n">omop_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">omop_data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dataframe_dict</span> <span class="o">=</span> <span class="n">create_omop_domain_dataframes</span><span class="p">(</span><span class="n">omop_data</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no data from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">write_csv_flag</span><span class="p">:</span>
+        <span class="n">write_csvs_from_dataframe_dict</span><span class="p">(</span><span class="n">dataframe_dict</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dataframe_dict</span></div>
+
+
+
+<div class="viewcode-block" id="dict_summary">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.dict_summary">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dict_summary</span><span class="p">(</span><span class="n">my_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Log the key names and row counts of a dict of lists.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">my_dict</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Summary </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">my_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="build_file_to_domain_dict">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.build_file_to_domain_dict">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_file_to_domain_dict</span><span class="p">(</span><span class="n">meta_config_dict</span> <span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The meta_config_dict is a dictionary keyed by domain filenames that</span>
+<span class="sd">        has the data that drives the conversion. Included is a &#39;root&#39; element</span>
+<span class="sd">        that has an attribute &#39;expected_domain_id&#39; that we&#39;re after to identify</span>
+<span class="sd">        the OMOP domain that a file&#39;s data is destined for.</span>
+<span class="sd">        This is where multiple files for the same domain get combined.</span>
+
+<span class="sd">        For example, the Measurement domain, rows for the measurement table can</span>
+<span class="sd">        come from at least two kinds of files:</span>
+<span class="sd">         &lt;file&gt;__Measurement_results.csv</span>
+<span class="sd">         &lt;file&gt;__Measurement_vital_signs.csv</span>
+
+<span class="sd">       This map maps from filenames to domains</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_domain_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">file_domain</span> <span class="ow">in</span> <span class="n">meta_config_dict</span><span class="p">:</span>
+        <span class="n">file_domain_map</span><span class="p">[</span><span class="n">file_domain</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta_config_dict</span><span class="p">[</span><span class="n">file_domain</span><span class="p">][</span><span class="s1">&#39;root&#39;</span><span class="p">][</span><span class="s1">&#39;expected_domain_id&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">file_domain_map</span></div>
+
+
+
+
+<div class="viewcode-block" id="combine_datasets">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.combine_datasets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_datasets</span><span class="p">(</span><span class="n">omop_dataset_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine like datasets from different parse configurations that produce rows for the same domain.</span>
+
+<span class="sd">    Collects all files/datasets that share the same expected_domain_id. For example,</span>
+<span class="sd">    rows for the Measurement table can come from at least two kinds of files:</span>
+<span class="sd">        &lt;file&gt;__Measurement_results.csv</span>
+<span class="sd">        &lt;file&gt;__Measurement_vital_signs.csv</span>
+
+<span class="sd">    Two dictionaries at play:</span>
+<span class="sd">    1. omop_dataset_dict: keyed by domain_keys (config filenames)</span>
+<span class="sd">    2. config data from get_meta_dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_to_domain_dict</span> <span class="o">=</span> <span class="n">build_file_to_domain_dict</span><span class="p">(</span><span class="n">get_meta_dict</span><span class="p">())</span>
+    <span class="n">domain_dataset_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">omop_dataset_dict</span><span class="p">:</span>
+        <span class="n">domain_id</span> <span class="o">=</span> <span class="n">file_to_domain_dict</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">omop_dataset_dict</span> <span class="ow">and</span> <span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">domain_id</span> <span class="ow">in</span> <span class="n">domain_dataset_dict</span> <span class="ow">and</span> <span class="n">domain_dataset_dict</span><span class="p">[</span><span class="n">domain_id</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">domain_dataset_dict</span><span class="p">[</span><span class="n">domain_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span> <span class="n">domain_dataset_dict</span><span class="p">[</span><span class="n">domain_id</span><span class="p">],</span> <span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">domain_dataset_dict</span><span class="p">[</span><span class="n">domain_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NO DATA for config </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> in LD.combine_datasets()&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">domain_dataset_dict</span></div>
+
+
+
+
+<div class="viewcode-block" id="do_write_csv_files">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.do_write_csv_files">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">do_write_csv_files</span><span class="p">(</span><span class="n">domain_dataset_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write each combined domain DataFrame to output/domain_&lt;domain_id&gt;.csv.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">domain_id</span> <span class="ow">in</span> <span class="n">domain_dataset_dict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">domain_id</span> <span class="ow">in</span> <span class="n">domain_dataset_dict</span> <span class="ow">and</span> <span class="n">domain_dataset_dict</span><span class="p">[</span><span class="n">domain_id</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Writing CSV for domain:</span><span class="si">{</span><span class="n">domain_id</span><span class="si">}</span><span class="s2"> dim:</span><span class="si">{</span><span class="n">domain_dataset_dict</span><span class="p">[</span><span class="n">domain_id</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">domain_dataset_dict</span><span class="p">[</span><span class="n">domain_id</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;output/domain_</span><span class="si">{</span><span class="n">domain_id</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error Writing CSV for domain:</span><span class="si">{</span><span class="n">domain_id</span><span class="si">}</span><span class="s2"> no such table in dict&quot;</span><span class="p">)</span></div>
+
+
+
+
+
+<span class="c1"># ENTRY POINT for directory of files</span>
+<div class="viewcode-block" id="process_directory">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.process_directory">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_directory</span><span class="p">(</span><span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write_csv_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">parse_config</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process all XML files in a directory, concatenate results by domain, and optionally write CSVs.&quot;&quot;&quot;</span>
+    <span class="n">omop_dataset_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keyed by dataset_names (legacy domain names)</span>
+
+    <span class="n">only_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory_path</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="p">(</span><span class="n">only_files</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">):</span>
+            <span class="n">new_data_dict</span> <span class="o">=</span> <span class="n">process_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory_path</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="n">write_csv_flag</span><span class="p">,</span> <span class="n">parse_config</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">new_data_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">omop_dataset_dict</span> <span class="ow">and</span> <span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">new_data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span>  <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span> <span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">new_data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span> <span class="n">new_data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">new_data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_dataset_dict</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">omop_dataset_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">new_data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_dataset_dict</span><span class="p">)</span><span class="si">}</span><span class="s2"> None / no data&quot;</span><span class="p">)</span>
+
+    <span class="n">domain_dataset_dict</span> <span class="o">=</span> <span class="n">combine_datasets</span><span class="p">(</span><span class="n">omop_dataset_dict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">write_csv_flag</span><span class="p">:</span>
+        <span class="n">do_write_csv_files</span><span class="p">(</span><span class="n">domain_dataset_dict</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># JUPYTER ENTRY POINT</span>
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../api/ccda_to_omop.layer_datasets.html#ccda_to_omop.layer_datasets.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;CCDA - OMOP parser with datasets layer layer_datasets.py&#39;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;reads CCDA XML, translate to and writes OMOP CSV files&quot;</span><span class="p">,</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="s1">&#39;epilog?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;--directory&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;directory of files to parse&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--filename&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;XML filename to parse&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-ds&#39;</span><span class="p">,</span> <span class="s1">&#39;--dataset&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;dataset to parse&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-g&#39;</span><span class="p">,</span> <span class="s1">&#39;--config&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;parse configuration filename to use&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--write_csv&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">BooleanOptionalAction</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;write CSV files to local&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="s1">&#39;--limit&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;max files to process&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--skip&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;files to skip before processing to limit, -s 100 &quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;got args:  dataset:</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="si">}</span><span class="s2"> filename:</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2"> directory:</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">directory</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;got args 2: csv:</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">write_csv</span><span class="si">}</span><span class="s2"> limit:</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">limit</span><span class="si">}</span><span class="s2"> skip:</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">skip</span><span class="si">}</span><span class="s2"> config:</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2">   &quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; ARGS: </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+    <span class="n">omop_dataset_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># keyed by dataset_names (legacy domain names)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">codemap_df</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;codemap_xwalk&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pandas&quot;</span><span class="p">)</span>  <span class="c1"># noqa: F821</span>
+        <span class="n">codemap_dict</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">create_codemap_dict</span><span class="p">(</span><span class="n">codemap_df</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CODEMAP  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">codemap_dict</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">VT</span><span class="o">.</span><span class="n">set_codemap_dict</span><span class="p">(</span><span class="n">codemap_dict</span><span class="p">)</span>
+
+        <span class="n">metadata_df</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ccda_response_metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pandas&quot;</span><span class="p">)</span>  <span class="c1"># noqa: F821</span>
+        <span class="c1"># Create a dictionary: { &#39;filename.xml&#39;: mspi_value }</span>
+        <span class="c1"># We use &#39;response_file_path&#39; as the key to match the &#39;filename&#39; in the OMOP output</span>
+        <span class="n">mspi_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">metadata_df</span><span class="p">[</span><span class="s1">&#39;response_file_path&#39;</span><span class="p">],</span> <span class="n">metadata_df</span><span class="p">[</span><span class="s1">&#39;mspi&#39;</span><span class="p">]))</span>
+        <span class="n">partner_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">metadata_df</span><span class="p">[</span><span class="s1">&#39;response_file_path&#39;</span><span class="p">],</span> <span class="n">metadata_df</span><span class="p">[</span><span class="s1">&#39;healthcare_site&#39;</span><span class="p">]))</span>
+        <span class="n">VT</span><span class="o">.</span><span class="n">set_mspi_map</span><span class="p">(</span><span class="n">mspi_map</span><span class="p">)</span>
+        <span class="n">VT</span><span class="o">.</span><span class="n">set_partner_map</span><span class="p">(</span><span class="n">partner_map</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MSPI Map initialized with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mspi_map</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries.&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load mapping datasets from Foundry: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">return</span>  <span class="c1"># Exit if mappings cannot be loaded</span>
+
+    <span class="c1"># Single File, put the datasets into the omop_dataset_dict</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">process_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">write_csv</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">domain_dataset_dict</span> <span class="o">=</span> <span class="n">process_directory</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">write_csv</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">domain_dataset_dict</span> <span class="o">=</span> <span class="n">process_file_from_dataset</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">export</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">write_csv</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">skip</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>  <span class="c1"># noqa: F821</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">domain_dataset_dict</span> <span class="o">=</span> <span class="n">process_dataset_of_files</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">export</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">write_csv</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">skip</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>  <span class="c1"># noqa: F821</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Did args parse let us  down? Have neither a file, nor a directory.&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

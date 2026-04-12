@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ccda_to_omop.find_paths &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">ccda_to_omop</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ccda_to_omop.find_paths</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ccda_to_omop.find_paths</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_meta_dict</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This script aims to link the various field types from XML source</span>
+<span class="sd">to OMOP table/field destination. In some cases it&#39;s direct</span>
+<span class="sd">XML to OMOP. In others there are intervening steps of calculation</span>
+<span class="sd">or mapping. The different field types are processed in an order</span>
+<span class="sd">that is reflected here.</span>
+<span class="sd">field types:  None, CONSTANT, FIELD, DERIVED, HASH, PRIORITY.</span>
+
+<span class="sd">Key to this whole world is a hierarchy of config_types and what they can use:</span>
+<span class="sd">- CONSTANT, FIELD, PK are at the bottom and don&#39;t/can&#39;t depend on anything</span>
+<span class="sd">- DERIVED and DOMAIN (latter ignored here) can use as input either of the previous three</span>
+<span class="sd">- HASH can use either of the previous two categories</span>
+<span class="sd">- PRIORITY can use eithe of the previous three categories (TBC here)</span>
+
+<span class="sd">RESET: clearer  data_dict</span>
+
+<span class="sd">    direct fields like PK,  FIELD, CONSTANT:</span>
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: &#39;constant&#39;,</span>
+<span class="sd">             &#39;arg&#39; : path | constant | PK field key ,</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">           }</span>
+
+<span class="sd">    derived fields like FK</span>
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: &#39;FK&#39;,</span>
+<span class="sd">             &#39;values-dict&#39; : { key? : field_name_1 }</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">           }</span>
+
+<span class="sd">    derived fields like DERIVED</span>
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: function-name,</span>
+<span class="sd">             &#39;values-dict&#39; : { arg_name_1: struct_1, ...arg_name_n: struct_n }</span>
+<span class="sd">             &#39;args-dict&#39; : { arg_name_1: field_name_1, ...field_name_n: struct_n }</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">           }</span>
+
+<span class="sd">    hash  fields like HASH</span>
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: &#39;hash&#39;,</span>
+<span class="sd">             &#39;values-dict&#39; : { arg_name_1: struct_1, ...arg_name_n: struct_n }</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">           }</span>
+
+<span class="sd">    priority fields like PRIORITY</span>
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: &#39;priority&#39;,</span>
+<span class="sd">             &#39;values-list&#39; :  arg_name_1: struct_1, ...arg_name_n: struct_n }</span>
+<span class="sd">             &#39;args-list&#39; :  arg_name_1: field_name_1, ...field_name_n: struct_n }</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">            }</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">print_order_flag</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">print_derived_to_base</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="strip_detail">
+<a class="viewcode-back" href="../../api/ccda_to_omop.find_paths.html#ccda_to_omop.find_paths.strip_detail">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">strip_detail</span><span class="p">(</span><span class="n">input_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; strips namespaces and conditionals out of an XPath</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">interim</span> <span class="o">=</span>  <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;hl7:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">input_string</span><span class="p">)</span>
+    <span class="n">interim</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[.*\]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">interim</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">interim</span></div>
+
+
+
+<div class="viewcode-block" id="get_base_elements">
+<a class="viewcode-back" href="../../api/ccda_to_omop.find_paths.html#ccda_to_omop.find_paths.get_base_elements">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_base_elements</span><span class="p">(</span><span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetches keys of elements that are fetched from XML.</span>
+<span class="sd">    The types of these keys are FIELD, PK.</span>
+<span class="sd">    The keys are returned as config, field pairs.</span>
+
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: &#39;constant&#39;,</span>
+<span class="sd">             &#39;arg&#39; : path | constant | FK field key ,</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">base_field_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+        <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">root_path</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="s1">&#39;root&#39;</span><span class="p">][</span><span class="s1">&#39;element&#39;</span><span class="p">]</span>
+        <span class="n">root_path</span> <span class="o">=</span> <span class="n">strip_detail</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">field_key</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">]:</span>
+            <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># type</span>
+            <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span>
+
+            <span class="c1"># arg</span>
+            <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+
+            <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;CONSTANT&#39;</span><span class="p">:</span>
+                <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;constant_value&#39;</span><span class="p">]</span>
+
+
+            <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;FIELD&#39;</span><span class="p">,</span> <span class="s1">&#39;PK&#39;</span><span class="p">):</span>
+                <span class="n">path</span><span class="o">=</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s2">/&quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">strip_detail</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;element&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+                      <span class="sa">f</span><span class="s2">&quot;@</span><span class="si">{</span><span class="n">strip_detail</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;attribute&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+
+
+            <span class="c1"># order</span>
+            <span class="k">if</span> <span class="s1">&#39;order&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]:</span>
+                <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">base_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">return</span> <span class="n">base_field_dict</span></div>
+
+
+
+<div class="viewcode-block" id="get_derived_fields">
+<a class="viewcode-back" href="../../api/ccda_to_omop.find_paths.html#ccda_to_omop.find_paths.get_derived_fields">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_derived_fields</span><span class="p">(</span><span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetches functions and arguments (field names) of elements that are</span>
+<span class="sd">    derived from base fields.</span>
+<span class="sd">    The types of these keys are DERIVED and DOMAIN. Only DERIVED are fetched</span>
+<span class="sd">    here because DOMAIN are part of denying fields that are in the wrong domain. TODO.</span>
+
+<span class="sd">    Returns for each config_key, field_key a dictionary with &#39;function&#39; and &#39;args&#39;</span>
+<span class="sd">    keys and associated values.</span>
+
+<span class="sd">     config_key --&gt; field_key --&gt; {&#39;type&#39;: function name,</span>
+<span class="sd">                                   &#39;args&#39; : [ field names ],</span>
+<span class="sd">                                   &#39;order&#39; : int }</span>
+<span class="sd">       # DERIVED</span>
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: function-name,</span>
+<span class="sd">             &#39;args-dict&#39; : { arg_name_1: struct_1, ...arg_name_n: struct_n }</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">           }</span>
+<span class="sd">       # FK</span>
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;type&#39;: &#39;FK&#39;,</span>
+<span class="sd">             &#39;args-dict&#39; : { FK_field_key : struct_1 }</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">           }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">derived_field_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+        <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">field_key</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FK&#39;</span><span class="p">:</span>
+                <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="c1"># type</span>
+                <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;FK&#39;</span>
+
+                <span class="c1"># values-dict only</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># fk_field_key = metadata[config_key][field_key][&#39;config_type&#39;][&#39;FK&#39;]</span>
+                    <span class="n">fk_field_key</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;FK&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">x</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ERROR: </span><span class="si">{</span><span class="n">config_key</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">field_key</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">x</span>
+                <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;values-dict&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="p">{</span>
+                            <span class="n">fk_field_key</span><span class="p">:</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">fk_field_key</span><span class="p">]</span>
+                <span class="p">}</span>
+
+                <span class="c1"># order</span>
+                <span class="k">if</span> <span class="s1">&#39;order&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]:</span>
+                    <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DERIVED&#39;</span><span class="p">:</span>
+                <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="c1"># type</span>
+                <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;FUNCTION&#39;</span><span class="p">],</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot;()&quot;</span>
+
+                <span class="c1"># args &amp; values</span>
+                <span class="n">arg_keys</span><span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;argument_names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="n">args_hash</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">values_hash</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">arg_key</span> <span class="ow">in</span> <span class="n">arg_keys</span><span class="p">:</span>
+                    <span class="c1"># Use the arg name to get the field_key it refers to. Does assume the  references are within the same config_key.</span>
+                    <span class="n">arg_field_key</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;argument_names&#39;</span><span class="p">][</span><span class="n">arg_key</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">arg_key</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+                        <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_field_key</span>
+                        <span class="n">args_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;(constant default)&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">args_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_field_key</span>
+                        <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FIELD&#39;</span><span class="p">:</span>
+                            <span class="c1"># values_hash[arg_key] =  metadata[config_key][arg_field_key]</span>
+                            <span class="n">root_path</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="s1">&#39;root&#39;</span><span class="p">][</span><span class="s1">&#39;element&#39;</span><span class="p">]</span>
+                            <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s2">/&quot;</span>
+                                                   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_field_key</span><span class="p">][</span><span class="s1">&#39;element&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                                                   <span class="s2">&quot;/@&quot;</span>
+                                                   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_field_key</span><span class="p">][</span><span class="s1">&#39;attribute&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;CONSTANT&#39;</span><span class="p">:</span>
+                            <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_field_key</span><span class="p">][</span><span class="s1">&#39;constant_value&#39;</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_field_key</span><span class="p">]</span>
+                <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;args-dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args_hash</span>
+                <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;values-dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values_hash</span>
+
+                <span class="c1"># order</span>
+                <span class="k">if</span> <span class="s1">&#39;order&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]:</span>
+                    <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">return</span> <span class="n">derived_field_dict</span></div>
+
+
+
+<div class="viewcode-block" id="get_hash_fields">
+<a class="viewcode-back" href="../../api/ccda_to_omop.find_paths.html#ccda_to_omop.find_paths.get_hash_fields">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_hash_fields</span><span class="p">(</span><span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">derived_field_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &#39;measurement_id_hash&#39;: {</span>
+<span class="sd">            &#39;config_type&#39;: &#39;HASH&#39;,</span>
+<span class="sd">            &#39;fields&#39; : [ &#39;measurement_id_root&#39;, &#39;measurement_id_extension&#39; ],</span>
+
+<span class="sd">       config_key --&gt;  field_key --&gt;</span>
+<span class="sd">           { &#39;function&#39;: &#39;hash&#39;,</span>
+<span class="sd">             &#39;values-dict&#39; : { arg_name_1: struct_1, ...arg_name_n: struct_n }</span>
+<span class="sd">             &#39;order&#39; : n</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hash_field_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+        <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">field_key</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HASH&#39;</span><span class="p">:</span>
+                <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="c1"># type</span>
+                <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;hash&#39;</span>
+
+                <span class="c1"># values-dict only</span>
+                <span class="n">arg_fields</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;fields&#39;</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="c1"># doesn&#39;t pull up deeper definitions</span>
+                    <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;values-dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">arg_key</span> <span class="ow">in</span> <span class="n">arg_fields</span><span class="p">:</span>
+                        <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;values-dict&#39;</span><span class="p">][</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">values_hash</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">arg_key</span> <span class="ow">in</span> <span class="n">arg_fields</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DERIVED&#39;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+                                <span class="c1"># doesn&#39;t pull up deeper definitions</span>
+                                <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+                                    <span class="c1"># madness, deeper, but raw</span>
+                                    <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">]</span>
+                                    <span class="c1"># arg:test_derived_field value:{&#39;type&#39;: &#39;map_hl7_to_omop_concept_id()&#39;,</span>
+                                    <span class="c1">#                              &#39;args-dict&#39;: {&#39;concept_code&#39;: &#39;field_code&#39;, &#39;vocabulary_oid&#39;: &#39;field_oid&#39;, &#39;default&#39;: &#39;(constant default)&#39;},</span>
+                                    <span class="c1">#                              &#39;values-dict&#39;: {&#39;concept_code&#39;: &#39;fake/doc/path/id/@code&#39;, &#39;vocabulary_oid&#39;: &#39;fake/doc/path/id/@codeSystem&#39;, &#39;default&#39;: 0},</span>
+                                    <span class="c1">#                              &#39;order&#39;: 6}</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">values_list</span>  <span class="o">=</span> <span class="p">[]</span>
+                                    <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;values-dict&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                                        <span class="n">values_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                                    <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">derived_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">values_list</span><span class="si">}</span><span class="s2"> &quot;</span>
+
+                        <span class="k">elif</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FIELD&#39;</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+                                <span class="c1"># just the dict of config data</span>
+                                <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">root_path</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="s1">&#39;root&#39;</span><span class="p">][</span><span class="s1">&#39;element&#39;</span><span class="p">]</span>
+                                <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">root_path</span><span class="si">}</span><span class="s2">/&quot;</span>
+                                                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;element&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                                                         <span class="s2">&quot;/@&quot;</span>
+                                                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;attribute&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;config_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;CONSTANT&#39;</span><span class="p">:</span>
+                             <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">][</span><span class="s1">&#39;constant_value&#39;</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">values_hash</span><span class="p">[</span><span class="n">arg_key</span><span class="p">]</span> <span class="o">=</span>  <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">arg_key</span><span class="p">]</span>
+                    <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;values-dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values_hash</span>
+
+
+                <span class="c1"># order</span>
+                <span class="k">if</span> <span class="s1">&#39;order&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]:</span>
+                    <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hash_field_dict</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">][</span><span class="s1">&#39;order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">hash_field_dict</span></div>
+
+
+
+<div class="viewcode-block" id="print_data_hash">
+<a class="viewcode-back" href="../../api/ccda_to_omop.find_paths.html#ccda_to_omop.find_paths.print_data_hash">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_data_hash</span><span class="p">(</span><span class="n">data_hash</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print a human-readable view of the nested field path/type/order structure produced by get_*_fields().&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data_hash</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">field_key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data_hash</span><span class="p">[</span><span class="n">config_key</span><span class="p">]):</span>
+            <span class="n">thing</span> <span class="o">=</span>  <span class="n">data_hash</span><span class="p">[</span><span class="n">config_key</span><span class="p">][</span><span class="n">field_key</span><span class="p">]</span>
+            <span class="c1"># if &#39;order&#39; in thing and thing[&#39;order&#39;]:</span>
+            <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config_key</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">field_key</span><span class="si">}</span><span class="s2"> type:</span><span class="si">{</span><span class="n">thing</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> order:</span><span class="si">{</span><span class="n">thing</span><span class="p">[</span><span class="s1">&#39;order&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;arg&#39;</span> <span class="ow">in</span> <span class="n">thing</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  arg: </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">thing</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;values-dict&#39;</span> <span class="ow">in</span> <span class="n">thing</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;values-dict&#39;</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="s1">&#39;args-dict&#39;</span> <span class="ow">in</span> <span class="n">thing</span><span class="p">:</span>
+                                <span class="c1"># keys  should be parallel</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  arg:</span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2"> name:</span><span class="si">{</span><span class="n">thing</span><span class="p">[</span><span class="s1">&#39;args-dict&#39;</span><span class="p">][</span><span class="n">arg</span><span class="p">]</span><span class="si">}</span><span class="s2"> value:</span><span class="si">{</span><span class="n">thing</span><span class="p">[</span><span class="s1">&#39;values-dict&#39;</span><span class="p">][</span><span class="n">arg</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  arg:</span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2"> value:</span><span class="si">{</span><span class="n">thing</span><span class="p">[</span><span class="s1">&#39;values-dict&#39;</span><span class="p">][</span><span class="n">arg</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="merge_second_level_dict">
+<a class="viewcode-back" href="../../api/ccda_to_omop.find_paths.html#ccda_to_omop.find_paths.merge_second_level_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_second_level_dict</span><span class="p">(</span><span class="n">dest_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">additional_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge additional_dict into dest_dict, combining second-level dicts with | for shared keys.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">additional_dict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dest_dict</span><span class="p">:</span>
+            <span class="n">dest_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">dest_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">|</span> <span class="n">additional_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dest_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../api/ccda_to_omop.find_paths.html#ccda_to_omop.find_paths.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">get_meta_dict</span><span class="p">()</span>
+    <span class="c1"># config_key --&gt; field_key --&gt; dict (described in data_driven_parse.py)</span>
+
+    <span class="c1"># FIELD, PK</span>
+    <span class="n">base_field_dict</span> <span class="o">=</span> <span class="n">get_base_elements</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+      <span class="c1"># (old) config_key --&gt; field_key --&gt; XML Path</span>
+      <span class="c1"># (new) config_key --&gt; field_key --&gt; { &#39;path&#39;: XML Path,</span>
+      <span class="c1">#                                      &#39;order&#39; : int }</span>
+    <span class="c1"># print_data_hash(base_field_dict)</span>
+
+    <span class="c1"># DERIVED</span>
+    <span class="n">derived_field_dict</span> <span class="o">=</span> <span class="n">get_derived_fields</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+      <span class="c1"># config_key --&gt; field_key --&gt; {&#39;function&#39;: function name,</span>
+      <span class="c1">#                               &#39;args&#39; : [ field names ],</span>
+      <span class="c1">#                               &#39;order&#39; : int }</span>
+    <span class="c1"># print_data_hash(derived_field_dict)</span>
+
+    <span class="c1"># HASH</span>
+    <span class="n">hash_field_dict</span> <span class="o">=</span> <span class="n">get_hash_fields</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">derived_field_dict</span><span class="p">)</span>
+      <span class="c1"># config_key --&gt; field_key --&gt; { &#39;function&#39; : &#39;hash()&#39;,</span>
+      <span class="c1">#                                &#39;args&#39; : [ field names ],</span>
+      <span class="c1">#                                &#39;order&#39; : int }</span>
+    <span class="c1"># print_data_hash(hash_field_dict)</span>
+
+
+
+    <span class="c1"># LINK HASHED to HASHED????????</span>
+    <span class="c1"># any hashes that use hashes? YES *** To Do **** might even be a bug in data_driven_parse.py !!!</span>
+
+
+    <span class="c1"># SHOW ALL</span>
+    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">merged_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">merge_second_level_dict</span><span class="p">(</span><span class="n">merged_dict</span><span class="p">,</span> <span class="n">base_field_dict</span><span class="p">)</span>
+        <span class="n">merge_second_level_dict</span><span class="p">(</span><span class="n">merged_dict</span><span class="p">,</span> <span class="n">derived_field_dict</span><span class="p">)</span>
+        <span class="n">merge_second_level_dict</span><span class="p">(</span><span class="n">merged_dict</span><span class="p">,</span> <span class="n">hash_field_dict</span><span class="p">)</span>
+        <span class="n">print_data_hash</span><span class="p">(</span><span class="n">merged_dict</span><span class="p">)</span></div>
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

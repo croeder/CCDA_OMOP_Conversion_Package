@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ccda_to_omop.value_transformations module &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ccda_to_omop.visit_reconciliation module" href="ccda_to_omop.visit_reconciliation.html" />
+    <link rel="prev" title="ccda_to_omop.util module" href="ccda_to_omop.util.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ccda_to_omop</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ccda_to_omop.html">ccda_to_omop package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="ccda_to_omop.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.code_hunt.html">ccda_to_omop.code_hunt module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.constants.html">ccda_to_omop.constants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.data_driven_parse.html">ccda_to_omop.data_driven_parse module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.ddl.html">ccda_to_omop.ddl module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.domain_dataframe_column_types.html">ccda_to_omop.domain_dataframe_column_types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.find_paths.html">ccda_to_omop.find_paths module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.layer_datasets.html">ccda_to_omop.layer_datasets module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.load_duck_db.html">ccda_to_omop.load_duck_db module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.package_constant_access.html">ccda_to_omop.package_constant_access module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.util.html">ccda_to_omop.util module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ccda_to_omop.value_transformations module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ccda_to_omop.visit_reconciliation.html">ccda_to_omop.visit_reconciliation module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">ccda_to_omop</a></li>
+          <li class="breadcrumb-item"><a href="ccda_to_omop.html">ccda_to_omop package</a></li>
+      <li class="breadcrumb-item active">ccda_to_omop.value_transformations module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ccda_to_omop.value_transformations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ccda_to_omop.value_transformations">
+<span id="ccda-to-omop-value-transformations-module"></span><h1>ccda_to_omop.value_transformations module<a class="headerlink" href="#module-ccda_to_omop.value_transformations" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.VocabContext">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">VocabContext</span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#VocabContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.VocabContext" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Holds the vocabulary lookup maps used by transformation functions.</p>
+<p>A single module-level instance (_context) is used at runtime.  Tests can
+call reset() between cases to guarantee isolation without relying on
+import order or global keyword side-effects.</p>
+<p>Full dependency injection is not yet possible because transformation
+functions are referenced by name in metadata configs and are called with
+only args_dict.  This class is the first step: all mutable state lives
+here rather than as bare module globals, which eliminates the ‘global’
+keyword and makes the state easy to inspect and reset.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.cast_as_concept_id">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">cast_as_concept_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#cast_as_concept_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.cast_as_concept_id" title="Link to this definition"></a></dt>
+<dd><p>Return args_dict[‘input’] as an int32 concept ID if type is ‘CD’ or ‘CE’, else None.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.cast_as_number">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">cast_as_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#cast_as_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.cast_as_number" title="Link to this definition"></a></dt>
+<dd><p>Return args_dict[‘input’] as an int if type is ‘PQ’ (HL7 physical quantity), else None.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.cast_as_string">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">cast_as_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#cast_as_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.cast_as_string" title="Link to this definition"></a></dt>
+<dd><p>Return args_dict[‘input’] as a string if type is ‘ST’ (HL7 string), else None.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.codemap_xwalk_concept_id">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">codemap_xwalk_concept_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#codemap_xwalk_concept_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.codemap_xwalk_concept_id" title="Link to this definition"></a></dt>
+<dd><p>expects: vocabulary_oid, concept_code
+returns: concept_id AS INTEGER (because that’s what’s in the table), not necessarily standard</p>
+<blockquote>
+<div><p>If NMC is disallowed, it will return None instead of 0.
+Control this via set_allow_no_macthing_concept() in package_constant_access.</p>
+</div></blockquote>
+<p>throws/raises when codemap_xwalk is None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.codemap_xwalk_domain_id">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">codemap_xwalk_domain_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#codemap_xwalk_domain_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.codemap_xwalk_domain_id" title="Link to this definition"></a></dt>
+<dd><p>expects: vocabulary_oid, concept_code
+returns: always returns domain_id
+throws/raises when codemap_xwalk is None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.codemap_xwalk_source_concept_id">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">codemap_xwalk_source_concept_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int32</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#codemap_xwalk_source_concept_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.codemap_xwalk_source_concept_id" title="Link to this definition"></a></dt>
+<dd><p>expects: vocabulary_oid, concept_code
+returns: unmapped concept_id AS INTEGER (because that’s what’s in the table), not necessarily standard
+throws/raises when codemap_xwalk is None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.concat_field_list_names">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">concat_field_list_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#concat_field_list_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.concat_field_list_names" title="Link to this definition"></a></dt>
+<dd><p>A DERIVED2 style function.
+Looks for a argument with the name of ‘args’ under the ‘argument_list’
+brought in from the parse configuration. That list is a list of keys
+whose data we’re interested in fetching from the data_dict.</p>
+<p>args_dict: the field’s paragraph in the parse configuration
+data_dict: the dictionary of values being built up for an OMOP row</p>
+<blockquote>
+<div><p>by the parse configuration where all this comes from.</p>
+</div></blockquote>
+<p>Returns: a joined list of the keys. The data_dict is unused.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.concat_field_list_values">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">concat_field_list_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#concat_field_list_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.concat_field_list_values" title="Link to this definition"></a></dt>
+<dd><p>A DERIVED2 style function.
+Looks for a argument with the name of ‘args’ under the ‘argument_list’
+brought in from the parse configuration. That list is a list of keys
+whose data we’re interested in fetching from the data_dict.</p>
+<p>args_dict: the field’s paragraph in the parse configuration
+data_dict: the dictionary of values being built up for an OMOP row</p>
+<blockquote>
+<div><p>by the parse configuration where all this comes from.</p>
+</div></blockquote>
+<p>Returns: a joined list of the data values associated with those keys.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.concat_fields">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">concat_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#concat_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.concat_fields" title="Link to this definition"></a></dt>
+<dd><p>A DERIVED style function.
+input key “delimiter” is a character to use to separate the fields
+following items in dict are the names of keys in the values to concat</p>
+<p>returns one string, the concatenation of values corresponding to args 2-n, using arg 1 as a delimieter</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.extract_day_of_birth">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">extract_day_of_birth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int32</span></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#extract_day_of_birth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.extract_day_of_birth" title="Link to this definition"></a></dt>
+<dd><p>Extract day of birth from args_dict[‘date_object’] (assumes a date/datetime).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.extract_month_of_birth">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">extract_month_of_birth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int32</span></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#extract_month_of_birth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.extract_month_of_birth" title="Link to this definition"></a></dt>
+<dd><p>Extract month of birth from args_dict[‘date_object’] (assumes a date/datetime).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.extract_year_of_birth">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">extract_year_of_birth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int32</span></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#extract_year_of_birth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.extract_year_of_birth" title="Link to this definition"></a></dt>
+<dd><p>Extract year of birth from args_dict[‘date_object’] (assumes a date/datetime).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.get_codemap_dict">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">get_codemap_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#get_codemap_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.get_codemap_dict" title="Link to this definition"></a></dt>
+<dd><p>Return the currently loaded codemap crosswalk dictionary.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.get_data_partner_id">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">get_data_partner_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int32</span></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#get_data_partner_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.get_data_partner_id" title="Link to this definition"></a></dt>
+<dd><p>Returns Data Partner ID. Defaults to 0 if filename is not in map.
+Strictly returns an integer per the component contract.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.get_mspi_map">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">get_mspi_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#get_mspi_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.get_mspi_map" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.get_partner_map">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">get_partner_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#get_partner_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.get_partner_map" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.map_filename_to_mspi">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">map_filename_to_mspi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#map_filename_to_mspi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.map_filename_to_mspi" title="Link to this definition"></a></dt>
+<dd><p>Returns MSPI (person_id). Defaults to 0 if filename is not in map.
+Raises if the MSPI map has not been initialized.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.reset_context">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">reset_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#reset_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.reset_context" title="Link to this definition"></a></dt>
+<dd><p>Reset all vocab maps to None.  Call between test cases for isolation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.set_codemap_dict">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">set_codemap_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#set_codemap_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.set_codemap_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.set_mspi_map">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">set_mspi_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#set_mspi_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.set_mspi_map" title="Link to this definition"></a></dt>
+<dd><p>Initializes the MSPI (person_id) map on the executor.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.set_partner_map">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">set_partner_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#set_partner_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.set_partner_map" title="Link to this definition"></a></dt>
+<dd><p>Initializes the partner map on the executor.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.transform_datetime_high">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">transform_datetime_high</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#transform_datetime_high"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.transform_datetime_high" title="Link to this definition"></a></dt>
+<dd><p>Transforms a date-only string into a full ISO 8601 datetime defaulting to 23:59:59.</p>
+<p>This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD)
+format. We can make this assumption because this transformation is typically
+called after ‘parseutils.parser’ has already standardized the raw input.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ccda_to_omop.value_transformations.transform_datetime_low">
+<span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">transform_datetime_low</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#transform_datetime_low"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.transform_datetime_low" title="Link to this definition"></a></dt>
+<dd><p>Transforms a date-only string into a full ISO 8601 datetime defaulting to 00:00:00.</p>
+<p>This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD)
+format. We can make this assumption because this transformation is typically
+called after ‘parseutils.parser’ has already standardized the raw input.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ccda_to_omop.util.html" class="btn btn-neutral float-left" title="ccda_to_omop.util module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ccda_to_omop.visit_reconciliation.html" class="btn btn-neutral float-right" title="ccda_to_omop.visit_reconciliation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

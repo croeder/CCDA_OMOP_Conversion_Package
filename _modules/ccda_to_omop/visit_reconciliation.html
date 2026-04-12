@@ -1,0 +1,1073 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ccda_to_omop.visit_reconciliation &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">ccda_to_omop</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ccda_to_omop.visit_reconciliation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ccda_to_omop.visit_reconciliation</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visit_reconciliation.py</span>
+
+<span class="sd">    This module contains functions for linking domain rows to visits</span>
+<span class="sd">    as well as functions to differentiate visit_occurrence from visit_detail.</span>
+
+<span class="sd">    Main entry points are:</span>
+<span class="sd">    - assign_visit_occurrence_ids_to_events()</span>
+<span class="sd">    - assign_visit_detail_ids_to_events()</span>
+<span class="sd">    - reclassify_nested_visit_occurrences_as_detail()</span>
+
+<span class="sd">    This code processes visit data to create a hierarchical structure</span>
+<span class="sd">    where inpatient parent visits (&lt;= 1 year duration) are kept in visit_occurrence</span>
+<span class="sd">    and their nested child visits are moved to visit_detail.</span>
+
+<span class="sd">    Process:</span>
+<span class="sd">    1. Identify inpatient parent visits with duration &lt;= 1 year</span>
+<span class="sd">    2. Find visits temporally nested within each parent</span>
+<span class="sd">    3. Create visit_detail records for nested children</span>
+<span class="sd">    4. Return updated visit_occurrence (parents + standalone) and new visit_detail list</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">int64</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typeguard</span><span class="w"> </span><span class="kn">import</span> <span class="n">typechecked</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop</span><span class="w"> </span><span class="kn">import</span> <span class="n">ddl</span> <span class="k">as</span> <span class="n">DDL</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">INPATIENT_CONCEPT_IDS</span><span class="p">,</span> <span class="n">MAX_PARENT_DURATION_DAYS</span><span class="p">,</span> <span class="n">SECONDS_PER_DAY</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">OMOPRecord</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_visit_duration_days">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.get_visit_duration_days">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_visit_duration_days</span><span class="p">(</span><span class="n">visit_dict</span><span class="p">:</span> <span class="n">OMOPRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate visit duration in days.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        visit_dict: Dictionary containing visit record</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Duration in days, or None if dates are missing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Try datetime columns first, fall back to date columns</span>
+    <span class="k">if</span> <span class="s1">&#39;visit_start_datetime&#39;</span> <span class="ow">in</span> <span class="n">visit_dict</span> <span class="ow">and</span> <span class="s1">&#39;visit_end_datetime&#39;</span> <span class="ow">in</span> <span class="n">visit_dict</span><span class="p">:</span>
+        <span class="n">start_key</span> <span class="o">=</span> <span class="s1">&#39;visit_start_datetime&#39;</span>
+        <span class="n">end_key</span> <span class="o">=</span> <span class="s1">&#39;visit_end_datetime&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">start_key</span> <span class="o">=</span> <span class="s1">&#39;visit_start_date&#39;</span>
+        <span class="n">end_key</span> <span class="o">=</span> <span class="s1">&#39;visit_end_date&#39;</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">visit_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">start_key</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">visit_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">end_key</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Strip timezone info</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+    <span class="c1"># Handle both datetime and date objects</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="n">SECONDS_PER_DAY</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="identify_inpatient_parents">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.identify_inpatient_parents">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">identify_inpatient_parents</span><span class="p">(</span><span class="n">visit_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify inpatient parent visits that are meaningful and time-bounded.</span>
+
+<span class="sd">    Criteria:</span>
+<span class="sd">    - visit_concept_id is in INPATIENT_CONCEPT_IDS</span>
+<span class="sd">    - Duration between start and end is &lt;= 1 year</span>
+<span class="sd">    - Has valid start and end datetimes</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        visit_list: List of visit record dictionaries</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List containing only eligible inpatient parent visits</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">visit_list</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No visits to process for parent identification&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="n">eligible_parents</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">visit</span> <span class="ow">in</span> <span class="n">visit_list</span><span class="p">:</span>
+        <span class="c1"># Check if inpatient concept</span>
+        <span class="n">concept_id</span> <span class="o">=</span> <span class="n">visit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_concept_id&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">concept_id</span> <span class="ow">in</span> <span class="n">INPATIENT_CONCEPT_IDS</span><span class="p">:</span>
+            <span class="c1"># Calculate duration</span>
+            <span class="n">duration_days</span> <span class="o">=</span> <span class="n">get_visit_duration_days</span><span class="p">(</span><span class="n">visit</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">duration_days</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Check duration threshold</span>
+                <span class="k">if</span> <span class="n">duration_days</span> <span class="o">&lt;</span> <span class="n">MAX_PARENT_DURATION_DAYS</span><span class="p">:</span>
+                    <span class="n">eligible_parents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">visit</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identified </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">eligible_parents</span><span class="p">)</span><span class="si">}</span><span class="s2"> inpatient parent visits from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">visit_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> total visits&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">eligible_parents</span></div>
+
+
+
+<div class="viewcode-block" id="is_temporally_contained">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.is_temporally_contained">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_temporally_contained</span><span class="p">(</span><span class="n">child_dict</span><span class="p">:</span> <span class="n">OMOPRecord</span><span class="p">,</span> <span class="n">parent_dict</span><span class="p">:</span> <span class="n">OMOPRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if child visit is temporally contained within parent visit.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        child_dict: Child visit record</span>
+<span class="sd">        parent_dict: Parent visit record</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        True if child is fully contained within parent timeframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determine which date columns to use</span>
+    <span class="k">if</span> <span class="s1">&#39;visit_start_datetime&#39;</span> <span class="ow">in</span> <span class="n">child_dict</span> <span class="ow">and</span> <span class="s1">&#39;visit_end_datetime&#39;</span> <span class="ow">in</span> <span class="n">child_dict</span><span class="p">:</span>
+        <span class="n">start_key</span> <span class="o">=</span> <span class="s1">&#39;visit_start_datetime&#39;</span>
+        <span class="n">end_key</span> <span class="o">=</span> <span class="s1">&#39;visit_end_datetime&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">start_key</span> <span class="o">=</span> <span class="s1">&#39;visit_start_date&#39;</span>
+        <span class="n">end_key</span> <span class="o">=</span> <span class="s1">&#39;visit_end_date&#39;</span>
+
+    <span class="n">child_start</span> <span class="o">=</span> <span class="n">child_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">start_key</span><span class="p">)</span>
+    <span class="n">child_end</span> <span class="o">=</span> <span class="n">child_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">end_key</span><span class="p">)</span>
+    <span class="n">parent_start</span> <span class="o">=</span> <span class="n">parent_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">start_key</span><span class="p">)</span>
+    <span class="n">parent_end</span> <span class="o">=</span> <span class="n">parent_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">end_key</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">child_start</span><span class="p">,</span> <span class="n">child_end</span><span class="p">,</span> <span class="n">parent_start</span><span class="p">,</span> <span class="n">parent_end</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Normalize timezone info to allow comparison (strip timezone if present)</span>
+    <span class="n">child_start</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">child_start</span><span class="p">)</span>
+    <span class="n">child_end</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">child_end</span><span class="p">)</span>
+    <span class="n">parent_start</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">parent_start</span><span class="p">)</span>
+    <span class="n">parent_end</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">parent_end</span><span class="p">)</span>
+
+    <span class="c1"># Check temporal containment</span>
+    <span class="k">return</span> <span class="n">parent_start</span> <span class="o">&lt;=</span> <span class="n">child_start</span> <span class="ow">and</span> <span class="n">parent_end</span> <span class="o">&gt;=</span> <span class="n">child_end</span></div>
+
+
+
+<div class="viewcode-block" id="find_most_specific_parent">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.find_most_specific_parent">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_most_specific_parent</span><span class="p">(</span><span class="n">child_dict</span><span class="p">:</span> <span class="n">OMOPRecord</span><span class="p">,</span>
+                              <span class="n">potential_parents</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int64</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the most specific (shortest duration, most immediate) parent for a child visit.</span>
+
+<span class="sd">    When multiple parents overlap and contain a child, choose the parent with the</span>
+<span class="sd">    shortest duration as it represents the most specific/immediate context.</span>
+
+<span class="sd">    However, if the child has multiple containing parents that are at the same</span>
+<span class="sd">    hierarchy level (i.e., the parents don&#39;t contain each other), returns None</span>
+<span class="sd">    to avoid ambiguity. The child visit will remain at its current level.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        child_dict: Child visit record</span>
+<span class="sd">        potential_parents: List of potential parent visit records</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        visit_occurrence_id of the most specific parent, or None if:</span>
+<span class="sd">        - No parent found</span>
+<span class="sd">        - Multiple parents at the same hierarchy level exist (ambiguous)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">potential_parents</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">child_person_id</span> <span class="o">=</span> <span class="n">child_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;person_id&#39;</span><span class="p">)</span>
+    <span class="n">child_visit_id</span> <span class="o">=</span> <span class="n">child_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Filter to parents that contain this child</span>
+    <span class="n">containing_parents</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">potential_parents</span><span class="p">:</span>
+        <span class="c1"># Same person</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;person_id&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">child_person_id</span><span class="p">:</span>
+            <span class="c1"># Not self</span>
+            <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">child_visit_id</span><span class="p">:</span>
+                <span class="c1"># Temporally contains child</span>
+                <span class="k">if</span> <span class="n">is_temporally_contained</span><span class="p">(</span><span class="n">child_dict</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+                    <span class="n">containing_parents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">containing_parents</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Check if any of the containing parents are at the same hierarchy level</span>
+    <span class="c1"># (i.e., they don&#39;t contain each other)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">containing_parents</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">containing_parents</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">containing_parents</span><span class="p">)):</span>
+                <span class="n">parent_i</span> <span class="o">=</span> <span class="n">containing_parents</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">parent_j</span> <span class="o">=</span> <span class="n">containing_parents</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+                <span class="c1"># Check if parent_i contains parent_j</span>
+                <span class="n">i_contains_j</span> <span class="o">=</span> <span class="n">is_temporally_contained</span><span class="p">(</span><span class="n">parent_j</span><span class="p">,</span> <span class="n">parent_i</span><span class="p">)</span>
+
+                <span class="c1"># Check if parent_j contains parent_i</span>
+                <span class="n">j_contains_i</span> <span class="o">=</span> <span class="n">is_temporally_contained</span><span class="p">(</span><span class="n">parent_i</span><span class="p">,</span> <span class="n">parent_j</span><span class="p">)</span>
+
+                <span class="c1"># If neither contains the other, they&#39;re at the same level (siblings)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">i_contains_j</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">j_contains_i</span><span class="p">:</span>
+                    <span class="n">parent_i_id</span> <span class="o">=</span> <span class="n">parent_i</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span>
+                    <span class="n">parent_j_id</span> <span class="o">=</span> <span class="n">parent_j</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Visit </span><span class="si">{</span><span class="n">child_visit_id</span><span class="si">}</span><span class="s2"> has multiple parents at the same hierarchy level &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;(parents </span><span class="si">{</span><span class="n">parent_i_id</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">parent_j_id</span><span class="si">}</span><span class="s2"> don&#39;t contain each other). &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Keeping in current level to avoid ambiguity.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># All parents are in a hierarchical chain - find the most specific (shortest duration)</span>
+    <span class="n">min_duration</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">most_specific_parent</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">containing_parents</span><span class="p">:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">get_visit_duration_days</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">min_duration</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">duration</span> <span class="o">&lt;</span> <span class="n">min_duration</span><span class="p">:</span>
+                <span class="n">min_duration</span> <span class="o">=</span> <span class="n">duration</span>
+                <span class="n">most_specific_parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="k">if</span> <span class="n">most_specific_parent</span><span class="p">:</span>
+        <span class="n">parent_id</span> <span class="o">=</span> <span class="n">most_specific_parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parent_id</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="create_visit_detail_record">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.create_visit_detail_record">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_visit_detail_record</span><span class="p">(</span><span class="n">visit_dict</span><span class="p">:</span> <span class="n">OMOPRecord</span><span class="p">,</span>
+                               <span class="n">top_level_parent_id</span><span class="p">:</span> <span class="n">int64</span><span class="p">,</span>
+                               <span class="n">immediate_parent_id</span><span class="p">:</span> <span class="n">int64</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OMOPRecord</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a visit (visit_occurrence) record into visit_detail format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        visit_dict: Visit record to convert</span>
+<span class="sd">        top_level_parent_id: The top-level visit_occurrence_id</span>
+<span class="sd">        immediate_parent_id: The immediate parent&#39;s visit_detail_id (or None for Layer 2)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dictionary in visit_detail format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">detail_record</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Map visit_occurrence fields to visit_detail fields</span>
+    <span class="n">field_mapping</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;person_id&#39;</span><span class="p">:</span> <span class="s1">&#39;person_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_concept_id&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_concept_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_start_date&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_start_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_start_datetime&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_start_datetime&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_end_date&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_end_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_end_datetime&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_end_datetime&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_type_concept_id&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_type_concept_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;provider_id&#39;</span><span class="p">:</span> <span class="s1">&#39;provider_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;care_site_id&#39;</span><span class="p">:</span> <span class="s1">&#39;care_site_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_source_value&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_source_value&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;visit_source_concept_id&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_source_concept_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;admitting_source_value&#39;</span><span class="p">:</span> <span class="s1">&#39;admitting_source_value&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;admitting_source_concept_id&#39;</span><span class="p">:</span> <span class="s1">&#39;admitting_source_concept_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;discharge_to_source_value&#39;</span><span class="p">:</span> <span class="s1">&#39;discharge_to_source_value&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;discharge_to_concept_id&#39;</span><span class="p">:</span> <span class="s1">&#39;discharge_to_concept_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;filename&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cfg_name&#39;</span><span class="p">:</span> <span class="s1">&#39;cfg_name&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Copy mapped fields</span>
+    <span class="k">for</span> <span class="n">src_field</span><span class="p">,</span> <span class="n">dest_field</span> <span class="ow">in</span> <span class="n">field_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">src_field</span> <span class="ow">in</span> <span class="n">visit_dict</span><span class="p">:</span>
+            <span class="n">detail_record</span><span class="p">[</span><span class="n">dest_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">visit_dict</span><span class="p">[</span><span class="n">src_field</span><span class="p">]</span>
+
+    <span class="c1"># Set parent references</span>
+    <span class="n">detail_record</span><span class="p">[</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_level_parent_id</span>
+    <span class="n">detail_record</span><span class="p">[</span><span class="s1">&#39;visit_detail_parent_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">immediate_parent_id</span>
+    <span class="n">detail_record</span><span class="p">[</span><span class="s1">&#39;preceding_visit_detail_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">detail_record</span></div>
+
+
+
+<div class="viewcode-block" id="reclassify_nested_visit_occurrences_as_detail">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.reclassify_nested_visit_occurrences_as_detail">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reclassify_nested_visit_occurrences_as_detail</span><span class="p">(</span><span class="n">omop_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main entry point for visit hierarchy processing.</span>
+<span class="sd">    Merges visits from both &#39;Visit&#39; and &#39;Visit_encompassingEncounter&#39; configs,</span>
+<span class="sd">    deduplicates them, processes hierarchy, and creates visit_detail records.</span>
+
+<span class="sd">    Strategy:</span>
+<span class="sd">    1. Collect visits from both configs</span>
+<span class="sd">    2. Deduplicate (keep &#39;Visit&#39; when duplicate exists with &#39;Visit_encompassingEncounter&#39;)</span>
+<span class="sd">    3. Process merged list as unified hierarchy</span>
+<span class="sd">    4. Put results in &#39;Visit&#39; config and create &#39;VISITDETAIL_visit_occurrence&#39; config</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        omop_dict: Dictionary of config_name → list of records</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Updated omop_dict with:</span>
+<span class="sd">        - &#39;Visit&#39;: top-level visit_occurrence records (merged from both configs)</span>
+<span class="sd">        - &#39;VISITDETAIL_visit_occurrence&#39;: visit_detail records</span>
+<span class="sd">        - &#39;Visit_encompassingEncounter&#39;: removed (merged into &#39;Visit&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Step 1: Collect visits from both configs</span>
+    <span class="n">all_visits</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="s1">&#39;Visit&#39;</span> <span class="ow">in</span> <span class="n">omop_dict</span> <span class="ow">and</span> <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit&#39;</span><span class="p">]:</span>
+        <span class="n">all_visits</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit&#39;</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> visits from &#39;Visit&#39; config&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;Visit_encompassingEncounter&#39;</span> <span class="ow">in</span> <span class="n">omop_dict</span> <span class="ow">and</span> <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit_encompassingEncounter&#39;</span><span class="p">]:</span>
+        <span class="n">all_visits</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit_encompassingEncounter&#39;</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Collected </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit_encompassingEncounter&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> visits from &#39;Visit_encompassingEncounter&#39; config&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_visits</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No visit data found to process&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">omop_dict</span>
+
+    <span class="c1"># If only one visit, no hierarchy processing needed</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_visits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Only one visit found - no hierarchy processing needed&quot;</span><span class="p">)</span>
+        <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_visits</span>
+        <span class="k">return</span> <span class="n">omop_dict</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total visits collected before deduplication: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_visits</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 2: Deduplicate - keep &#39;Visit&#39; when duplicate exists</span>
+    <span class="c1"># Use visit_occurrence_id as the unique key</span>
+    <span class="n">visit_map</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Key: visit_occurrence_id, Value: visit record</span>
+
+    <span class="k">for</span> <span class="n">visit</span> <span class="ow">in</span> <span class="n">all_visits</span><span class="p">:</span>
+        <span class="n">visit_id</span> <span class="o">=</span> <span class="n">visit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">visit_id</span> <span class="ow">in</span> <span class="n">visit_map</span><span class="p">:</span>
+            <span class="c1"># Duplicate found - keep &#39;Visit&#39; over &#39;Visit_encompassingEncounter&#39;</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="n">visit_map</span><span class="p">[</span><span class="n">visit_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">existing</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cfg_name&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Visit_encompassingEncounter&#39;</span> <span class="ow">and</span> <span class="n">visit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cfg_name&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Visit&#39;</span><span class="p">:</span>
+                <span class="n">visit_map</span><span class="p">[</span><span class="n">visit_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">visit</span>  <span class="c1"># Replace with &#39;Visit&#39;</span>
+            <span class="c1"># Otherwise keep existing</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">visit_map</span><span class="p">[</span><span class="n">visit_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">visit</span>
+
+    <span class="n">deduplicated_visits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">visit_map</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;After deduplication: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">deduplicated_visits</span><span class="p">)</span><span class="si">}</span><span class="s2"> unique visits (removed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_visits</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">deduplicated_visits</span><span class="p">)</span><span class="si">}</span><span class="s2"> duplicates)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 3: Process hierarchy on deduplicated visits</span>
+    <span class="c1"># Identify potential parent visits (inpatient with valid duration)</span>
+    <span class="n">parent_visits</span> <span class="o">=</span> <span class="n">identify_inpatient_parents</span><span class="p">(</span><span class="n">deduplicated_visits</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identified </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">parent_visits</span><span class="p">)</span><span class="si">}</span><span class="s2"> potential parent visits&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_visits</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No inpatient parent visits found - all visits stay as visit_occurrence&quot;</span><span class="p">)</span>
+        <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deduplicated_visits</span>
+        <span class="k">if</span> <span class="s1">&#39;Visit_encompassingEncounter&#39;</span> <span class="ow">in</span> <span class="n">omop_dict</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit_encompassingEncounter&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">omop_dict</span>
+
+    <span class="c1"># Build parent mapping for each visit</span>
+    <span class="n">visit_to_parent_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">nested_visit_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">visit_lookup</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">deduplicated_visits</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">visit</span> <span class="ow">in</span> <span class="n">deduplicated_visits</span><span class="p">:</span>
+        <span class="n">visit_id</span> <span class="o">=</span> <span class="n">visit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Find the most specific parent for this visit</span>
+        <span class="n">most_specific_parent_id</span> <span class="o">=</span> <span class="n">find_most_specific_parent</span><span class="p">(</span><span class="n">visit</span><span class="p">,</span> <span class="n">parent_visits</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">most_specific_parent_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">visit_to_parent_map</span><span class="p">[</span><span class="n">visit_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">most_specific_parent_id</span>
+            <span class="n">nested_visit_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">visit_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Visit </span><span class="si">{</span><span class="n">visit_id</span><span class="si">}</span><span class="s2"> will be nested under parent </span><span class="si">{</span><span class="n">most_specific_parent_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nested_visit_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> visits to be nested&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 4: Identify multi-level nesting (parents that are themselves nested)</span>
+    <span class="n">parent_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parent_visits</span><span class="p">}</span>
+    <span class="n">nested_parent_ids</span> <span class="o">=</span> <span class="n">parent_ids</span> <span class="o">&amp;</span> <span class="n">nested_visit_ids</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">parent_ids</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">nested_parent_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> top-level parents and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nested_parent_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> nested parents&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 5: Create visit_detail records for all nested visits</span>
+    <span class="n">visit_detail_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">visit_id</span> <span class="ow">in</span> <span class="n">nested_visit_ids</span><span class="p">:</span>
+        <span class="n">visit</span> <span class="o">=</span> <span class="n">visit_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">visit</span><span class="p">:</span>
+            <span class="n">immediate_parent_id</span> <span class="o">=</span> <span class="n">visit_to_parent_map</span><span class="p">[</span><span class="n">visit_id</span><span class="p">]</span>
+
+            <span class="c1"># Find top-level visit_occurrence_id by traversing up hierarchy</span>
+            <span class="n">top_level_parent_id</span> <span class="o">=</span> <span class="n">immediate_parent_id</span>
+            <span class="k">while</span> <span class="n">top_level_parent_id</span> <span class="ow">in</span> <span class="n">visit_to_parent_map</span><span class="p">:</span>
+                <span class="n">top_level_parent_id</span> <span class="o">=</span> <span class="n">visit_to_parent_map</span><span class="p">[</span><span class="n">top_level_parent_id</span><span class="p">]</span>
+
+            <span class="c1"># Determine visit_detail_parent_id</span>
+            <span class="k">if</span> <span class="n">immediate_parent_id</span> <span class="ow">in</span> <span class="n">nested_parent_ids</span><span class="p">:</span>
+                <span class="c1"># Immediate parent is in visit_detail</span>
+                <span class="n">visit_detail_parent_id</span> <span class="o">=</span> <span class="n">immediate_parent_id</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Immediate parent is in visit_occurrence (top-level)</span>
+                <span class="n">visit_detail_parent_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Create visit_detail record</span>
+            <span class="n">detail_record</span> <span class="o">=</span> <span class="n">create_visit_detail_record</span><span class="p">(</span><span class="n">visit</span><span class="p">,</span> <span class="n">top_level_parent_id</span><span class="p">,</span> <span class="n">visit_detail_parent_id</span><span class="p">)</span>
+            <span class="n">visit_detail_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">detail_record</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">visit_detail_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> visit_detail records&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 6: Create final visit_occurrence (remove nested children, keep only top-level)</span>
+    <span class="n">final_visit_occurrence</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">deduplicated_visits</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nested_visit_ids</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final visit_occurrence contains </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">final_visit_occurrence</span><span class="p">)</span><span class="si">}</span><span class="s2"> records&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Step 7: Update omop_dict with results</span>
+    <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_visit_occurrence</span>
+
+    <span class="c1"># Remove &#39;Visit_encompassingEncounter&#39; config (merged into &#39;Visit&#39;)</span>
+    <span class="k">if</span> <span class="s1">&#39;Visit_encompassingEncounter&#39;</span> <span class="ow">in</span> <span class="n">omop_dict</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;Visit_encompassingEncounter&#39;</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removed &#39;Visit_encompassingEncounter&#39; config (merged into &#39;Visit&#39;)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create &#39;VISITDETAIL_visit_occurrence&#39; config with visit_detail records</span>
+    <span class="k">if</span> <span class="n">visit_detail_list</span><span class="p">:</span>
+        <span class="n">omop_dict</span><span class="p">[</span><span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">visit_detail_list</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created &#39;VISITDETAIL_visit_occurrence&#39; config with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">visit_detail_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> records&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">omop_dict</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot; domain_dates tell the FK functionality in do_foreign_keys() how to</span>
+<span class="sd">    choose visits for domain_rows.It is one of the most encumbered parts of the code.</span>
+
+<span class="sd">    Rules:</span>
+<span class="sd">    - Encounters must be populated before domains. This is controlled by the</span>
+<span class="sd">      order of the metadata files in the metadata/__init__.py file.</span>
+<span class="sd">    - This structure must include a mapping from start or start and end to</span>
+<span class="sd">      names of the fields for each specific domain to be processed.</span>
+<span class="sd">    - These are _config_ names, not domain names. For example, the domain</span>
+<span class="sd">      Measurement is fed by configs names Measurement_vital_signs, and</span>
+<span class="sd">      Measurement_results. They are the keys into the output dict where the</span>
+<span class="sd">      visit candidates will be found.</span>
+<span class="sd">    + This all happens in the do_basic_keys</span>
+
+<span class="sd">    Background: An xml file is processed in phases, one for each configuration file in</span>
+<span class="sd">    the metadata directory. Since the configuration files are organized by omop table,</span>
+<span class="sd">    it&#39;s helpful to think of the phases being the OMOP tables too.  Within each config</span>
+<span class="sd">    phase, there is another level of phases: the types of the fields: none, constant,</span>
+<span class="sd">    basic, derived, domain, hash, and foreign key. This means any fields in the current</span>
+<span class="sd">    config phase are available for looking up the value of a foreign key.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">domain_dates</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Measurement&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;measurement_date&#39;</span><span class="p">,</span> <span class="s1">&#39;measurement_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;measurement_id&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;Observation&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;observation_date&#39;</span><span class="p">,</span> <span class="s1">&#39;observation_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;observation_id&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;Condition&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;condition_start_date&#39;</span><span class="p">,</span> <span class="s1">&#39;condition_start_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;end&#39;</span><span class="p">:</span>   <span class="p">[</span><span class="s1">&#39;condition_end_date&#39;</span><span class="p">,</span> <span class="s1">&#39;condition_end_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;condition_id&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;Procedure&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;procedure_date&#39;</span><span class="p">,</span> <span class="s1">&#39;procedure_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;procedure_occurrence_id&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;Drug&#39;</span>       <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;drug_exposure_start_date&#39;</span><span class="p">,</span> <span class="s1">&#39;drug_exposure_start_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;drug_exposure_end_date&#39;</span><span class="p">,</span> <span class="s1">&#39;drug_exposure_end_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;drug_exposure_id&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;Device&#39;</span>     <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;device_exposure_start_date&#39;</span><span class="p">,</span> <span class="s1">&#39;device_exposure_start_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;device_exposure_end_date&#39;</span><span class="p">,</span> <span class="s1">&#39;device_exposure_end_datetime&#39;</span><span class="p">],</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;device_exposure_id&#39;</span><span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="strip_tz">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.strip_tz">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">strip_tz</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove timezone info from a datetime, leaving date objects unchanged.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dt: A datetime.datetime, datetime.date, or None value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The same value with tzinfo removed if it was a timezone-aware datetime;</span>
+<span class="sd">        otherwise the original value unchanged.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="n">dt</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dt</span></div>
+
+
+
+<div class="viewcode-block" id="reconcile_visit_FK_with_specific_domain">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.reconcile_visit_FK_with_specific_domain">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reconcile_visit_FK_with_specific_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                            <span class="n">domain_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+                                            <span class="n">visit_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign visit_occurrence_id to each event record in a clinical domain.</span>
+
+<span class="sd">    Matches each event in domain_dict to a visit in visit_dict by checking whether</span>
+<span class="sd">    the event&#39;s date falls within the visit&#39;s start/end window. If exactly one visit</span>
+<span class="sd">    matches, its visit_occurrence_id is written into the event record. If zero or</span>
+<span class="sd">    multiple visits match, a warning is logged and the field is left unset (or a</span>
+<span class="sd">    ``__visit_candidates`` key is added for ambiguous cases).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        domain: OMOP domain name (e.g. ``&#39;Measurement&#39;``, ``&#39;Condition&#39;``). Must be</span>
+<span class="sd">            a key in the module-level ``domain_dates`` config dict.</span>
+<span class="sd">        domain_dict: List of clinical event record dicts to be matched.</span>
+<span class="sd">        visit_dict: List of visit_occurrence record dicts to match against.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">visit_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no visits for </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> in reconcile_visit_FK_with_specific_domain, reconciliation&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">domain_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no data for </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> in reconcile_visit_FK_with_specific_domain, reconciliation&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Only Measurement, Observation, Condition, Procedure, Drug, and Device participate in Visit FK reconciliation</span>
+    <span class="k">if</span> <span class="n">domain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no metadata for domain </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> in reconcile_visit_FK_with_specific_domain, reconciliation&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="s1">&#39;date&#39;</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c1"># Logic for domains with just one date</span>
+        <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">domain_dict</span><span class="p">:</span>
+
+            <span class="n">date_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">datetime_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># Start with the plain date. If a datetime value is present, prefer it (more specific)</span>
+            <span class="n">date_field_value</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="n">date_field_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">datetime_field_name</span> <span class="ow">in</span> <span class="n">thing</span> <span class="ow">and</span> <span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">datetime_field_name</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">datetime_field_name</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)):</span>
+                <span class="n">date_field_value</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">datetime_field_name</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">date_field_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="n">visit</span> <span class="ow">in</span> <span class="n">visit_dict</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">start_visit_date</span> <span class="o">=</span> <span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_start_date&#39;</span><span class="p">]</span>
+                        <span class="n">start_visit_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_start_datetime&#39;</span><span class="p">])</span>
+                        <span class="n">end_visit_date</span> <span class="o">=</span> <span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_end_date&#39;</span><span class="p">]</span>
+                        <span class="n">end_visit_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_end_datetime&#39;</span><span class="p">])</span>
+
+                        <span class="n">in_window</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="c1"># Match using datetime</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_field_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">start_visit_datetime</span> <span class="o">!=</span> <span class="n">end_visit_datetime</span><span class="p">:</span>
+                                <span class="n">in_window</span> <span class="o">=</span> <span class="n">start_visit_datetime</span> <span class="o">&lt;=</span> <span class="n">date_field_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_datetime</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">end_visit_datetime_adjusted</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">end_visit_date</span><span class="p">,</span>
+                                                                                        <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">59</span><span class="p">))</span>
+                                <span class="n">in_window</span> <span class="o">=</span> <span class="n">start_visit_datetime</span> <span class="o">&lt;=</span> <span class="n">date_field_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_datetime_adjusted</span>
+
+                        <span class="c1"># Match using only dates</span>
+                        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_field_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+                            <span class="n">in_window</span> <span class="o">=</span> <span class="n">start_visit_date</span> <span class="o">&lt;=</span> <span class="n">date_field_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_date</span>
+
+                        <span class="k">if</span> <span class="n">in_window</span><span class="p">:</span>
+                            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">])</span>
+
+                    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ke</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;missing field  </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">ke</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">, in visit reconciliation, got error </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ke</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; couldn&#39;t reconcile visit for </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> event: </span><span class="si">{</span><span class="n">thing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;Ambiguous visit match for </span><span class="si">%s</span><span class="s2"> (id=</span><span class="si">%s</span><span class="s2">): </span><span class="si">%d</span><span class="s2"> candidates; leaving visit_occurrence_id unset&quot;</span><span class="p">,</span>
+                        <span class="n">domain</span><span class="p">,</span> <span class="n">thing</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;__visit_candidates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matches</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># S.O.L.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no date available for visit reconciliation in domain </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">thing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Logic for domains with start and end date/dateime</span>
+    <span class="k">elif</span> <span class="s1">&#39;start&#39;</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;end&#39;</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">domain_dict</span><span class="p">:</span>
+            <span class="n">start_date_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;start&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">start_datetime_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;start&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">end_date_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;end&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">end_datetime_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;end&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">start_date_value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">end_date_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Prefer datetime if available</span>
+            <span class="k">if</span> <span class="n">thing</span><span class="p">[</span><span class="n">start_datetime_field_name</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">start_datetime_field_name</span><span class="p">],</span>
+                                                                           <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                <span class="n">start_date_value</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">start_datetime_field_name</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">start_date_value</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="n">start_date_field_name</span><span class="p">]</span>
+
+            <span class="c1"># Prefer datetime if available, else use end_date field, else fallback to start_date</span>
+            <span class="k">if</span> <span class="n">thing</span><span class="p">[</span><span class="n">end_datetime_field_name</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">end_datetime_field_name</span><span class="p">],</span>
+                                                                         <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                <span class="n">end_date_value</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">end_datetime_field_name</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">thing</span><span class="p">[</span><span class="n">end_date_field_name</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">end_date_value</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="n">end_date_field_name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">end_date_value</span> <span class="o">=</span> <span class="n">start_date_value</span>
+
+            <span class="k">if</span> <span class="n">start_date_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end_date_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="n">visit</span> <span class="ow">in</span> <span class="n">visit_dict</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">start_visit_date</span> <span class="o">=</span> <span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_start_date&#39;</span><span class="p">]</span>
+                        <span class="n">start_visit_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_start_datetime&#39;</span><span class="p">])</span>
+                        <span class="n">end_visit_date</span> <span class="o">=</span> <span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_end_date&#39;</span><span class="p">]</span>
+                        <span class="n">end_visit_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_end_datetime&#39;</span><span class="p">])</span>
+
+                        <span class="n">in_window</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="c1"># Adjust datetime comparisons for start and end values</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_date_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_date_value</span><span class="p">,</span>
+                                                                                          <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">start_visit_datetime</span> <span class="o">!=</span> <span class="n">end_visit_datetime</span><span class="p">:</span>
+                                <span class="n">in_window</span> <span class="o">=</span> <span class="p">(</span>
+                                        <span class="p">(</span><span class="n">start_visit_datetime</span> <span class="o">&lt;=</span> <span class="n">start_date_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_datetime</span><span class="p">)</span> <span class="ow">and</span>
+                                        <span class="p">(</span><span class="n">start_visit_datetime</span> <span class="o">&lt;=</span> <span class="n">end_date_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_datetime</span><span class="p">)</span>
+                                <span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">end_visit_datetime_adjusted</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">end_visit_date</span><span class="p">,</span>
+                                                                                        <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="mi">23</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">59</span><span class="p">))</span>
+                                <span class="n">in_window</span> <span class="o">=</span> <span class="p">(</span>
+                                        <span class="p">(</span><span class="n">start_visit_datetime</span> <span class="o">&lt;=</span> <span class="n">start_date_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_datetime_adjusted</span><span class="p">)</span> <span class="ow">and</span>
+                                        <span class="p">(</span><span class="n">start_visit_datetime</span> <span class="o">&lt;=</span> <span class="n">end_date_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_datetime_adjusted</span><span class="p">)</span>
+                                <span class="p">)</span>
+                        <span class="c1"># Compare with dates if datetime is not available</span>
+                        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_date_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_date_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+                            <span class="n">in_window</span> <span class="o">=</span> <span class="p">(</span>
+                                    <span class="p">(</span><span class="n">start_visit_date</span> <span class="o">&lt;=</span> <span class="n">start_date_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_date</span><span class="p">)</span> <span class="ow">and</span>
+                                    <span class="p">(</span><span class="n">start_visit_date</span> <span class="o">&lt;=</span> <span class="n">end_date_value</span> <span class="o">&lt;=</span> <span class="n">end_visit_date</span><span class="p">)</span>
+                            <span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">in_window</span><span class="p">:</span>
+                            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">visit</span><span class="p">[</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">])</span>
+
+                    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ke</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;missing field </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">ke</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> in visit reconciliation, got error </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ke</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;something wrong in visit reconciliation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; couldn&#39;t reconcile visit for </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> event: </span><span class="si">{</span><span class="n">thing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;Ambiguous visit match for </span><span class="si">%s</span><span class="s2"> (id=</span><span class="si">%s</span><span class="s2">): </span><span class="si">%d</span><span class="s2"> candidates; leaving visit_occurrence_id unset&quot;</span><span class="p">,</span>
+                        <span class="n">domain</span><span class="p">,</span> <span class="n">thing</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;__visit_candidates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matches</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># S.O.L.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no date available for visit reconciliation in domain </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">thing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;??? bust in domain_dates for reconciliation&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="assign_visit_occurrence_ids_to_events">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.assign_visit_occurrence_ids_to_events">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">assign_visit_occurrence_ids_to_events</span><span class="p">(</span><span class="n">data_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign visit_occurrence_id FKs to all clinical event records in data_dict.</span>
+
+<span class="sd">    Iterates over all configs in data_dict whose domain is one of Measurement,</span>
+<span class="sd">    Observation, Condition, Procedure, Drug, or Device, and calls</span>
+<span class="sd">    reconcile_visit_FK_with_specific_domain() to match each event to a visit.</span>
+
+<span class="sd">    Expects visit records to be under the ``&#39;Visit&#39;`` config key (after visit</span>
+<span class="sd">    hierarchy processing has merged Visit and Visit_encompassingEncounter).</span>
+<span class="sd">    Removes the temporary ``__visit_candidates`` key from all records after</span>
+<span class="sd">    reconciliation is complete.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_dict: Dict mapping config names to lists of record dicts, as returned</span>
+<span class="sd">            by parse_doc().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># data_dict is a dictionary of config_names to a list of record-dicts</span>
+    <span class="c1"># Only Measurement, Observation, Condition, Procedure, Drug, and Device participate in Visit FK reconciliation</span>
+    <span class="c1"># Visit hierarchy processing (reclassify_nested_visit_occurrences_as_detail) merges both</span>
+    <span class="c1"># Visit and Visit_encompassingEncounter configs, so by this point all visits (visit_occurrence) are in &#39;Visit&#39;.</span>
+    <span class="n">VISIT_CFG_NAME</span> <span class="o">=</span> <span class="s1">&#39;Visit&#39;</span>
+
+    <span class="c1"># Use ddl.py mappings as single source of truth</span>
+    <span class="n">config_to_domain_map</span> <span class="o">=</span> <span class="n">DDL</span><span class="o">.</span><span class="n">config_to_domain_name_dict</span>
+
+    <span class="c1"># Only process configs that exist in data_dict and have clinical events needing visit reconciliation</span>
+    <span class="k">for</span> <span class="n">cfg_name</span><span class="p">,</span> <span class="n">domain_name</span> <span class="ow">in</span> <span class="n">config_to_domain_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">cfg_name</span> <span class="ow">in</span> <span class="n">data_dict</span> <span class="ow">and</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">cfg_name</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">domain_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Measurement&#39;</span><span class="p">,</span> <span class="s1">&#39;Observation&#39;</span><span class="p">,</span> <span class="s1">&#39;Condition&#39;</span><span class="p">,</span> <span class="s1">&#39;Procedure&#39;</span><span class="p">,</span> <span class="s1">&#39;Drug&#39;</span><span class="p">,</span> <span class="s1">&#39;Device&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">VISIT_CFG_NAME</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">:</span>
+                    <span class="n">reconcile_visit_FK_with_specific_domain</span><span class="p">(</span><span class="n">domain_name</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">cfg_name</span><span class="p">],</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">VISIT_CFG_NAME</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NO </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">VISIT_CFG_NAME</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">, no visit reconciliation or inference done.&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">cfg_name</span><span class="p">,</span> <span class="n">domain_name</span> <span class="ow">in</span> <span class="n">config_to_domain_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">cfg_name</span> <span class="ow">in</span> <span class="n">data_dict</span> <span class="ow">and</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">cfg_name</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">domain_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Measurement&#39;</span><span class="p">,</span> <span class="s1">&#39;Observation&#39;</span><span class="p">,</span> <span class="s1">&#39;Condition&#39;</span><span class="p">,</span> <span class="s1">&#39;Procedure&#39;</span><span class="p">,</span> <span class="s1">&#39;Drug&#39;</span><span class="p">,</span> <span class="s1">&#39;Device&#39;</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">cfg_name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="s1">&#39;__visit_candidates&#39;</span> <span class="ow">in</span> <span class="n">record</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">record</span><span class="p">[</span><span class="s1">&#39;__visit_candidates&#39;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="assign_visit_detail_ids_to_events">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.assign_visit_detail_ids_to_events">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">assign_visit_detail_ids_to_events</span><span class="p">(</span><span class="n">data_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    visit_detail FK reconciliation: Match clinical domain events to visit_detail records.</span>
+
+<span class="sd">    This assigns visit_detail_id to events that occur during nested visits.</span>
+<span class="sd">    Events must already have visit_occurrence_id set (from assign_visit_occurrence_ids_to_events).</span>
+
+<span class="sd">    For events that fall within multiple nested visits, chooses the most specific</span>
+<span class="sd">    (smallest duration) visit_detail.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_dict: Dictionary with config_name → list of records (omop_dict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">VISIT_DETAIL_CFG_NAME</span> <span class="o">=</span> <span class="s1">&#39;VISITDETAIL_visit_occurrence&#39;</span>
+
+    <span class="k">if</span> <span class="n">VISIT_DETAIL_CFG_NAME</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_dict</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">VISIT_DETAIL_CFG_NAME</span><span class="p">]:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No visit_detail records found - skipping visit_detail FK reconciliation&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">visit_detail_list</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">VISIT_DETAIL_CFG_NAME</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing visit_detail FK reconciliation for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">visit_detail_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> visit_detail records&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Use ddl.py mappings as single source of truth</span>
+    <span class="n">config_to_domain_map</span> <span class="o">=</span> <span class="n">DDL</span><span class="o">.</span><span class="n">config_to_domain_name_dict</span>
+
+    <span class="c1"># Only process configs that exist and have clinical events needing visit_detail reconciliation</span>
+    <span class="k">for</span> <span class="n">cfg_name</span><span class="p">,</span> <span class="n">domain_name</span> <span class="ow">in</span> <span class="n">config_to_domain_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">cfg_name</span> <span class="ow">in</span> <span class="n">data_dict</span> <span class="ow">and</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">cfg_name</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">domain_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Measurement&#39;</span><span class="p">,</span> <span class="s1">&#39;Observation&#39;</span><span class="p">,</span> <span class="s1">&#39;Condition&#39;</span><span class="p">,</span> <span class="s1">&#39;Procedure&#39;</span><span class="p">,</span> <span class="s1">&#39;Drug&#39;</span><span class="p">,</span> <span class="s1">&#39;Device&#39;</span><span class="p">]:</span>
+                <span class="n">reconcile_visit_detail_FK_with_specific_domain</span><span class="p">(</span><span class="n">domain_name</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">cfg_name</span><span class="p">],</span> <span class="n">visit_detail_list</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="reconcile_visit_detail_FK_with_specific_domain">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.reconcile_visit_detail_FK_with_specific_domain">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reconcile_visit_detail_FK_with_specific_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                                    <span class="n">domain_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+                                                    <span class="n">visit_detail_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OMOPRecord</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Match events to visit_detail records by temporal containment.</span>
+<span class="sd">    Choose the most specific (smallest duration) matching visit_detail.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        domain: Domain name (e.g., &#39;Measurement&#39;, &#39;Condition&#39;)</span>
+<span class="sd">        domain_dict: List of event records to reconcile</span>
+<span class="sd">        visit_detail_dict: List of visit_detail records</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">visit_detail_dict</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">domain_dict</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">domain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No date metadata for domain </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> in visit_detail reconciliation&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reconciling visit_detail FKs for </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">domain_dict</span><span class="p">)</span><span class="si">}</span><span class="s2"> events, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">visit_detail_dict</span><span class="p">)</span><span class="si">}</span><span class="s2"> visit_details)&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Visit_detail date field mapping</span>
+    <span class="n">visit_detail_date_fields</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;start_date&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_start_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;start_datetime&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_start_datetime&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;end_date&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_end_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;end_datetime&#39;</span><span class="p">:</span> <span class="s1">&#39;visit_detail_end_datetime&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">matched_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">no_match_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Process events with a single date field</span>
+    <span class="k">if</span> <span class="s1">&#39;date&#39;</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">domain_dict</span><span class="p">:</span>
+            <span class="c1"># Skip if no visit_occurrence_id</span>
+            <span class="k">if</span> <span class="s1">&#39;visit_occurrence_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">thing</span> <span class="ow">or</span> <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">date_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">datetime_field_name</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># Get event date (prefer datetime over date)</span>
+            <span class="n">event_date</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">thing</span><span class="p">[</span><span class="n">datetime_field_name</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">datetime_field_name</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                <span class="n">event_date</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">datetime_field_name</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">event_date</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="n">date_field_name</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">event_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Find matching visit_details</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vd</span> <span class="ow">in</span> <span class="n">visit_detail_dict</span><span class="p">:</span>
+                <span class="c1"># Must be in the same visit_occurrence</span>
+                <span class="k">if</span> <span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">thing</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Get visit_detail dates</span>
+                <span class="n">vd_start_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]))</span>
+                <span class="n">vd_start_date</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">])</span>
+                <span class="n">vd_end_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">]))</span>
+                <span class="n">vd_end_date</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;end_date&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Check containment</span>
+                <span class="n">in_window</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event_date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">vd_start_datetime</span> <span class="ow">and</span> <span class="n">vd_end_datetime</span><span class="p">:</span>
+                        <span class="n">in_window</span> <span class="o">=</span> <span class="n">vd_start_datetime</span> <span class="o">&lt;=</span> <span class="n">event_date</span> <span class="o">&lt;=</span> <span class="n">vd_end_datetime</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event_date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">vd_start_date</span> <span class="ow">and</span> <span class="n">vd_end_date</span><span class="p">:</span>
+                        <span class="n">in_window</span> <span class="o">=</span> <span class="n">vd_start_date</span> <span class="o">&lt;=</span> <span class="n">event_date</span> <span class="o">&lt;=</span> <span class="n">vd_end_date</span>
+
+                <span class="k">if</span> <span class="n">in_window</span><span class="p">:</span>
+                    <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vd</span><span class="p">)</span>
+
+            <span class="c1"># Set visit_detail_id based on matches</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span>
+                <span class="n">matched_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Multiple matches - choose most specific (smallest duration)</span>
+                <span class="n">most_specific</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">vd</span><span class="p">:</span> <span class="n">get_visit_detail_duration</span><span class="p">(</span><span class="n">vd</span><span class="p">))</span>
+                <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">most_specific</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span>
+                <span class="n">matched_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> event matched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span><span class="si">}</span><span class="s2"> visit_details, chose most specific (id=</span><span class="si">{</span><span class="n">most_specific</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No match - leave visit_detail_id as None</span>
+                <span class="n">no_match_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Process events with start and end dates</span>
+    <span class="k">elif</span> <span class="s1">&#39;start&#39;</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;end&#39;</span> <span class="ow">in</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">domain_dict</span><span class="p">:</span>
+            <span class="c1"># Skip if no visit_occurrence_id</span>
+            <span class="k">if</span> <span class="s1">&#39;visit_occurrence_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">thing</span> <span class="ow">or</span> <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">start_date_field</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;start&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">start_datetime_field</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;start&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">end_date_field</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;end&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">end_datetime_field</span> <span class="o">=</span> <span class="n">domain_dates</span><span class="p">[</span><span class="n">domain</span><span class="p">][</span><span class="s1">&#39;end&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># Get event dates</span>
+            <span class="n">start_date_value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">end_date_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">thing</span><span class="p">[</span><span class="n">start_datetime_field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">start_datetime_field</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                <span class="n">start_date_value</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">start_datetime_field</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">start_date_value</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="n">start_date_field</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">thing</span><span class="p">[</span><span class="n">end_datetime_field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">end_datetime_field</span><span class="p">],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                <span class="n">end_date_value</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">thing</span><span class="p">[</span><span class="n">end_datetime_field</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">thing</span><span class="p">[</span><span class="n">end_date_field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">end_date_value</span> <span class="o">=</span> <span class="n">thing</span><span class="p">[</span><span class="n">end_date_field</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">end_date_value</span> <span class="o">=</span> <span class="n">start_date_value</span>
+
+            <span class="k">if</span> <span class="n">start_date_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">end_date_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Find matching visit_details</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vd</span> <span class="ow">in</span> <span class="n">visit_detail_dict</span><span class="p">:</span>
+                <span class="c1"># Must be in the same visit_occurrence</span>
+                <span class="k">if</span> <span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">thing</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_occurrence_id&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Get visit_detail dates</span>
+                <span class="n">vd_start_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;start_datetime&#39;</span><span class="p">]))</span>
+                <span class="n">vd_start_date</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">])</span>
+                <span class="n">vd_end_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;end_datetime&#39;</span><span class="p">]))</span>
+                <span class="n">vd_end_date</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">visit_detail_date_fields</span><span class="p">[</span><span class="s1">&#39;end_date&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Check containment (both start and end must be within visit_detail window)</span>
+                <span class="n">in_window</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_date_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_date_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">vd_start_datetime</span> <span class="ow">and</span> <span class="n">vd_end_datetime</span><span class="p">:</span>
+                        <span class="n">in_window</span> <span class="o">=</span> <span class="p">(</span><span class="n">vd_start_datetime</span> <span class="o">&lt;=</span> <span class="n">start_date_value</span> <span class="o">&lt;=</span> <span class="n">vd_end_datetime</span> <span class="ow">and</span>
+                                    <span class="n">vd_start_datetime</span> <span class="o">&lt;=</span> <span class="n">end_date_value</span> <span class="o">&lt;=</span> <span class="n">vd_end_datetime</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_date_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_date_value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">vd_start_date</span> <span class="ow">and</span> <span class="n">vd_end_date</span><span class="p">:</span>
+                        <span class="n">in_window</span> <span class="o">=</span> <span class="p">(</span><span class="n">vd_start_date</span> <span class="o">&lt;=</span> <span class="n">start_date_value</span> <span class="o">&lt;=</span> <span class="n">vd_end_date</span> <span class="ow">and</span>
+                                   <span class="n">vd_start_date</span> <span class="o">&lt;=</span> <span class="n">end_date_value</span> <span class="o">&lt;=</span> <span class="n">vd_end_date</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">in_window</span><span class="p">:</span>
+                    <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vd</span><span class="p">)</span>
+
+            <span class="c1"># Set visit_detail_id based on matches</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span>
+                <span class="n">matched_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Multiple matches - choose most specific (smallest duration)</span>
+                <span class="n">most_specific</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">vd</span><span class="p">:</span> <span class="n">get_visit_detail_duration</span><span class="p">(</span><span class="n">vd</span><span class="p">))</span>
+                <span class="n">thing</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">most_specific</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span>
+                <span class="n">matched_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> event matched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span><span class="si">}</span><span class="s2"> visit_details, chose most specific (id=</span><span class="si">{</span><span class="n">most_specific</span><span class="p">[</span><span class="s1">&#39;visit_detail_id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No match - leave visit_detail_id as None</span>
+                <span class="n">no_match_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">matched_count</span><span class="si">}</span><span class="s2"> events matched to visit_detail, </span><span class="si">{</span><span class="n">no_match_count</span><span class="si">}</span><span class="s2"> without visit_detail match&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_visit_detail_duration">
+<a class="viewcode-back" href="../../api/ccda_to_omop.visit_reconciliation.html#ccda_to_omop.visit_reconciliation.get_visit_detail_duration">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_visit_detail_duration</span><span class="p">(</span><span class="n">visit_detail_dict</span><span class="p">:</span> <span class="n">OMOPRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate duration of a visit_detail in days.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        visit_detail_dict: Visit_detail record</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Duration in days (float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">visit_detail_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_detail_start_datetime&#39;</span><span class="p">)</span>
+    <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">visit_detail_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_detail_end_datetime&#39;</span><span class="p">)</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">visit_detail_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_detail_start_date&#39;</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">visit_detail_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visit_detail_end_date&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Prefer datetime for precision</span>
+    <span class="k">if</span> <span class="n">start_datetime</span> <span class="ow">and</span> <span class="n">end_datetime</span><span class="p">:</span>
+        <span class="c1"># Strip timezone to allow subtraction</span>
+        <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">)</span>
+        <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">strip_tz</span><span class="p">(</span><span class="n">end_datetime</span><span class="p">)</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">end_datetime</span> <span class="o">-</span> <span class="n">start_datetime</span>
+        <span class="k">return</span> <span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="n">SECONDS_PER_DAY</span>  <span class="c1"># Convert to days</span>
+    <span class="k">elif</span> <span class="n">start_date</span> <span class="ow">and</span> <span class="n">end_date</span><span class="p">:</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">end_date</span> <span class="o">-</span> <span class="n">start_date</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mf">0.0</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

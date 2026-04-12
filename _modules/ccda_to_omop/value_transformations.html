@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ccda_to_omop.value_transformations &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">ccda_to_omop</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ccda_to_omop.value_transformations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ccda_to_omop.value_transformations</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typeguard</span><span class="w"> </span><span class="kn">import</span> <span class="n">typechecked</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">int32</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast_to_datetime</span><span class="p">,</span> <span class="n">CodemapDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop</span><span class="w"> </span><span class="kn">import</span> <span class="n">package_constant_access</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ccda_to_omop.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">HL7_DATE_LENGTH</span><span class="p">,</span> <span class="n">ISO_DATE_LENGTH</span><span class="p">,</span> <span class="n">DATETIME_LOW_SUFFIX</span><span class="p">,</span> <span class="n">DATETIME_HIGH_SUFFIX</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Functions for use in DERVIED fields.</span>
+<span class="sd">    The configuration for this type of field is:</span>
+<span class="sd">        &lt;new field name&gt;: {</span>
+<span class="sd">            &#39;config_type&#39;: &#39;DERIVED&#39;,</span>
+<span class="sd">            &#39;FUNCTION&#39;: VT.&lt;function_name&gt;</span>
+<span class="sd">            &#39;argument_names&#39;: {</span>
+<span class="sd">                &lt;arg_name_1&gt;: &lt;field_name_1&gt;</span>
+<span class="sd">                ...</span>
+<span class="sd">                &lt;arg_name_n&gt;: &lt;field_name_n&gt;</span>
+<span class="sd">                &#39;default&#39;: &lt;default_value&gt;</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">    The config links argument names to functions defined here to field names</span>
+<span class="sd">    for the values. The code that calls these functions does the value lookup,</span>
+<span class="sd">    so they operate on values, not field names or keys.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VocabContext">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.VocabContext">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VocabContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Holds the vocabulary lookup maps used by transformation functions.</span>
+
+<span class="sd">    A single module-level instance (_context) is used at runtime.  Tests can</span>
+<span class="sd">    call reset() between cases to guarantee isolation without relying on</span>
+<span class="sd">    import order or global keyword side-effects.</span>
+
+<span class="sd">    Full dependency injection is not yet possible because transformation</span>
+<span class="sd">    functions are referenced by name in metadata configs and are called with</span>
+<span class="sd">    only args_dict.  This class is the first step: all mutable state lives</span>
+<span class="sd">    here rather than as bare module globals, which eliminates the &#39;global&#39;</span>
+<span class="sd">    keyword and makes the state easy to inspect and reset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codemap_dict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partner_map</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mspi_lookup_map</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<span class="n">_context</span> <span class="o">=</span> <span class="n">VocabContext</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="reset_context">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.reset_context">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reset_context</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reset all vocab maps to None.  Call between test cases for isolation.&quot;&quot;&quot;</span>
+    <span class="n">_context</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="set_codemap_dict">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.set_codemap_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_codemap_dict</span><span class="p">(</span><span class="nb">map</span><span class="p">:</span> <span class="n">CodemapDict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;set_codemap_dict </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">map</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;set_codemap_dict None map&quot;</span><span class="p">)</span>
+    <span class="n">_context</span><span class="o">.</span><span class="n">codemap_dict</span> <span class="o">=</span> <span class="nb">map</span></div>
+
+
+<div class="viewcode-block" id="get_codemap_dict">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.get_codemap_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_codemap_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CodemapDict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the currently loaded codemap crosswalk dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_context</span><span class="o">.</span><span class="n">codemap_dict</span></div>
+
+
+
+
+<div class="viewcode-block" id="cast_as_string">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.cast_as_string">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cast_as_string</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return args_dict[&#39;input&#39;] as a string if type is &#39;ST&#39; (HL7 string), else None.&quot;&quot;&quot;</span>
+    <span class="n">string_value</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">]</span>
+    <span class="n">type_value</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">type_value</span> <span class="o">==</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">string_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="cast_as_number">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.cast_as_number">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cast_as_number</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return args_dict[&#39;input&#39;] as an int if type is &#39;PQ&#39; (HL7 physical quantity), else None.&quot;&quot;&quot;</span>
+    <span class="n">string_value</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">]</span>
+    <span class="n">type_value</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">type_value</span> <span class="o">==</span> <span class="s1">&#39;PQ&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">string_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="cast_as_concept_id">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.cast_as_concept_id">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cast_as_concept_id</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int32</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return args_dict[&#39;input&#39;] as an int32 concept ID if type is &#39;CD&#39; or &#39;CE&#39;, else None.&quot;&quot;&quot;</span>
+    <span class="n">string_value</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">]</span>
+    <span class="n">type_value</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">type_value</span> <span class="o">==</span> <span class="s1">&#39;CD&#39;</span> <span class="ow">or</span> <span class="n">type_value</span> <span class="o">==</span> <span class="s1">&#39;CE&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">int32</span><span class="p">(</span><span class="n">string_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+
+
+<span class="c1">############################################################################</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    table: codemap_xwalk</span>
+<span class="sd">    functions: codemap_xwalk...</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="codemap_xwalk_concept_id">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.codemap_xwalk_concept_id">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">codemap_xwalk_concept_id</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int32</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; expects: vocabulary_oid, concept_code</span>
+<span class="sd">        returns: concept_id AS INTEGER (because that&#39;s what&#39;s in the table), not necessarily standard</span>
+<span class="sd">                 If NMC is disallowed, it will return None instead of 0.</span>
+<span class="sd">                 Control this via set_allow_no_macthing_concept() in package_constant_access.</span>
+<span class="sd">        throws/raises when codemap_xwalk is None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">id_value</span> <span class="o">=</span> <span class="n">_codemap_xwalk</span><span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;vocabulary_oid&#39;</span><span class="p">],</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;concept_code&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;target_concept_id&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">id_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">id_value</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">package_constant_access</span><span class="o">.</span><span class="n">get_allow_no_matching_concept</span><span class="p">()):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;codemap_xwalk_concept_id concept_id is </span><span class="si">{</span><span class="n">id_value</span><span class="si">}</span><span class="s2">  for </span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">int32</span><span class="p">(</span><span class="n">id_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;codemap_xwalk_concept_id concept_id is None  for </span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="codemap_xwalk_domain_id">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.codemap_xwalk_domain_id">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">codemap_xwalk_domain_id</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; expects: vocabulary_oid, concept_code</span>
+<span class="sd">        returns: always returns domain_id</span>
+<span class="sd">        throws/raises when codemap_xwalk is None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">id_value</span> <span class="o">=</span> <span class="n">_codemap_xwalk</span><span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;vocabulary_oid&#39;</span><span class="p">],</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;concept_code&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;target_domain_id&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">id_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">id_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="codemap_xwalk_source_concept_id">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.codemap_xwalk_source_concept_id">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">codemap_xwalk_source_concept_id</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int32</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; expects: vocabulary_oid, concept_code</span>
+<span class="sd">        returns: unmapped concept_id AS INTEGER (because that&#39;s what&#39;s in the table), not necessarily standard</span>
+<span class="sd">        throws/raises when codemap_xwalk is None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">id_value</span> <span class="o">=</span> <span class="n">_codemap_xwalk</span><span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;vocabulary_oid&#39;</span><span class="p">],</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;concept_code&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;source_concept_id&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">id_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">id_value</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">package_constant_access</span><span class="o">.</span><span class="n">get_allow_no_matching_concept</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">int32</span><span class="p">(</span><span class="n">id_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_codemap_xwalk</span><span class="p">(</span><span class="n">vocabulary_oid</span><span class="p">,</span> <span class="n">concept_code</span><span class="p">,</span> <span class="n">column_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Look up a single column value from the codemap crosswalk dict.</span>
+
+<span class="sd">    Raises if the codemap is not initialized. Returns None if the</span>
+<span class="sd">    (vocabulary_oid, concept_code) key is absent or has no matching rows.</span>
+<span class="sd">    If NMC (no-matching-concept, value 0) is disallowed, also returns None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">get_codemap_dict</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;codemap_dict is not initialized in ccda_to_omop/value_transformations.py for value_transformations.py&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;codemap_dict is not initialized in ccda_to_omop/value_transformations.py for value_transformations.py&quot;</span><span class="p">)</span>
+    <span class="n">codemap_xwalk_mapping_dict</span><span class="o">=</span> <span class="n">get_codemap_dict</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">vocabulary_oid</span><span class="p">,</span> <span class="n">concept_code</span><span class="p">)</span> <span class="ow">in</span> <span class="n">codemap_xwalk_mapping_dict</span><span class="p">:</span>
+        <span class="n">mapping_rows</span> <span class="o">=</span> <span class="n">codemap_xwalk_mapping_dict</span><span class="p">[(</span><span class="n">vocabulary_oid</span><span class="p">,</span> <span class="n">concept_code</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;value_transformations.py _codemap_xwalk vocabulary_id:</span><span class="se">\&quot;</span><span class="si">{</span><span class="n">vocabulary_oid</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> ,</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">vocabulary_oid</span><span class="p">)</span><span class="si">}</span><span class="s2">, code:</span><span class="se">\&quot;</span><span class="si">{</span><span class="n">concept_code</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">, </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">concept_code</span><span class="p">)</span><span class="si">}</span><span class="s2">  not present or not found&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">mapping_rows</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;codemap_dict mapping_rows is None  for vocab:</span><span class="si">{</span><span class="n">vocabulary_oid</span><span class="si">}</span><span class="s2"> code:</span><span class="si">{</span><span class="n">concept_code</span><span class="si">}</span><span class="s2"> column_name:</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mapping_rows</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;codemap_dict mapping_rows is &lt;1 for vocab:</span><span class="si">{</span><span class="n">vocabulary_oid</span><span class="si">}</span><span class="s2"> code:</span><span class="si">{</span><span class="n">concept_code</span><span class="si">}</span><span class="s2"> column_name:</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mapping_rows</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;_codemap_xwalk(): more than one  concept for  </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> from  </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">vocabulary_oid</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">concept_code</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">, chose the first&quot;</span><span class="p">)</span>
+
+    <span class="n">column_value</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">mapping_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">column_value</span> <span class="o">=</span> <span class="n">mapping_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">column_name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;value_transformations.py _codemap_xwalk doens&#39;t have the column</span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">....</span><span class="si">{</span><span class="n">mapping_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;f (cont) </span><span class="si">{mapping_rows}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">column_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">column_value</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">package_constant_access</span><span class="o">.</span><span class="n">get_allow_no_matching_concept</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">column_value</span>
+
+
+<span class="c1">############################################################################</span>
+
+
+<div class="viewcode-block" id="extract_day_of_birth">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.extract_day_of_birth">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_day_of_birth</span><span class="p">(</span><span class="n">args_dict</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int32</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract day of birth from args_dict[&#39;date_object&#39;] (assumes a date/datetime).&quot;&quot;&quot;</span>
+    <span class="n">date_object</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;date_object&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">date_object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">int32</span><span class="p">(</span><span class="n">date_object</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="extract_month_of_birth">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.extract_month_of_birth">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_month_of_birth</span><span class="p">(</span><span class="n">args_dict</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int32</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract month of birth from args_dict[&#39;date_object&#39;] (assumes a date/datetime).&quot;&quot;&quot;</span>
+    <span class="n">date_object</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;date_object&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">date_object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">int32</span><span class="p">(</span><span class="n">date_object</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="extract_year_of_birth">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.extract_year_of_birth">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_year_of_birth</span><span class="p">(</span><span class="n">args_dict</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int32</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract year of birth from args_dict[&#39;date_object&#39;] (assumes a date/datetime).&quot;&quot;&quot;</span>
+    <span class="n">date_object</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;date_object&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">date_object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">int32</span><span class="p">(</span><span class="n">date_object</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="concat_field_list_names">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.concat_field_list_names">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">concat_field_list_names</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">data_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        A DERIVED2 style function.</span>
+<span class="sd">        Looks for a argument with the name of &#39;args&#39; under the &#39;argument_list&#39;</span>
+<span class="sd">        brought in from the parse configuration. That list is a list of keys</span>
+<span class="sd">        whose data we&#39;re interested in fetching from the data_dict.</span>
+
+<span class="sd">        args_dict: the field&#39;s paragraph in the parse configuration</span>
+<span class="sd">        data_dict: the dictionary of values being built up for an OMOP row</span>
+<span class="sd">           by the parse configuration where all this comes from.</span>
+
+<span class="sd">        Returns: a joined list of the keys. The data_dict is unused.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">args_key</span> <span class="o">=</span> <span class="s1">&#39;argument_list&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;no args dict </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> &quot;</span>
+    <span class="k">if</span> <span class="n">args_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;no  </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">args_key</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> in args dict </span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;key_list&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;argument_list&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;no  </span><span class="se">\&quot;</span><span class="s2">key_list</span><span class="se">\&quot;</span><span class="s2"> in args dict </span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span>  <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;argument_list&#39;</span><span class="p">][</span><span class="s1">&#39;key_list&#39;</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="concat_field_list_values">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.concat_field_list_values">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">concat_field_list_values</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">data_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        A DERIVED2 style function.</span>
+<span class="sd">        Looks for a argument with the name of &#39;args&#39; under the &#39;argument_list&#39;</span>
+<span class="sd">        brought in from the parse configuration. That list is a list of keys</span>
+<span class="sd">        whose data we&#39;re interested in fetching from the data_dict.</span>
+
+<span class="sd">        args_dict: the field&#39;s paragraph in the parse configuration</span>
+<span class="sd">        data_dict: the dictionary of values being built up for an OMOP row</span>
+<span class="sd">           by the parse configuration where all this comes from.</span>
+
+<span class="sd">        Returns: a joined list of the data values associated with those keys.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;no args dict </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> &quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;argument_list&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;no  argument_list in args dict </span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;key_list&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;argument_list&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;no  </span><span class="se">\&quot;</span><span class="s2">key_list</span><span class="se">\&quot;</span><span class="s2"> in args dict </span><span class="si">{</span><span class="n">args_dict</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;argument_list&#39;</span><span class="p">][</span><span class="s1">&#39;key_list&#39;</span><span class="p">]</span> <span class="p">)))</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="concat_fields">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.concat_fields">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">concat_fields</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      A DERIVED style function.</span>
+<span class="sd">      input key &quot;delimiter&quot; is a character to use to separate the fields</span>
+<span class="sd">      following items in dict are the names of keys in the values to concat</span>
+
+<span class="sd">      returns one string, the concatenation of values corresponding to args 2-n, using arg 1 as a delimieter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">delimiter</span> <span class="o">=</span> <span class="s1">&#39;|&#39;</span>
+
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;first_field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;second_field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;first_field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;second_field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;second_field&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;first_field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;second_field&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;first_field&#39;</span><span class="p">]</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">values_to_concat</span> <span class="o">=</span> <span class="p">[</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;first_field&#39;</span><span class="p">],</span> <span class="n">args_dict</span><span class="p">[</span><span class="s1">&#39;second_field&#39;</span><span class="p">]</span> <span class="p">]</span>
+        <span class="k">return</span> <span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">values_to_concat</span><span class="p">)</span></div>
+
+
+<span class="c1">####################################################################################################</span>
+
+<div class="viewcode-block" id="set_partner_map">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.set_partner_map">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_partner_map</span><span class="p">(</span><span class="n">m</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initializes the partner map on the executor.&quot;&quot;&quot;</span>
+    <span class="n">_context</span><span class="o">.</span><span class="n">partner_map</span> <span class="o">=</span> <span class="n">m</span></div>
+
+
+<div class="viewcode-block" id="get_partner_map">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.get_partner_map">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_partner_map</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_context</span><span class="o">.</span><span class="n">partner_map</span></div>
+
+
+<div class="viewcode-block" id="get_data_partner_id">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.get_data_partner_id">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_data_partner_id</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">int32</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns Data Partner ID. Defaults to 0 if filename is not in map.</span>
+<span class="sd">    Strictly returns an integer per the component contract.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">get_partner_map</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">mapping</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data partner id map is missing&quot;</span><span class="p">)</span>
+    <span class="c1"># We don&#39;t catch errors here; if mapping[fname] is garbage,</span>
+    <span class="c1"># int32() will raise an error &#39;loudly&#39; as requested.</span>
+    <span class="k">return</span> <span class="n">int32</span><span class="p">(</span><span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="set_mspi_map">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.set_mspi_map">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_mspi_map</span><span class="p">(</span><span class="n">m</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initializes the MSPI (person_id) map on the executor.&quot;&quot;&quot;</span>
+    <span class="n">_context</span><span class="o">.</span><span class="n">mspi_lookup_map</span> <span class="o">=</span> <span class="n">m</span></div>
+
+
+<div class="viewcode-block" id="get_mspi_map">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.get_mspi_map">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_mspi_map</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_context</span><span class="o">.</span><span class="n">mspi_lookup_map</span></div>
+
+
+<div class="viewcode-block" id="map_filename_to_mspi">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.map_filename_to_mspi">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">map_filename_to_mspi</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns MSPI (person_id). Defaults to 0 if filename is not in map.</span>
+<span class="sd">    Raises if the MSPI map has not been initialized.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">get_mspi_map</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">mapping</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;MSPI map is missing&quot;</span><span class="p">)</span>
+    <span class="c1"># If filename is missing, returns 0.</span>
+    <span class="c1"># If value exists but isn&#39;t an integer, int() will raise a ValueError.</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="transform_datetime_low">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.transform_datetime_low">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">transform_datetime_low</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transforms a date-only string into a full ISO 8601 datetime defaulting to 00:00:00.</span>
+
+<span class="sd">    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD)</span>
+<span class="sd">    format. We can make this assumption because this transformation is typically</span>
+<span class="sd">    called after &#39;parseutils.parser&#39; has already standardized the raw input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;input_value&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
+
+    <span class="n">val_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="c1"># HL7 format (YYYYMMDD)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span> <span class="o">==</span> <span class="n">HL7_DATE_LENGTH</span> <span class="ow">and</span> <span class="n">val_str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">cast_to_datetime</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val_str</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">val_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">val_str</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span><span class="si">}{</span><span class="n">DATETIME_LOW_SUFFIX</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># ISO 8601 format (YYYY-MM-DD)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span> <span class="o">==</span> <span class="n">ISO_DATE_LENGTH</span> <span class="ow">and</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">val_str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cast_to_datetime</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val_str</span><span class="si">}{</span><span class="n">DATETIME_LOW_SUFFIX</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cast_to_datetime</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="transform_datetime_high">
+<a class="viewcode-back" href="../../api/ccda_to_omop.value_transformations.html#ccda_to_omop.value_transformations.transform_datetime_high">[docs]</a>
+<span class="nd">@typechecked</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">transform_datetime_high</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transforms a date-only string into a full ISO 8601 datetime defaulting to 23:59:59.</span>
+
+<span class="sd">    This function assumes the input is either in ISO 8601 (YYYY-MM-DD) or HL7 (YYYYMMDD)</span>
+<span class="sd">    format. We can make this assumption because this transformation is typically</span>
+<span class="sd">    called after &#39;parseutils.parser&#39; has already standardized the raw input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;input_value&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
+
+    <span class="n">val_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="c1"># HL7 format (YYYYMMDD)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span> <span class="o">==</span> <span class="n">HL7_DATE_LENGTH</span> <span class="ow">and</span> <span class="n">val_str</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">cast_to_datetime</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val_str</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">val_str</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">val_str</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span><span class="si">}{</span><span class="n">DATETIME_HIGH_SUFFIX</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># ISO 8601 format (YYYY-MM-DD)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span> <span class="o">==</span> <span class="n">ISO_DATE_LENGTH</span> <span class="ow">and</span> <span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">val_str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cast_to_datetime</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val_str</span><span class="si">}{</span><span class="n">DATETIME_HIGH_SUFFIX</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cast_to_datetime</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
