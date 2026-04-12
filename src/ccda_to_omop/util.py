@@ -1,3 +1,10 @@
+"""
+Shared utility functions and type aliases.
+
+Covers: codemap CSV loading (``create_codemap_dict_from_csv``), date/datetime
+parsing and casting, and the ``CodemapDict`` type alias used throughout the
+conversion pipeline.
+"""
 
 from collections import defaultdict
 import logging

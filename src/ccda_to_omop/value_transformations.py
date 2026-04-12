@@ -1,3 +1,13 @@
+"""
+Transformation functions used by DERIVED fields in metadata configs.
+
+Each function receives a dict of resolved argument values (looked up from the
+current output record by the parsing engine) and returns a single output value.
+Covers: concept ID / domain / source-concept lookups via the codemap, date and
+datetime casting, string concatenation, hash-based ID generation, and person /
+data-partner ID extraction.
+"""
+
 import datetime
 from typing import Any
 from typeguard import typechecked
