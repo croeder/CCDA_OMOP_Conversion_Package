@@ -166,17 +166,13 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[OMOPRecord | None] |
                                 domain_df[column_name] = None
                         else:
                             try:
-                                # Only fill missing values for non-nullable columns
-                                if column_name not in non_nullable_cols:
-                                    # For nullable integer columns, use pandas nullable Int64 and Int32 type
-                                    if column_type == int64:
-                                        domain_df[column_name] = domain_df[column_name].astype('Int64')
-                                    elif column_type == int32:
-                                        domain_df[column_name] = domain_df[column_name].astype('Int32')
-                                    else:
-                                        pass  # leave as None/NaN for other types
+                                # Use pandas nullable int types for all integer columns (NA preferred over 0)
+                                if column_type == int64:
+                                    domain_df[column_name] = domain_df[column_name].astype('Int64')
+                                elif column_type == int32:
+                                    domain_df[column_name] = domain_df[column_name].astype('Int32')
                                 else:
-                                    domain_df[column_name] = domain_df[column_name].fillna(0).astype(column_type)
+                                    pass  # leave as None/NaN for other types
                             except (TypeError, ValueError) as e:
                                 logger.error(f"CAST ERROR in layer_datasets.py create_omop_domain_dataframes() table:{table_name} column:{column_name} type:{column_type}  ")
                                 if column_name in domain_df:
@@ -185,14 +181,6 @@ def create_omop_domain_dataframes(omop_data: dict[str, list[OMOPRecord | None] |
                                     logger.error(f"    (cont.)  column \"{column_name}\" is not in the domain_df for domain \"{domain_name}\"")
                                 logger.error(f"    (cont.)  exception:{e}")
 
-                    # After casting datetimes, drop rows with nulls in non-nullable columns
-                    before_dropped = len(domain_df)
-                    domain_df = domain_df.dropna(subset=non_nullable_cols)
-                    after_dropped = len(domain_df)
-
-                    if before_dropped != after_dropped:
-                        logger.warning(f"{config_name}: dropped {before_dropped - after_dropped} "
-                                       f"rows with missing required fields (table={table_name})")
 
                 df_dict[config_name] = domain_df
             except (ValueError, KeyError) as e:
