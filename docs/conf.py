@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../src'))
 
 project = 'ccda_to_omop'
-copyright = '2024, Chris Roeder'
+copyright = '2024, 2025, 2026 UNC Chapel Hill; 2026 Chris Roeder'
 author = 'Chris Roeder'
 
 extensions = [

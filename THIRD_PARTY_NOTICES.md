@@ -1,5 +1,8 @@
 # Third-Party Notices
 
+`ccda_to_omop` is copyright (c) 2024, 2025, 2026 UNC Chapel Hill; 2026 Chris Roeder,
+and is released under the MIT License.
+
 This project depends on the following third-party packages. Their licenses are
 reproduced or summarised below as required by those licenses.
 
