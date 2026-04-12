@@ -1,0 +1,60 @@
+Parse Configurations
+====================
+
+One page per metadata configuration file. Each config defines how a
+C-CDA section is parsed into an OMOP domain table.
+
+.. toctree::
+   :maxdepth: 1
+
+   Care_Site_ee
+   Care_Site_pr
+   Condition
+   DEVICE_from_act_observation_playingEntity
+   DEVICE_from_medications_consumable
+   DEVICE_from_medications_nested_substanceAdministration
+   DEVICE_from_medications_substance_administration
+   DEVICE_from_medications_supply
+   DEVICE_from_procedures
+   Device_organizer_procedure
+   Device_organizer_supply
+   Device_procedure
+   Device_supply
+   Immunization_immunization_activity
+   Location
+   Location_ee
+   Location_pr
+   MEASUREMENT_from_plan_of_tmt_observation
+   MEASUREMENT_from_procedure_act
+   MEASUREMENT_from_procedure_procedure
+   MEASUREMENT_from_results_organizer_observation
+   MEASUREMENT_from_results_procedure
+   MEASUREMENT_from_vital_signs_organizer_observation
+   Medication_medication_activity
+   Medication_medication_dispense
+   OBSERVATION_from_Encounter
+   OBSERVATION_from_Encounter_participantRole
+   OBSERVATION_from_Procedure
+   OBSERVATION_from_assessments
+   OBSERVATION_from_assessments_act
+   OBSERVATION_from_procedure_act
+   Observation
+   Observation_social_history_cultural
+   Observation_social_history_home_environment
+   Observation_social_history_pregnancy
+   Observation_social_history_smoking
+   Observation_social_history_tobacco_use
+   PROCEDURE_from_Immunization_manufactured_material
+   PROCEDURE_from_encounter_encounter
+   PROCEDURE_from_procedure_act
+   PROCEDURE_from_procedure_observation
+   PROCEDURE_from_procedure_procedure
+   PROCEDURE_from_results_observation
+   PROCEDURE_from_results_procedure
+   PROVIDER_from_encompassingEncounter_encounterParticipant
+   PROVIDER_from_encompassingEncounter_responsibleParty
+   PROVIDER_from_encounter_performer_assignedEntity
+   PROVIDER_from_serviceEvent_performer
+   Person
+   Visit
+   Visit_encompassingEncounter

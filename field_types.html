@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Field Types (config_type reference) &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Parse Configurations" href="metadata/index.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Field Types (config_type reference)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#none">None</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constant">CONSTANT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#filename">FILENAME</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#field">FIELD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fk">FK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#derived">DERIVED</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#derived2">DERIVED2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hash">HASH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#priority">PRIORITY</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="metadata/index.html">Parse Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">ccda_to_omop</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Field Types (config_type reference)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/field_types.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="field-types-config-type-reference">
+<h1>Field Types (config_type reference)<a class="headerlink" href="#field-types-config-type-reference" title="Link to this heading"></a></h1>
+<p>Each field in a parse configuration has a <code class="docutils literal notranslate"><span class="pre">config_type</span></code> that controls how
+the parser populates it. The behaviour of each type is implemented in
+<code class="docutils literal notranslate"><span class="pre">data_driven_parse.py</span></code> by a corresponding <code class="docutils literal notranslate"><span class="pre">do_*</span></code> function.</p>
+<section id="none">
+<h2>None<a class="headerlink" href="#none" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_none_fields()</span></code></p>
+<p>Set fields whose config_type is None to None in output_dict.</p>
+</section>
+<section id="constant">
+<h2>CONSTANT<a class="headerlink" href="#constant" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_constant_fields()</span></code></p>
+<p>Write CONSTANT fields from config into output_dict, truncating strings to the allowed length.</p>
+</section>
+<section id="filename">
+<h2>FILENAME<a class="headerlink" href="#filename" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_filename_fields()</span></code></p>
+<p>Write the source filename into any FILENAME-typed fields in output_dict.</p>
+</section>
+<section id="field">
+<h2>FIELD<a class="headerlink" href="#field" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_basic_fields()</span></code></p>
+<p>Extract FIELD and PK values from the XML element and write them into output_dict.</p>
+<p>PK values are also appended to pk_dict so downstream FK fields can reference them.
+String values are whitespace-normalized and truncated to the configured max length.</p>
+</section>
+<section id="fk">
+<h2>FK<a class="headerlink" href="#fk" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_foreign_key_fields()</span></code></p>
+<p>When a configuration has an FK field, it uses the tag in that configuration
+to find corresponding values from PK fields.  This mechanism is intended for
+PKs uniquely identified in a CCDA document header for any places in the sections
+it would be used as an FK. This is typically true for person_id and visit_occurrence_id,
+but there are exceptions. In particular, some documents have multiple encounters, so
+you can’t just naively choose the only visit_id because there are many.</p>
+<p>Choosing the visit is more complicated, because it requires a join (on date ranges)
+between the domain table and the encounters table, or portion of the header that
+has encompassingEncounters in it. This code, the do_foreign_key_fields() function
+operates in too narrow a context for that join. These functions are scoped down
+to processing a single config entry for a particular OMOP domain. The output_dict,
+parameter is just for that one domain. It wouldn’t include the encounters.
+For example, the measurement_results.py file has a configuration for parsing OMOP
+measurement rows out of an XML file. The visit.py would have been previosly processed
+and it’s rows stashed away elsewhere in the parse_doc() function whose scope is large
+enough to consider all the configurations. So the visit choice/reconciliation
+must happen from there.</p>
+<p>TL;DR not all foreign keys are resolved here. In particular, domain FK references,
+visit_occurrence_id, in cases where more than a single encounter has previously been
+parsed, are not, can not, be resolved here. See the parse_doc() function for how
+it is handled there.</p>
+</section>
+<section id="derived">
+<h2>DERIVED<a class="headerlink" href="#derived" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_derived_fields()</span></code></p>
+<p>Do/compute derived values now that their inputs should be available in the output_dict
+Except for a special argument named ‘default’, when the value is what is other wise the field to look up in the output dict.</p>
+<p>This set-up is for functions that expect explicit named arguments. This code here adds values for those arguments to the
+the dictionary passed to the function.
+It’s tempting to want to pass a list of arguments, but that’s not how this function works.</p>
+<p>Also a PK</p>
+</section>
+<section id="derived2">
+<h2>DERIVED2<a class="headerlink" href="#derived2" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_derived2_fields()</span></code></p>
+<p>Compute DERIVED2 fields using functions that receive the full output_dict and argument_list.</p>
+<p>Unlike DERIVED, the called function is responsible for fetching its own values from
+output_dict using the key_list in argument_list, allowing a variable number of inputs.</p>
+</section>
+<section id="hash">
+<h2>HASH<a class="headerlink" href="#hash" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_hash_fields()</span></code></p>
+<p>Compute HASH fields by hashing a list of named input fields into a single ID.</p>
+<p>Similar to DERIVED but takes a list of field names rather than individually named arguments.
+The resulting hash is also stored in pk_dict so it can be used as a PK/FK reference.
+Note: hash IDs are 64-bit but OMOP integer columns are typically 32-bit — use with care.
+See the code for data_type-based conversion logic.</p>
+<blockquote>
+<div><p>where a different kind of hash is beat into an integer.</p>
+<p>ALSO A PK</p>
+</div></blockquote>
+</section>
+<section id="priority">
+<h2>PRIORITY<a class="headerlink" href="#priority" title="Link to this heading"></a></h2>
+<p><em>Implemented by:</em> <code class="docutils literal notranslate"><span class="pre">do_priority_fields()</span></code></p>
+<dl class="simple">
+<dt>ARGS expected in config:</dt><dd><p>‘config_type’: ‘PRIORITY’,
+‘defult’: 0, in case there is no non-null value in the priority change and we don’t want a null value in the end.
+‘order’: 17</p>
+</dd>
+</dl>
+<p>Returns the list of  priority_names so the chosen one (first non-null) can be
+added to output fields Also, adds this field to the PK list?
+This is basically what SQL calls a coalesce.</p>
+<p>Within the config_dict, find all fields tagged with priority and group
+them by their priority names in a dictionary keyed by that name
+Ex. { ‘person_id’: [ (‘person_id_ssn’, 1), (‘person_id_unknown’, 2) ]
+Sort them, choose the first one that is not None.</p>
+<p>NB now there is a separate config_type PRIORITY to compliment the priority attribute.
+So you might have person_id_npi, person_id_ssn and person_id_hash tagged with priority
+attributes to create a field person_id, but then also another field, just plain person_id.
+The point of it is to have a unique place to put that field’s order attribute. The code
+here (and in the ordering code later) must be aware of a  that field in the
+config_dict (where it isn’t used) …and not clobber it. It’s an issue over in the
+sorting/ordering.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="metadata/index.html" class="btn btn-neutral float-right" title="Parse Configurations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
