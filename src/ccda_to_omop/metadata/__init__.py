@@ -89,6 +89,7 @@ def discover_and_sort_metadata() -> Dict[str, Any]:
         return {}
 
     files_to_skip = ['__init__.py', 'test.py', 'ddl.py', 'util.py',
+        'TEMPLATE.py',  # annotated skeleton for new configs — not a real config
         'test'  # (though a dir, still needs to be skipped, getting an error about test.py?
     ]
     filenames = os.listdir(METADATA_DIR)
