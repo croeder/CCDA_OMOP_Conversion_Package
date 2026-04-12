@@ -1,0 +1,47 @@
+name: Build and deploy docs
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install sphinx sphinx-rtd-theme
+          pip install -r requirements.txt
+
+      - name: Regenerate API stubs
+        run: |
+          sphinx-apidoc \
+            --force \
+            --module-first \
+            --separate \
+            -o docs/api \
+            src/ccda_to_omop \
+            src/ccda_to_omop/metadata
+
+      - name: Build HTML
+        run: sphinx-build -b html docs docs/_build/html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/html

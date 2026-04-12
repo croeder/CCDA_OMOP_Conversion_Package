@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling >= 1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ccda_to_omop"
+version = "2.0.2"
+authors = [ { name="Chris Roeder", email="croeder@croeder.com" }, ]
+description = "An HL7 C-CDA to OMOP Converter"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "GPL-3.0"
+license-files = ["LICEN[CS]E*"]
+
+[project.optional-dependencies]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/croeder/CCDA_OMOP_Conversion_Package"
+Issues = "https://github.com/croeder/CCDA_OMOP_Conversion_Package/issues"
+Documentation = "https://croeder.github.io/CCDA_OMOP_Conversion_Package/"
