@@ -13,6 +13,7 @@ This is a project to convert CCDA documents to OMOP CDM format in Python.
 
 [![codecov](https://codecov.io/gh/croeder/CCDA_OMOP_Conversion_Package/graph/badge.svg)](https://codecov.io/gh/croeder/CCDA_OMOP_Conversion_Package)
 
+[Documentation](https://croeder.github.io/CCDA_OMOP_Conversion_Package/)
 
 ## What it does
 
