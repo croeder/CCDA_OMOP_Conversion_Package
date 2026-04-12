@@ -14,6 +14,9 @@ DOCS="$REPO_ROOT/docs"
 
 cd "$REPO_ROOT"
 
+echo "==> Generating metadata config docs..."
+python3 "$DOCS/gen_metadata_docs.py"
+
 echo "==> Regenerating API stubs from source..."
 sphinx-apidoc \
     --force \
