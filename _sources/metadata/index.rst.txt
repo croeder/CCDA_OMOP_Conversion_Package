@@ -32,6 +32,7 @@ C-CDA section is parsed into an OMOP domain table.
    MEASUREMENT_from_vital_signs_organizer_observation
    Medication_medication_activity
    Medication_medication_dispense
+   MyDomain
    OBSERVATION_from_Encounter
    OBSERVATION_from_Encounter_participantRole
    OBSERVATION_from_Procedure

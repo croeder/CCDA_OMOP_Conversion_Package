@@ -72,18 +72,17 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ccda_to_omop.ddl</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot; setup_omop</span>
-<span class="sd">    Initiates an in-memory instance of DuckDB, reads in the OMOP DDL,</span>
-<span class="sd">    and reads in any data provided.</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">OMOP table definitions and domain routing maps.</span>
 
-<span class="sd">    For now, it&#39;s useful to see issues regarding  PK presence and uniqueness, datatypes..</span>
+<span class="sd">Provides three key dictionaries used to route parsed records to the correct</span>
+<span class="sd">output table:</span>
 
-<span class="sd">    TODO: This includes abuse of the OMOP DDL.  Better solutions  include</span>
-<span class="sd">    - better metadata so the resulting dataset and CSV look like OMOP</span>
-<span class="sd">    - a second stage here that modifies the resulting datasets to look more</span>
-<span class="sd">      like OMOP</span>
-<span class="sd">    - some compromise means getting a handle on how narrow the CSV can be</span>
-<span class="sd">      compared to OMOP. Can you leave out unused nullable fields?</span>
+<span class="sd">- ``config_to_domain_name_dict``: maps metadata config names (e.g. ``&quot;Condition&quot;``)</span>
+<span class="sd">  to OMOP domain names (e.g. ``&quot;Condition&quot;``)</span>
+<span class="sd">- ``domain_name_to_table_name``: maps OMOP domain names to CDM table names</span>
+<span class="sd">  (e.g. ``&quot;Condition&quot;`` → ``&quot;condition_occurrence&quot;``)</span>
+<span class="sd">- Column lists for each OMOP table, used to align DataFrame output to the CDM schema</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>

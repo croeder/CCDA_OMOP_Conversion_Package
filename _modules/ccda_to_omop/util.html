@@ -72,7 +72,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for ccda_to_omop.util</h1><div class="highlight"><pre>
-<span></span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Shared utility functions and type aliases.</span>
+
+<span class="sd">Covers: codemap CSV loading (``create_codemap_dict_from_csv``), date/datetime</span>
+<span class="sd">parsing and casting, and the ``CodemapDict`` type alias used throughout the</span>
+<span class="sd">conversion pipeline.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typeguard</span><span class="w"> </span><span class="kn">import</span> <span class="n">typechecked</span>

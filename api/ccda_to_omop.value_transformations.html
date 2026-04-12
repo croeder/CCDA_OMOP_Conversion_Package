@@ -98,6 +98,12 @@
              
   <section id="module-ccda_to_omop.value_transformations">
 <span id="ccda-to-omop-value-transformations-module"></span><h1>ccda_to_omop.value_transformations module<a class="headerlink" href="#module-ccda_to_omop.value_transformations" title="Link to this heading"></a></h1>
+<p>Transformation functions used by DERIVED fields in metadata configs.</p>
+<p>Each function receives a dict of resolved argument values (looked up from the
+current output record by the parsing engine) and returns a single output value.
+Covers: concept ID / domain / source-concept lookups via the codemap, date and
+datetime casting, string concatenation, hash-based ID generation, and person /
+data-partner ID extraction.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ccda_to_omop.value_transformations.VocabContext">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">ccda_to_omop.value_transformations.</span></span><span class="sig-name descname"><span class="pre">VocabContext</span></span><a class="reference internal" href="../_modules/ccda_to_omop/value_transformations.html#VocabContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ccda_to_omop.value_transformations.VocabContext" title="Link to this definition"></a></dt>

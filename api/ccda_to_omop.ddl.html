@@ -98,19 +98,15 @@
              
   <section id="module-ccda_to_omop.ddl">
 <span id="ccda-to-omop-ddl-module"></span><h1>ccda_to_omop.ddl module<a class="headerlink" href="#module-ccda_to_omop.ddl" title="Link to this heading"></a></h1>
-<p>setup_omop
-Initiates an in-memory instance of DuckDB, reads in the OMOP DDL,
-and reads in any data provided.</p>
-<p>For now, it’s useful to see issues regarding  PK presence and uniqueness, datatypes..</p>
-<p>TODO: This includes abuse of the OMOP DDL.  Better solutions  include
-- better metadata so the resulting dataset and CSV look like OMOP
-- a second stage here that modifies the resulting datasets to look more</p>
-<blockquote>
-<div><p>like OMOP</p>
-</div></blockquote>
+<p>OMOP table definitions and domain routing maps.</p>
+<p>Provides three key dictionaries used to route parsed records to the correct
+output table:</p>
 <ul class="simple">
-<li><p>some compromise means getting a handle on how narrow the CSV can be
-compared to OMOP. Can you leave out unused nullable fields?</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config_to_domain_name_dict</span></code>: maps metadata config names (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Condition&quot;</span></code>)
+to OMOP domain names (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Condition&quot;</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">domain_name_to_table_name</span></code>: maps OMOP domain names to CDM table names
+(e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Condition&quot;</span></code> → <code class="docutils literal notranslate"><span class="pre">&quot;condition_occurrence&quot;</span></code>)</p></li>
+<li><p>Column lists for each OMOP table, used to align DataFrame output to the CDM schema</p></li>
 </ul>
 <dl class="py function">
 <dt class="sig sig-object py" id="ccda_to_omop.ddl.generate_cfg_name_to_domain_map">
