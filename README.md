@@ -74,6 +74,10 @@ bash bin/compare_correct.sh
 # Expected: 205 missing / 0 errors
 ```
 
+## Spark Usage
+see the (repository ccda_to_omop_drivers)[https://github.com/croeder/ccda_to_omop_drivers] for sample spark drivers.
+
+
 ## Architecture overview
 
 The conversion is table-driven. Each OMOP domain (Condition, Measurement, Visit, etc.) has a Python metadata file under `src/ccda_to_omop/metadata/` that describes:
