@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture &mdash; ccda_to_omop  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Field Types (config_type reference)" href="field_types.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ccda_to_omop
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#abstract">Abstract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#system-architecture">2. System Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mapping-configurations">2.1 Mapping Configurations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parsing-engine">2.2 Parsing Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#row-emission-and-linking">2.3 Row Emission and Linking</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advantages-over-traditional-sql-pipeline-thinking">3. Advantages Over Traditional SQL Pipeline Thinking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#discussion">4. Discussion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">5. Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="field_types.html">Field Types (config_type reference)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata/index.html">Parse Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">ccda_to_omop</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ccda_to_omop</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/architecture.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="architecture">
+<h1>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h1>
+<p><em>A Declarative, Content-Driven Architecture for CCDA to OMOP Transformation:
+Design Rationale and Advantages over Traditional ETL Pipelines</em></p>
+<section id="abstract">
+<h2>Abstract<a class="headerlink" href="#abstract" title="Link to this heading"></a></h2>
+<p>Clinical Document Architecture (CCDA) files are widely used for electronic
+health record exchange, yet their hierarchical and variable structure presents
+challenges for transformation into relational formats such as the Observational
+Medical Outcomes Partnership (OMOP) Common Data Model. Traditional ETL pipelines
+rely on sequential SQL transformations and table staging, which often obscure
+provenance and complicate iteration over heterogeneous data. We describe a
+lightweight, Python-based, rule-driven engine that leverages parse
+configurations, content-driven extraction, fallback logic, transformation rules,
+and content-based hashing to emit OMOP rows. This architecture simplifies
+maintenance, accelerates iteration, and improves robustness while preserving
+hierarchical context, in contrast to conventional pipelines.</p>
+</section>
+<section id="introduction">
+<h2>1. Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>Mapping CCDA documents to OMOP tables requires handling nested structures,
+optional elements, multiple template variations, and vendor-specific quirks.
+Traditional pipeline approaches, dominated by SQL and batch transformations, are
+familiar to data analysts but often introduce complexity, flatten hierarchical
+data prematurely, and slow iterative development. In contrast, software
+engineering principles suggest separating engine logic from data-driven mapping
+specifications to create maintainable, flexible systems.</p>
+<p>This paper presents a declarative, lightweight engine for CCDA parsing,
+highlights its design rationale, and contrasts it with conventional ETL pipeline
+approaches.</p>
+</section>
+<section id="system-architecture">
+<h2>2. System Architecture<a class="headerlink" href="#system-architecture" title="Link to this heading"></a></h2>
+<p>The architecture is composed of three core layers.</p>
+<section id="mapping-configurations">
+<h3>2.1 Mapping Configurations<a class="headerlink" href="#mapping-configurations" title="Link to this heading"></a></h3>
+<p>Each OMOP domain (e.g., <code class="docutils literal notranslate"><span class="pre">condition_occurrence</span></code>, <code class="docutils literal notranslate"><span class="pre">drug_exposure</span></code>) has one or
+more parse configurations. Each parse configuration defines:</p>
+<ul class="simple">
+<li><p>CCDA sections to parse</p></li>
+<li><p>Locales or structural variants within sections</p></li>
+<li><p>XPath extraction rules for each locale</p></li>
+<li><p>Fallback options (coalescing) for optional or inconsistent elements</p></li>
+<li><p>Transformation rules, such as date normalization or terminology mapping</p></li>
+</ul>
+<p>This declarative specification captures the mapping logic in a compact, readable,
+and maintainable format.</p>
+</section>
+<section id="parsing-engine">
+<h3>2.2 Parsing Engine<a class="headerlink" href="#parsing-engine" title="Link to this heading"></a></h3>
+<p>The engine iterates over sections and locales in the CCDA document:</p>
+<ol class="arabic simple">
+<li><p>Executes XPath queries for each rule</p></li>
+<li><p>Applies fallback logic to select the first non-null value</p></li>
+<li><p>Applies transformations, including date normalization and code translation</p></li>
+<li><p>Emits rows for the target OMOP domain</p></li>
+</ol>
+</section>
+<section id="row-emission-and-linking">
+<h3>2.3 Row Emission and Linking<a class="headerlink" href="#row-emission-and-linking" title="Link to this heading"></a></h3>
+<p>To maintain referential integrity without requiring intermediate tables or
+temporary IDs, the engine uses content-based hashing:</p>
+<ul class="simple">
+<li><p>Each row’s primary key is derived from a hash of its content</p></li>
+<li><p>Foreign keys are derived consistently from related content hashes</p></li>
+<li><p>This ensures reproducibility and deterministic linkage across multiple locales
+in a document</p></li>
+</ul>
+</section>
+</section>
+<section id="advantages-over-traditional-sql-pipeline-thinking">
+<h2>3. Advantages Over Traditional SQL Pipeline Thinking<a class="headerlink" href="#advantages-over-traditional-sql-pipeline-thinking" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Aspect</p></th>
+<th class="head"><p>Traditional ETL Pipeline</p></th>
+<th class="head"><p>Declarative Parsing Engine</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Visibility</p></td>
+<td><p>Logic spread across multiple staging tables</p></td>
+<td><p>Mapping rules and engine clearly separate; mappings readable</p></td>
+</tr>
+<tr class="row-odd"><td><p>Iteration Speed</p></td>
+<td><p>Slow; must rebuild or rerun batches</p></td>
+<td><p>Fast; single-document execution and debugging</p></td>
+</tr>
+<tr class="row-even"><td><p>Hierarchical Context</p></td>
+<td><p>Flattened early; often loses provenance</p></td>
+<td><p>Maintains CCDA structure until row emission</p></td>
+</tr>
+<tr class="row-odd"><td><p>Handling Variability</p></td>
+<td><p>Complex joins and CASE statements</p></td>
+<td><p>Coalesce/fallback logic declaratively handles multiple templates</p></td>
+</tr>
+<tr class="row-even"><td><p>Maintenance</p></td>
+<td><p>Changes require procedural edits</p></td>
+<td><p>Changes often involve configuration edits only</p></td>
+</tr>
+<tr class="row-odd"><td><p>Scalability</p></td>
+<td><p>Batch-oriented; table-first</p></td>
+<td><p>Document-at-a-time; parallelizable without changing engine</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="discussion">
+<h2>4. Discussion<a class="headerlink" href="#discussion" title="Link to this heading"></a></h2>
+<p>This architecture embodies several software engineering principles:</p>
+<ol class="arabic simple">
+<li><p><strong>Data-driven design</strong>: rules and mappings encode variation, minimizing
+repeated code</p></li>
+<li><p><strong>Declarative mapping</strong>: separates “what to extract” from “how to extract it”</p></li>
+<li><p><strong>Iteration-friendly</strong>: enables rapid testing and debugging on single documents</p></li>
+<li><p><strong>Content-addressed linking</strong>: avoids fragile IDs and maintains integrity</p></li>
+<li><p><strong>Transparency</strong>: dense configuration provides an immediate view of the
+mapping without inspecting engine internals</p></li>
+</ol>
+<p>While SQL pipelines are familiar to analysts and align with warehouse practices,
+they can obscure complexity, particularly when input data is hierarchical and
+heterogeneous. The engine approach better matches the document structure of CCDA
+and allows for incremental adaptation to vendor differences.</p>
+</section>
+<section id="conclusion">
+<h2>5. Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The CCDA → OMOP mapping engine provides a lightweight, declarative framework
+that balances maintainability, robustness, and speed of iteration. It contrasts
+with traditional SQL pipeline thinking by preserving hierarchical context,
+centralizing mapping rules, and handling variable document structures elegantly.
+Its content-driven PK/FK linking ensures deterministic row relationships without
+requiring staging tables or arbitrary IDs. This architecture is broadly
+applicable to clinical ETL work and provides a template for other
+hierarchical-to-relational transformations in healthcare informatics.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Rob Pike. <em>Notes on Programming in Go</em> — on emphasizing data structures over
+repeated code patterns.</p></li>
+<li><p>HL7 Clinical Document Architecture (CCDA) Standard. Health Level Seven
+International, 2015.</p></li>
+<li><p>Observational Medical Outcomes Partnership (OMOP) Common Data Model. OHDSI,
+2021.</p></li>
+<li><p>Inmon, W. H. <em>Building the Data Warehouse</em>, 4th Edition. Wiley, 2005.</p></li>
+<li><p>Kimball, R., Ross, M. <em>The Data Warehouse Toolkit</em>, 3rd Edition. Wiley, 2013.</p></li>
+<li><p>Cormen, T., Leiserson, C., Rivest, R., Stein, C. <em>Introduction to
+Algorithms</em>, 4th Edition. MIT Press, 2022 — for graph and hashing principles.</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="field_types.html" class="btn btn-neutral float-right" title="Field Types (config_type reference)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, 2025, 2026 UNC Chapel Hill; 2026 Chris Roeder.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
