@@ -52,7 +52,11 @@ more parse configurations. Each parse configuration defines:
 - Transformation rules, such as date normalization or terminology mapping
 
 This declarative specification captures the mapping logic in a compact, readable,
-and maintainable format.
+and maintainable format. Driving the conversion from configurations rather than
+procedural code makes the structural mappings — which CCDA element goes to which
+OMOP column and why — visible at a glance. The dense mapping files serve as
+living documentation of the transformation logic without requiring anyone to wade
+through engine code to understand what is being extracted.
 
 2.2 Parsing Engine
 ~~~~~~~~~~~~~~~~~~
@@ -133,6 +137,28 @@ Its content-driven PK/FK linking ensures deterministic row relationships without
 requiring staging tables or arbitrary IDs. This architecture is broadly
 applicable to clinical ETL work and provides a template for other
 hierarchical-to-relational transformations in healthcare informatics.
+
+6. Execution Environments
+-------------------------
+
+The engine runs in two complementary environments depending on the task at hand.
+
+**Spark (production)** — ``layer_datasets.py`` wraps the parsing engine in a
+Spark-compatible entry point for large-scale production volumes, making the
+package suitable for enterprise clinical data pipelines.
+
+**Command line or Jupyter (development and debugging)** — the same conversion
+can be driven from a shell script or a Jupyter notebook against a single file or
+a small directory. BI developers familiar with SQL pipelines sometimes overlook
+how valuable this is: iterating on a single document takes seconds, intermediate
+DataFrames can be inspected inline, and mapping changes can be validated
+immediately without rebuilding a batch pipeline. Jupyter in particular is
+well-suited to exploring CCDA structure, tracing a specific field through the
+transformation, and spot-checking output — all before committing to a full run.
+
+This symmetry between environments is a direct consequence of the document-at-a-time
+architecture: because the engine processes one CCDA file independently, there is
+no batch state to manage and no pipeline to rebuild when iterating on a mapping.
 
 References
 ----------
