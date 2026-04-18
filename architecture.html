@@ -52,12 +52,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#mapping-configurations">2.1 Mapping Configurations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parsing-engine">2.2 Parsing Engine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#row-emission-and-linking">2.3 Row Emission and Linking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advantages-over-traditional-sql-pipeline-thinking">2.4 Advantages Over Traditional SQL Pipeline Thinking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#design-principles">2.5 Design Principles</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#advantages-over-traditional-sql-pipeline-thinking">3. Advantages Over Traditional SQL Pipeline Thinking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#discussion">4. Discussion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#conclusion">5. Conclusion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#execution-environments">6. Execution Environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#execution-environments">3. Execution Environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">4. Conclusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
@@ -163,9 +163,8 @@ temporary IDs, the engine uses content-based hashing:</p>
 in a document</p></li>
 </ul>
 </section>
-</section>
 <section id="advantages-over-traditional-sql-pipeline-thinking">
-<h2>3. Advantages Over Traditional SQL Pipeline Thinking<a class="headerlink" href="#advantages-over-traditional-sql-pipeline-thinking" title="Link to this heading"></a></h2>
+<h3>2.4 Advantages Over Traditional SQL Pipeline Thinking<a class="headerlink" href="#advantages-over-traditional-sql-pipeline-thinking" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 20.0%" />
@@ -206,8 +205,8 @@ in a document</p></li>
 </tbody>
 </table>
 </section>
-<section id="discussion">
-<h2>4. Discussion<a class="headerlink" href="#discussion" title="Link to this heading"></a></h2>
+<section id="design-principles">
+<h3>2.5 Design Principles<a class="headerlink" href="#design-principles" title="Link to this heading"></a></h3>
 <p>This architecture embodies several software engineering principles:</p>
 <ol class="arabic simple">
 <li><p><strong>Data-driven design</strong>: rules and mappings encode variation, minimizing
@@ -223,19 +222,9 @@ they can obscure complexity, particularly when input data is hierarchical and
 heterogeneous. The engine approach better matches the document structure of CCDA
 and allows for incremental adaptation to vendor differences.</p>
 </section>
-<section id="conclusion">
-<h2>5. Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
-<p>The CCDA → OMOP mapping engine provides a lightweight, declarative framework
-that balances maintainability, robustness, and speed of iteration. It contrasts
-with traditional SQL pipeline thinking by preserving hierarchical context,
-centralizing mapping rules, and handling variable document structures elegantly.
-Its content-driven PK/FK linking ensures deterministic row relationships without
-requiring staging tables or arbitrary IDs. This architecture is broadly
-applicable to clinical ETL work and provides a template for other
-hierarchical-to-relational transformations in healthcare informatics.</p>
 </section>
 <section id="execution-environments">
-<h2>6. Execution Environments<a class="headerlink" href="#execution-environments" title="Link to this heading"></a></h2>
+<h2>3. Execution Environments<a class="headerlink" href="#execution-environments" title="Link to this heading"></a></h2>
 <p>The engine runs in two complementary environments depending on the task at hand.</p>
 <p><strong>Spark (production)</strong> — <code class="docutils literal notranslate"><span class="pre">layer_datasets.py</span></code> wraps the parsing engine in a
 Spark-compatible entry point for large-scale production volumes, making the
@@ -251,6 +240,17 @@ transformation, and spot-checking output — all before committing to a full run
 <p>This symmetry between environments is a direct consequence of the document-at-a-time
 architecture: because the engine processes one CCDA file independently, there is
 no batch state to manage and no pipeline to rebuild when iterating on a mapping.</p>
+</section>
+<section id="conclusion">
+<h2>4. Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The CCDA → OMOP mapping engine provides a lightweight, declarative framework
+that balances maintainability, robustness, and speed of iteration. It contrasts
+with traditional SQL pipeline thinking by preserving hierarchical context,
+centralizing mapping rules, and handling variable document structures elegantly.
+Its content-driven PK/FK linking ensures deterministic row relationships without
+requiring staging tables or arbitrary IDs. This architecture is broadly
+applicable to clinical ETL work and provides a template for other
+hierarchical-to-relational transformations in healthcare informatics.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
