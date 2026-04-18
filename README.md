@@ -76,8 +76,23 @@ bash bin/compare_correct.sh
 # Expected: 205 missing / 0 errors
 ```
 
-## Spark Usage
-see the (repository ccda_to_omop_drivers)[https://github.com/croeder/ccda_to_omop_drivers] for sample spark drivers.
+## Execution environments
+
+The package runs in two complementary environments depending on the task at hand.
+
+**Spark (production)** — `layer_datasets.py` wraps the parsing engine in a
+Spark-compatible entry point for large-scale production volumes. See the
+[ccda_to_omop_drivers](https://github.com/croeder/ccda_to_omop_drivers) repository
+for sample Spark drivers.
+
+**Command line or Jupyter (development and debugging)** — the same conversion can
+be driven from a shell script or a Jupyter notebook against a single file or a
+small directory. BI developers familiar with SQL pipelines sometimes overlook how
+valuable this is: iterating on a single document takes seconds, intermediate
+DataFrames can be inspected inline, and mapping changes can be validated
+immediately without rebuilding a batch pipeline. Jupyter in particular is
+well-suited to exploring CCDA structure, tracing a specific field through the
+transformation, and spot-checking output — all before committing to a full run.
 
 
 ## Architecture overview
@@ -88,6 +103,8 @@ The conversion is table-driven. Each OMOP domain (Condition, Measurement, Visit,
 - Which fields to extract and how (field name, XPath, data type)
 - Derived fields computed from other fields via transformation functions
 - Vocabulary cross-walk lookups to map source codes to OMOP concept IDs
+
+Driving the conversion from metadata configurations rather than procedural code makes the structural mappings — which CCDA element goes to which OMOP column and why — visible at a glance. The dense mapping files serve as living documentation of the transformation logic without requiring anyone to wade through engine code to understand what is being extracted.
 
 The core parsing engine (`data_driven_parse.py`) reads these metadata configs and applies them uniformly to any CCDA document. Vocabulary lookups are handled by `value_transformations.py` using a pre-loaded codemap dictionary.
 
