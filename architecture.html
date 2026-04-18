@@ -57,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#advantages-over-traditional-sql-pipeline-thinking">3. Advantages Over Traditional SQL Pipeline Thinking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discussion">4. Discussion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#conclusion">5. Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#execution-environments">6. Execution Environments</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
@@ -135,7 +136,11 @@ more parse configurations. Each parse configuration defines:</p>
 <li><p>Transformation rules, such as date normalization or terminology mapping</p></li>
 </ul>
 <p>This declarative specification captures the mapping logic in a compact, readable,
-and maintainable format.</p>
+and maintainable format. Driving the conversion from configurations rather than
+procedural code makes the structural mappings — which CCDA element goes to which
+OMOP column and why — visible at a glance. The dense mapping files serve as
+living documentation of the transformation logic without requiring anyone to wade
+through engine code to understand what is being extracted.</p>
 </section>
 <section id="parsing-engine">
 <h3>2.2 Parsing Engine<a class="headerlink" href="#parsing-engine" title="Link to this heading"></a></h3>
@@ -228,6 +233,24 @@ Its content-driven PK/FK linking ensures deterministic row relationships without
 requiring staging tables or arbitrary IDs. This architecture is broadly
 applicable to clinical ETL work and provides a template for other
 hierarchical-to-relational transformations in healthcare informatics.</p>
+</section>
+<section id="execution-environments">
+<h2>6. Execution Environments<a class="headerlink" href="#execution-environments" title="Link to this heading"></a></h2>
+<p>The engine runs in two complementary environments depending on the task at hand.</p>
+<p><strong>Spark (production)</strong> — <code class="docutils literal notranslate"><span class="pre">layer_datasets.py</span></code> wraps the parsing engine in a
+Spark-compatible entry point for large-scale production volumes, making the
+package suitable for enterprise clinical data pipelines.</p>
+<p><strong>Command line or Jupyter (development and debugging)</strong> — the same conversion
+can be driven from a shell script or a Jupyter notebook against a single file or
+a small directory. BI developers familiar with SQL pipelines sometimes overlook
+how valuable this is: iterating on a single document takes seconds, intermediate
+DataFrames can be inspected inline, and mapping changes can be validated
+immediately without rebuilding a batch pipeline. Jupyter in particular is
+well-suited to exploring CCDA structure, tracing a specific field through the
+transformation, and spot-checking output — all before committing to a full run.</p>
+<p>This symmetry between environments is a direct consequence of the document-at-a-time
+architecture: because the engine processes one CCDA file independently, there is
+no batch state to manage and no pipeline to rebuild when iterating on a mapping.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
