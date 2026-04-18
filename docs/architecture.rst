@@ -79,8 +79,8 @@ temporary IDs, the engine uses content-based hashing:
 - This ensures reproducibility and deterministic linkage across multiple locales
   in a document
 
-3. Advantages Over Traditional SQL Pipeline Thinking
------------------------------------------------------
+2.4 Advantages Over Traditional SQL Pipeline Thinking
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -108,8 +108,8 @@ temporary IDs, the engine uses content-based hashing:
      - Batch-oriented; table-first
      - Document-at-a-time; parallelizable without changing engine
 
-4. Discussion
--------------
+2.5 Design Principles
+~~~~~~~~~~~~~~~~~~~~~~
 
 This architecture embodies several software engineering principles:
 
@@ -126,19 +126,7 @@ they can obscure complexity, particularly when input data is hierarchical and
 heterogeneous. The engine approach better matches the document structure of CCDA
 and allows for incremental adaptation to vendor differences.
 
-5. Conclusion
--------------
-
-The CCDA → OMOP mapping engine provides a lightweight, declarative framework
-that balances maintainability, robustness, and speed of iteration. It contrasts
-with traditional SQL pipeline thinking by preserving hierarchical context,
-centralizing mapping rules, and handling variable document structures elegantly.
-Its content-driven PK/FK linking ensures deterministic row relationships without
-requiring staging tables or arbitrary IDs. This architecture is broadly
-applicable to clinical ETL work and provides a template for other
-hierarchical-to-relational transformations in healthcare informatics.
-
-6. Execution Environments
+3. Execution Environments
 -------------------------
 
 The engine runs in two complementary environments depending on the task at hand.
@@ -159,6 +147,18 @@ transformation, and spot-checking output — all before committing to a full run
 This symmetry between environments is a direct consequence of the document-at-a-time
 architecture: because the engine processes one CCDA file independently, there is
 no batch state to manage and no pipeline to rebuild when iterating on a mapping.
+
+4. Conclusion
+-------------
+
+The CCDA → OMOP mapping engine provides a lightweight, declarative framework
+that balances maintainability, robustness, and speed of iteration. It contrasts
+with traditional SQL pipeline thinking by preserving hierarchical context,
+centralizing mapping rules, and handling variable document structures elegantly.
+Its content-driven PK/FK linking ensures deterministic row relationships without
+requiring staging tables or arbitrary IDs. This architecture is broadly
+applicable to clinical ETL work and provides a template for other
+hierarchical-to-relational transformations in healthcare informatics.
 
 References
 ----------
